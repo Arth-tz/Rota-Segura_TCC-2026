@@ -30,10 +30,18 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
+        $usuario = $request->user()?->loadMissing('pessoa');
+
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                'user' => $usuario ? [
+                    'id_usuario' => $usuario->id_usuario,
+                    'email' => $usuario->email,
+                    'role' => $usuario->role,
+                    'nome' => $usuario->pessoa?->nome,
+                    'id_pessoa' => $usuario->id_pessoa,
+                ] : null,
             ],
             'ziggy' => fn () => [
                 ...(new Ziggy)->toArray(),

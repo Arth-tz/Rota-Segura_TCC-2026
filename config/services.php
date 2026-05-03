@@ -35,4 +35,11 @@ return [
         ],
     ],
 
+    'nominatim' => [
+        'base_url' => env('NOMINATIM_BASE_URL', 'https://nominatim.openstreetmap.org'),
+        'timeout' => env('NOMINATIM_TIMEOUT', 5),
+        'user_agent' => env('NOMINATIM_USER_AGENT', env('APP_NAME', 'Rota Segura') . '/1.0'),
+        'email' => env('NOMINATIM_EMAIL'),
+    ],
+
 ];

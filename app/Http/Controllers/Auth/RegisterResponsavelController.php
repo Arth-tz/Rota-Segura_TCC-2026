@@ -3,58 +3,55 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
+use App\Models\Pessoa;
+use App\Models\Usuario;
 use App\Enums\UserRole;
 use App\Http\Requests\Auth\RegisterResponsavelRequest;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\Rules;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use Inertia\Response;
-use Illuminate\Support\Facades\DB;
 
 class RegisterResponsavelController extends Controller
 {
-    /**
-     * Display the registration view.
-     */
     public function create(): Response
     {
         return Inertia::render('Auth/RegisterResponsavel');
     }
 
-    /**
-     * Handle an incoming registration request.
-     *
-     * @throws \Illuminate\Validation\ValidationException
-     */
     public function store(RegisterResponsavelRequest $request): RedirectResponse
     {
         try {
-        DB::transaction(function () use ($request) {
-            $user = User::create([
-                'first_name' => $request->first_name,
-                'last_name'  => $request->last_name,
-                'email'      => $request->email,
-                'password'   => Hash::make($request->password),
-                'cpf'        => $request->cpf,
-                'phone'      => $request->phone,
-                'role'       => UserRole::Responsavel,
-            ]);
+            DB::transaction(function () use ($request) {
 
-            $user->responsavel()->create();
+                $pessoa = Pessoa::create([
+                    'nome'            => $request->nome,
+                    'cpf'             => $request->cpf,
+                    'data_nascimento' => $request->data_nascimento,
+                    'telefone'        => $request->telefone,
+                ]);
 
-            Auth::login($user);
-        });
+                $usuario = Usuario::create([
+                    'id_pessoa'  => $pessoa->id_pessoa,
+                    'email'      => $request->email,
+                    'senha_hash' => Hash::make($request->password),
+                    'role'       => UserRole::Responsavel,
+                ]);
 
-        return redirect()->route('responsavel.alunos.create'); //revisar se mandará direto ao dashboard ou para o cadastro de filho...amanhã pq to com sono
+                $usuario->responsavel()->create([
+                    'tipo_responsavel' => 'representante_legal',
+                ]);
 
-    } catch (\Exception $e) {
-        dd($e->getMessage());
-        return back()->withErrors(['geral' => 'Erro ao criar conta. Tente novamente.']);
-    }
+                Auth::login($usuario);
+            });
+
+            return redirect()->route('responsavel.passageiros.create');
+
+        } catch (\Throwable $e) {
+            report($e);
+            return back()->withErrors(['geral' => 'Erro ao criar conta. Tente novamente.']);
+        }
     }
 }

@@ -11,6 +11,7 @@ const scrollY     = ref(0)
 defineProps({
     canLogin: Boolean,
     canRegister: Boolean,
+    painelUrl: String,
 });
 
 const abrirModal = () => {
@@ -55,7 +56,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
                 </Link>
                 <div v-if="canLogin" class="rs-nav__actions">
                     <template v-if="$page.props.auth.user">
-                        <Link :href="route('responsavel.alunos.create')" class="rs-btn rs-btn--white rs-btn--sm">Entrar no Painel</Link>
+                        <Link :href="painelUrl || route('home')" class="rs-btn rs-btn--white rs-btn--sm">Entrar no Painel</Link>
                     </template>
                     <template v-else>
                         <Link :href="route('login')" class="rs-btn rs-btn--ghost rs-btn--sm">Entrar</Link>

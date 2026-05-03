@@ -2,83 +2,52 @@
 
 namespace App\Http\Requests\Auth;
 
-use App\Models\Responsavel;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class RegisterResponsavelRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
-     */
     public function authorize(): bool
     {
         return true;
     }
 
-
-    protected function prepareForValidation()
+    protected function prepareForValidation(): void
     {
         $this->merge([
-            'cpf'      => preg_replace('/\D/', '', $this->cpf),
-            'email'    => strtolower($this->email),// Padroniza para minúsculo
+            'cpf'      => preg_replace('/\D/', '', $this->cpf ?? ''),
+            'email'    => strtolower($this->email ?? ''),
         ]);
     }
 
     public function rules(): array
     {
         return [
-            'first_name' => ['required', 'string', 'min:2', 'max:100'],
-
-            'last_name' => ['required', 'string'],
-
-            'cpf' => [
-                'required', 'cpf', Rule::unique('users', 'cpf'),
-            ],
-
-            'phone' => [
-                'required', 'celular_com_ddd',
-                Rule::unique( 'users', 'phone'),
-            ],
-
-            'email' => [
+            'nome'            => ['required', 'string', 'min:2', 'max:150'],
+            'cpf'             => ['required', 'cpf', Rule::unique('pessoa', 'cpf')],
+            'data_nascimento' => ['required', 'date', 'before:today'],
+            'telefone'        => [
                 'required',
-                'string',
-                'lowercase',
-                'email:rfc,dns',
-                'max:255',
-                Rule::unique('users', 'email'),
-            ],
+                'celular_com_ddd',
+                function (string $attribute, mixed $value, \Closure $fail): void {
+                    $telefoneNumerico = preg_replace('/\D/', '', (string) $value);
 
-            'password' => [
-                'required',
-                'confirmed',
-                Password::min(8)
-                    ->letters()
-                    ->mixedCase()
-                    ->numbers() 
-                    ->uncompromised(),
-            ]
+                    if (DB::table('pessoa')->where('telefone', $telefoneNumerico)->exists()) {
+                        $fail('O valor indicado para o campo :attribute já se encontra registrado.');
+                    }
+                },
+            ],
+            'email'           => ['required', 'email:rfc,dns', 'max:150', Rule::unique('usuario', 'email')],
+            'password'        => ['required', 'confirmed', Password::defaults()],
         ];
     }
 
-     public function messages()
+    protected function passedValidation(): void
     {
-        return [
-            'first_name.required' => 'O nome é um campo obrigatório!',
-            'last_name.required' => 'O sobrenome é um campo obrigatório!',
-            'cpf.cpf'   => 'O CPF informado não é válido!',
-            'cpf.unique' => 'Este CPF já está em uso no sistema!',
-            'phone.celular_com_ddd' => 'O telefone informado não é válido!',
-            'email.email'        => 'Por favor, insira um e-mail válido.',
-            'password.confirmed' => 'A confirmação da senha não confere.',
-            'password.uncompromised' => 'Esta senha apareceu em um vazamento de dados. Escolha outra segurança.',
-        ];
+        $this->merge([
+            'telefone' => preg_replace('/\D/', '', (string) $this->telefone),
+        ]);
     }
 }
