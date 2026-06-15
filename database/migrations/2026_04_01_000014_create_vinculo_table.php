@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -11,6 +10,7 @@ return new class extends Migration {
             $table->unsignedBigInteger('id_van');
             $table->unsignedBigInteger('id_passageiro');
             $table->unsignedBigInteger('id_solicitacao')->unique();
+            $table->decimal('preco_total', 8, 2)->comment('Soma dos preços dos trajetos aceitos');
             $table->enum('status', ['ativo', 'suspenso', 'encerrado'])->default('ativo');
             $table->date('data_inicio');
             $table->date('data_fim')->nullable();

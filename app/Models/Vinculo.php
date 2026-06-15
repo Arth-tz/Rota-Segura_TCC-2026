@@ -16,6 +16,7 @@ class Vinculo extends Model
         'id_van',
         'id_passageiro',
         'id_solicitacao',
+        'preco_total',
         'status',
         'data_inicio',
         'data_fim',
@@ -23,8 +24,9 @@ class Vinculo extends Model
     ];
 
     protected $casts = [
-        'data_inicio' => 'date',
-        'data_fim'    => 'date',
+        'data_inicio'  => 'date',
+        'data_fim'     => 'date',
+        'preco_total'  => 'decimal:2',
     ];
 
     public function van()
@@ -43,6 +45,16 @@ class Vinculo extends Model
     }
 
     public function disponibilidades()
+    {
+        return $this->belongsToMany(
+            Disponibilidade::class,
+            'vinculo_disponibilidade',
+            'id_vinculo',
+            'id_disponibilidade'
+        )->withPivot('preco_mensal')->withTimestamps();
+    }
+
+    public function disponibilidadePassageiros()
     {
         return $this->hasMany(DisponibilidadePassageiro::class, 'id_vinculo', 'id_vinculo');
     }

@@ -59,7 +59,7 @@ function submit() {
     <div class="min-h-screen bg-slate-50 flex">
         <aside class="hidden lg:flex lg:w-5/12 bg-blue-700 text-white flex-col justify-between p-10 rounded-tr-3xl rounded-br-3xl">
             <Link :href="route('home')" class="inline-flex items-center">
-                <img src="/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-8 w-auto">
+                <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-10 w-auto">
             </Link>
             <div>
                 <p class="text-xs uppercase tracking-widest text-blue-200 mb-3">Para motoristas</p>
@@ -73,6 +73,9 @@ function submit() {
             <div class="w-full max-w-2xl bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 shadow-sm">
                 <h1 class="text-2xl font-bold text-slate-900 mb-1">Cadastro de motorista</h1>
                 <p class="text-sm text-slate-500 mb-6">Preencha os dados pessoais e da CNH.</p>
+                <div class="mb-4">
+                    <Link :href="route('home')" class="text-sm text-slate-600 hover:text-slate-900">Voltar</Link>
+                </div>
 
                 <form @submit.prevent="submit" class="space-y-4">
                     <div>

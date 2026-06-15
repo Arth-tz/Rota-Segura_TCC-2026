@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -9,6 +8,7 @@ return new class extends Migration {
         Schema::create('rota', function (Blueprint $table) {
             $table->bigIncrements('id_rota');
             $table->unsignedBigInteger('id_van');
+            $table->unsignedBigInteger('id_disponibilidade');
             $table->date('data');
             $table->enum('status', ['planejada', 'em_andamento', 'concluida', 'cancelada'])->default('planejada');
             $table->dateTime('horario_inicio_previsto')->nullable();
@@ -21,7 +21,9 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->foreign('id_van')->references('id_van')->on('van')->restrictOnDelete();
+            $table->foreign('id_disponibilidade')->references('id_disponibilidade')->on('disponibilidade')->restrictOnDelete();
             $table->index(['id_van', 'data']);
+            $table->index(['id_disponibilidade', 'data']);
             $table->index('status');
         });
     }

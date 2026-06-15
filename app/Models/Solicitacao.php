@@ -57,4 +57,14 @@ class Solicitacao extends Model
     {
         return $this->hasOne(Vinculo::class, 'id_solicitacao', 'id_solicitacao');
     }
+
+    public function disponibilidades()
+    {
+        return $this->belongsToMany(
+            Disponibilidade::class,
+            'solicitacao_disponibilidade',
+            'id_solicitacao',
+            'id_disponibilidade'
+        )->withPivot('preco_mensal')->withTimestamps();
+    }
 }

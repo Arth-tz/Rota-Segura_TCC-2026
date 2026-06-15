@@ -1,5 +1,4 @@
 <?php
-
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -9,7 +8,7 @@ return new class extends Migration {
         Schema::create('disponibilidade', function (Blueprint $table) {
             $table->bigIncrements('id_disponibilidade');
             $table->unsignedBigInteger('id_van');
-            $table->enum('dia_semana', ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom']);
+            $table->string('nome', 100)->comment('Ex: Manhã ida, Tarde volta, Treino ter/qui');
             $table->enum('turno', ['manha', 'tarde', 'noite']);
             $table->decimal('preco_mensal', 8, 2);
             $table->unsignedInteger('capacidade_total');
@@ -17,7 +16,7 @@ return new class extends Migration {
             $table->timestamps();
 
             $table->foreign('id_van')->references('id_van')->on('van')->cascadeOnDelete();
-            $table->index(['id_van', 'dia_semana']);
+            $table->index(['id_van', 'ativa']);
         });
     }
     public function down(): void { Schema::dropIfExists('disponibilidade'); }

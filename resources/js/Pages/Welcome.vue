@@ -48,7 +48,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
         <!-- NAV -->
         <nav class="rs-nav" :class="{ 'rs-nav--scrolled': scrollY > 30 }">
             <div class="rs-nav__inner">
-                <Link href="http://localhost/rota-segura/public/" class="rs-nav__logo">
+                <Link href="/rota-segura/public/" class="rs-nav__logo">
                     <div class="rs-nav__logo-ring">
                         <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Logo Rota Segura" class="rs-nav__logo-img" />
                     </div>
@@ -211,8 +211,8 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
             <div class="rs-container">
                 <div class="rs-footer__top">
                     <div class="rs-footer__brand">
-                        <Link href="http://localhost/rota-segura/public/" class="rs-footer__logo">
-                            <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Logo Rota-Segura" class="rs-footer__logo-img" />
+                        <Link href="/" class="rs-footer__logo">
+                            <img src="/images/Logo_rota-segura_branco.png" alt="Logo Rota-Segura" class="rs-footer__logo-img" />
                             <span>Rota Segura</span>
                         </Link>
                         <p class="rs-footer__tagline">Conectando famílias a motoristas de confiança para um transporte escolar mais seguro.</p>
@@ -243,12 +243,12 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
                         <p class="rs-modal__sub">Como você quer se cadastrar?</p>
                         <div class="rs-modal__grid">
                             <Link :href="route('register.responsavel')" class="rs-modal__option">
-                                <div class="rs-modal__option-emoji">👪</div>
+                                <div class="rs-modal__option-mark">R</div>
                                 <h3 class="rs-modal__option-title">Responsável</h3>
                                 <p class="rs-modal__option-desc">Quero encontrar uma van para meu filho</p>
                             </Link>
                             <Link :href="route('register.motorista')" class="rs-modal__option">
-                                <div class="rs-modal__option-emoji">🚐</div>
+                                <div class="rs-modal__option-mark">M</div>
                                 <h3 class="rs-modal__option-title">Motorista</h3>
                                 <p class="rs-modal__option-desc">Quero oferecer transporte escolar</p>
                             </Link>
@@ -297,12 +297,12 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 .rs-nav__logo { display: flex; align-items: center; gap: 10px; text-decoration: none; transition: opacity 0.2s; }
 .rs-nav__logo:hover { opacity: 0.85; }
 .rs-nav__logo-ring {
-    width: 38px; height: 38px; border-radius: 50%;
+    width: 48px; height: 48px; border-radius: 50%;
     background: rgba(255,255,255,0.15); display: flex; align-items: center; justify-content: center;
     transition: background 0.25s; flex-shrink: 0;
 }
 .rs-nav__logo:hover .rs-nav__logo-ring { background: rgba(255,255,255,0.25); }
-.rs-nav__logo-img { width: 24px; height: 24px; object-fit: contain; }
+.rs-nav__logo-img { width: 32px; height: 32px; object-fit: contain; }
 .rs-nav__logo-text { color: #fff; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1.05rem; }
 .rs-nav__actions { display: flex; align-items: center; gap: 8px; }
 
@@ -745,8 +745,19 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 }
 .rs-modal__option:active { transform: scale(0.97); }
 
-.rs-modal__option-emoji { font-size: 1.8rem; margin-bottom: 8px; display: block; }
-@media (min-width: 400px) { .rs-modal__option-emoji { font-size: 2.2rem; margin-bottom: 10px; } }
+.rs-modal__option-mark {
+    width: 42px;
+    height: 42px;
+    border-radius: 14px;
+    margin: 0 auto 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(37, 99, 235, 0.1);
+    color: #2563eb;
+    font-weight: 800;
+}
+@media (min-width: 400px) { .rs-modal__option-mark { width: 48px; height: 48px; } }
 .rs-modal__option-title { font-family: 'Nunito', sans-serif; font-weight: 800; color: #0f172a; font-size: 0.85rem; margin-bottom: 4px; }
 @media (min-width: 400px) { .rs-modal__option-title { font-size: 0.9rem; } }
 .rs-modal__option-desc { font-size: 0.7rem; color: #475569; line-height: 1.45; }

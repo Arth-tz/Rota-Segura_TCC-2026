@@ -1,0 +1,459 @@
+TABELAS E CAMPOS GERADOS A PARTIR DAS MIGRATIONS
+=================================================
+
+TABLE: cache (0001_01_01_000001_create_cache_table.php)
+FIELDS:
+  $table->string('key')->primary();
+  $table->mediumText('value');
+  $table->string('key')->primary();
+  $table->string('owner');
+INDEXES:
+  $table->integer('expiration')->index();
+  $table->integer('expiration')->index();
+
+TABLE: jobs (0001_01_01_000002_create_jobs_table.php)
+FIELDS:
+  $table->id();
+  $table->longText('payload');
+  $table->unsignedTinyInteger('attempts');
+  $table->unsignedInteger('reserved_at')->nullable();
+  $table->unsignedInteger('available_at');
+  $table->unsignedInteger('created_at');
+  $table->string('id')->primary();
+  $table->string('name');
+  $table->integer('total_jobs');
+  $table->integer('pending_jobs');
+  $table->integer('failed_jobs');
+  $table->longText('failed_job_ids');
+  $table->mediumText('options')->nullable();
+  $table->integer('cancelled_at')->nullable();
+  $table->integer('created_at');
+  $table->integer('finished_at')->nullable();
+  $table->id();
+  $table->text('connection');
+  $table->text('queue');
+  $table->longText('payload');
+  $table->longText('exception');
+  $table->timestamp('failed_at')->useCurrent();
+UNIQUES / CONSTRAINTS:
+  $table->string('uuid')->unique();
+INDEXES:
+  $table->string('queue')->index();
+
+TABLE: pessoa (2026_04_01_000001_create_pessoa_table.php)
+FIELDS:
+  $table->bigIncrements('id_pessoa');
+  $table->string('nome', 150);
+  $table->date('data_nascimento');
+  $table->string('telefone', 20)->nullable();
+  $table->string('foto_url', 255)->nullable();
+  $table->timestamp('foto_upload_data')->nullable();
+  $table->boolean('ativo')->default(true);
+  $table->timestamps();
+UNIQUES / CONSTRAINTS:
+  $table->char('cpf', 11)->unique();
+INDEXES:
+  $table->index('cpf');
+  $table->index('ativo');
+
+TABLE: usuario (2026_04_01_000002_create_usuario_table.php)
+FIELDS:
+  $table->bigIncrements('id_usuario');
+  $table->string('senha_hash', 255);
+  $table->enum('role', ['admin', 'motorista', 'responsavel', 'passageiro'])->default('passageiro');
+  $table->boolean('ativo')->default(true);
+  $table->timestamp('ultimo_login')->nullable();
+  $table->unsignedInteger('tentativas_falhas')->default(0);
+  $table->timestamp('bloqueado_ate')->nullable();
+  $table->rememberToken();
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa')->restrictOnDelete()->restrictOnUpdate();
+UNIQUES / CONSTRAINTS:
+  $table->unsignedBigInteger('id_pessoa')->unique();
+  $table->string('email', 150)->unique();
+INDEXES:
+  $table->index('ativo');
+  $table->index('role');
+  $table->index(['email', 'ativo']);
+
+TABLE: responsavel (2026_04_01_000003_create_responsavel_table.php)
+FIELDS:
+  $table->bigIncrements('id_responsavel');
+  $table->enum('tipo_responsavel', ['pai', 'mae', 'tutor', 'representante_legal', 'autoresponsavel'])->default('pai');
+  $table->string('telefone_emergencia', 20)->nullable();
+  $table->date('data_responsavel_ate')->nullable();
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_usuario')->references('id_usuario')->on('usuario')->restrictOnDelete()->restrictOnUpdate();
+UNIQUES / CONSTRAINTS:
+  $table->unsignedBigInteger('id_usuario')->unique();
+INDEXES:
+  $table->index('tipo_responsavel');
+
+TABLE: motorista (2026_04_01_000004_create_motorista_table.php)
+FIELDS:
+  $table->bigIncrements('id_motorista');
+  $table->string('cnh_categoria', 5);
+  $table->date('cnh_validade');
+  $table->string('cnh_foto_url', 255)->nullable();
+  $table->enum('status_aprovacao', ['pendente', 'aprovado', 'rejeitado'])->default('pendente');
+  $table->text('motivo_rejeicao')->nullable();
+  $table->timestamp('data_avaliacao_documento')->nullable();
+  $table->unsignedBigInteger('id_usuario_avaliador')->nullable();
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_usuario')->references('id_usuario')->on('usuario')->restrictOnDelete()->restrictOnUpdate();
+  $table->foreign('id_usuario_avaliador')->references('id_usuario')->on('usuario')->nullOnDelete();
+UNIQUES / CONSTRAINTS:
+  $table->unsignedBigInteger('id_usuario')->unique();
+  $table->string('cnh_numero', 20)->unique();
+INDEXES:
+  $table->index('status_aprovacao');
+  $table->index('cnh_validade');
+
+TABLE: endereco (2026_04_01_000005_create_endereco_table.php)
+FIELDS:
+  $table->bigIncrements('id_endereco');
+  $table->string('logradouro', 150);
+  $table->string('numero', 10)->nullable();
+  $table->string('complemento', 100)->nullable();
+  $table->string('bairro', 100);
+  $table->string('cidade', 100);
+  $table->char('estado', 2);
+  $table->char('cep', 8);
+  $table->decimal('latitude', 10, 7)->nullable();
+  $table->decimal('longitude', 10, 7)->nullable();
+  $table->timestamps();
+INDEXES:
+  $table->index(['cidade', 'estado']);
+  $table->index('cep');
+
+TABLE: passageiro (2026_04_01_000006_create_passageiro_table.php)
+FIELDS:
+  $table->bigIncrements('id_passageiro');
+  $table->text('observacoes_medicas')->nullable();
+  $table->boolean('ativo')->default(true);
+  $table->date('data_inscricao')->default(now());
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_pessoa')->references('id_pessoa')->on('pessoa')->restrictOnDelete()->restrictOnUpdate();
+  $table->foreign('id_usuario')->references('id_usuario')->on('usuario')->nullOnDelete();
+UNIQUES / CONSTRAINTS:
+  $table->unsignedBigInteger('id_pessoa')->unique();
+  $table->unsignedBigInteger('id_usuario')->nullable()->unique();
+INDEXES:
+  $table->index('ativo');
+
+TABLE: passageiro_endereco (2026_04_01_000007_create_passageiro_endereco_table.php)
+FIELDS:
+  $table->bigIncrements('id_passageiro_endereco');
+  $table->unsignedBigInteger('id_passageiro');
+  $table->unsignedBigInteger('id_endereco');
+  $table->enum('tipo', ['embarque', 'desembarque', 'residencia']);
+  $table->boolean('principal')->default(false);
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_passageiro')->references('id_passageiro')->on('passageiro')->cascadeOnDelete();
+  $table->foreign('id_endereco')->references('id_endereco')->on('endereco')->restrictOnDelete();
+UNIQUES / CONSTRAINTS:
+  $table->unique(['id_passageiro', 'id_endereco', 'tipo']);
+INDEXES:
+  $table->index(['id_passageiro', 'principal']);
+
+TABLE: destino (2026_04_01_000008_create_destino_table.php)
+FIELDS:
+  $table->bigIncrements('id_destino');
+  $table->string('nome', 150);
+  $table->enum('tipo', ['escola', 'atividade', 'outro']);
+  $table->boolean('ativo')->default(true);
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_endereco')->references('id_endereco')->on('endereco')->restrictOnDelete();
+UNIQUES / CONSTRAINTS:
+  $table->unsignedBigInteger('id_endereco')->unique();
+INDEXES:
+  $table->index('tipo');
+  $table->index('ativo');
+
+TABLE: van (2026_04_01_000009_create_van_table.php)
+FIELDS:
+  $table->bigIncrements('id_van');
+  $table->unsignedBigInteger('id_motorista');
+  $table->string('modelo', 100)->nullable();
+  $table->string('marca', 100)->nullable();
+  $table->year('ano_fabricacao')->nullable();
+  $table->string('cor', 50)->nullable();
+  $table->unsignedInteger('capacidade_passageiros');
+  $table->enum('status_aprovacao', ['pendente', 'aprovado', 'rejeitado'])->default('pendente');
+  $table->enum('status_operacional', ['ativa', 'manutencao', 'inativa'])->default('ativa');
+  $table->text('motivo_rejeicao')->nullable();
+  $table->unsignedBigInteger('id_usuario_avaliador')->nullable();
+  $table->timestamp('data_avaliacao')->nullable();
+  $table->string('foto_url', 255)->nullable();
+  $table->string('crlv_url', 255)->nullable();
+  $table->date('crlv_validade')->nullable();
+  $table->string('seguro_url', 255)->nullable();
+  $table->date('seguro_validade')->nullable();
+  $table->string('ipva_comprovante_url', 255)->nullable();
+  $table->date('ipva_comprovante_data')->nullable();
+  $table->boolean('documentacao_completa')->default(false);
+  $table->date('data_ultima_inspecao')->nullable();
+  $table->date('proxima_inspecao_prevista')->nullable();
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_motorista')->references('id_motorista')->on('motorista')->restrictOnDelete();
+  $table->foreign('id_usuario_avaliador')->references('id_usuario')->on('usuario')->nullOnDelete();
+UNIQUES / CONSTRAINTS:
+  $table->string('placa', 10)->unique();
+INDEXES:
+  $table->index('status_aprovacao');
+  $table->index('status_operacional');
+  $table->index('crlv_validade');
+  $table->index('documentacao_completa');
+
+TABLE: responsavel_passageiro (2026_04_01_000010_create_responsavel_passageiro_table.php)
+FIELDS:
+  $table->bigIncrements('id_responsavel_passageiro');
+  $table->unsignedBigInteger('id_responsavel');
+  $table->unsignedBigInteger('id_passageiro');
+  $table->date('data_inicio')->default(now());
+  $table->date('data_fim')->nullable();
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_responsavel')->references('id_responsavel')->on('responsavel')->cascadeOnDelete();
+  $table->foreign('id_passageiro')->references('id_passageiro')->on('passageiro')->cascadeOnDelete();
+INDEXES:
+  $table->index(['id_passageiro', 'data_fim']);
+
+TABLE: disponibilidade (2026_04_01_000011_create_disponibilidade_table.php)
+FIELDS:
+  $table->bigIncrements('id_disponibilidade');
+  $table->unsignedBigInteger('id_van');
+  $table->string('nome', 100)->comment('Ex: Manhã ida, Tarde volta, Treino ter/qui');
+  $table->enum('turno', ['manha', 'tarde', 'noite']);
+  $table->decimal('preco_mensal', 8, 2);
+  $table->unsignedInteger('capacidade_total');
+  $table->boolean('ativa')->default(true);
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_van')->references('id_van')->on('van')->cascadeOnDelete();
+INDEXES:
+  $table->index(['id_van', 'ativa']);
+
+TABLE: disponibilidade_dia (2026_04_01_000011b_create_disponibilidade_dia_table.php)
+FIELDS:
+  $table->bigIncrements('id_disponibilidade_dia');
+  $table->unsignedBigInteger('id_disponibilidade');
+  $table->enum('dia_semana', ['seg', 'ter', 'qua', 'qui', 'sex', 'sab', 'dom']);
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_disponibilidade')
+UNIQUES / CONSTRAINTS:
+  $table->unique(['id_disponibilidade', 'dia_semana'], 'uk_disponibilidade_dia');
+INDEXES:
+  $table->index('dia_semana');
+
+TABLE: disponibilidade_parada (2026_04_01_000012_create_disponibilidade_parada_table.php)
+FIELDS:
+  $table->bigIncrements('id_disponibilidade_parada');
+  $table->unsignedBigInteger('id_disponibilidade');
+  $table->unsignedBigInteger('id_endereco');
+  $table->unsignedInteger('ordem');
+  $table->enum('tipo', ['embarque', 'desembarque']);
+  $table->time('horario_previsto');
+  $table->boolean('ativa')->default(true);
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_disponibilidade')->references('id_disponibilidade')->on('disponibilidade')->cascadeOnDelete();
+  $table->foreign('id_endereco')->references('id_endereco')->on('endereco')->restrictOnDelete();
+UNIQUES / CONSTRAINTS:
+  $table->unique(['id_disponibilidade', 'ordem']);
+INDEXES:
+  $table->index(['id_disponibilidade', 'ordem']);
+
+TABLE: solicitacao (2026_04_01_000013_create_solicitacao_table.php)
+FIELDS:
+  $table->bigIncrements('id_solicitacao');
+  $table->unsignedBigInteger('id_van');
+  $table->unsignedBigInteger('id_passageiro');
+  $table->unsignedBigInteger('id_responsavel')->nullable();
+  $table->unsignedBigInteger('id_usuario_solicitante');
+  $table->enum('tipo_solicitante', ['responsavel', 'passageiro', 'admin'])->default('responsavel');
+  $table->enum('status', ['pendente', 'aceita', 'recusada', 'cancelada'])->default('pendente');
+  $table->text('mensagem')->nullable();
+  $table->text('motivo_recusa')->nullable();
+  $table->dateTime('data_solicitacao')->useCurrent();
+  $table->dateTime('data_resposta')->nullable();
+  $table->dateTime('cancelado_em')->nullable();
+  $table->unsignedBigInteger('cancelado_por')->nullable();
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_van')->references('id_van')->on('van')->restrictOnDelete();
+  $table->foreign('id_passageiro')->references('id_passageiro')->on('passageiro')->restrictOnDelete();
+  $table->foreign('id_responsavel')->references('id_responsavel')->on('responsavel')->nullOnDelete();
+  $table->foreign('id_usuario_solicitante')->references('id_usuario')->on('usuario')->restrictOnDelete();
+  $table->foreign('cancelado_por')->references('id_usuario')->on('usuario')->nullOnDelete();
+INDEXES:
+  $table->index(['id_van', 'status']);
+  $table->index(['id_responsavel', 'status']);
+  $table->index('data_solicitacao');
+
+TABLE: solicitacao_disponibilidade (2026_04_01_000013b_create_solicitacao_disponibilidade_table.php)
+FIELDS:
+  $table->bigIncrements('id_solicitacao_disponibilidade');
+  $table->unsignedBigInteger('id_solicitacao');
+  $table->unsignedBigInteger('id_disponibilidade');
+  $table->decimal('preco_mensal', 8, 2)->comment('Preço do trajeto no momento da solicitação');
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_solicitacao')->references('id_solicitacao')->on('solicitacao')->cascadeOnDelete();
+  $table->foreign('id_disponibilidade')->references('id_disponibilidade')->on('disponibilidade')->restrictOnDelete();
+UNIQUES / CONSTRAINTS:
+  $table->unique(['id_solicitacao', 'id_disponibilidade'], 'uk_solicitacao_disponibilidade');
+INDEXES:
+  $table->index('id_disponibilidade');
+
+TABLE: vinculo (2026_04_01_000014_create_vinculo_table.php)
+FIELDS:
+  $table->bigIncrements('id_vinculo');
+  $table->unsignedBigInteger('id_van');
+  $table->unsignedBigInteger('id_passageiro');
+  $table->decimal('preco_total', 8, 2)->comment('Soma dos preços dos trajetos aceitos');
+  $table->enum('status', ['ativo', 'suspenso', 'encerrado'])->default('ativo');
+  $table->date('data_inicio');
+  $table->date('data_fim')->nullable();
+  $table->text('observacoes')->nullable();
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_van')->references('id_van')->on('van')->restrictOnDelete();
+  $table->foreign('id_passageiro')->references('id_passageiro')->on('passageiro')->restrictOnDelete();
+  $table->foreign('id_solicitacao')->references('id_solicitacao')->on('solicitacao')->restrictOnDelete();
+UNIQUES / CONSTRAINTS:
+  $table->unsignedBigInteger('id_solicitacao')->unique();
+INDEXES:
+  $table->index(['id_passageiro', 'status']);
+  $table->index('status');
+
+TABLE: vinculo_disponibilidade (2026_04_01_000014b_create_vinculo_disponibilidade_table.php)
+FIELDS:
+  $table->bigIncrements('id_vinculo_disponibilidade');
+  $table->unsignedBigInteger('id_vinculo');
+  $table->unsignedBigInteger('id_disponibilidade');
+  $table->decimal('preco_mensal', 8, 2)->comment('Preço do trajeto acordado no vínculo');
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_vinculo')->references('id_vinculo')->on('vinculo')->cascadeOnDelete();
+  $table->foreign('id_disponibilidade')->references('id_disponibilidade')->on('disponibilidade')->restrictOnDelete();
+UNIQUES / CONSTRAINTS:
+  $table->unique(['id_vinculo', 'id_disponibilidade'], 'uk_vinculo_disponibilidade');
+INDEXES:
+  $table->index('id_disponibilidade');
+
+TABLE: disponibilidade_passageiro (2026_04_01_000015_create_disponibilidade_passageiro_table.php)
+FIELDS:
+  $table->bigIncrements('id_disponibilidade_passageiro');
+  $table->unsignedBigInteger('id_passageiro');
+  $table->unsignedBigInteger('id_vinculo');
+  $table->date('data');
+  $table->boolean('vai')->default(true);
+  $table->enum('motivo_falta', ['doenca', 'feriado', 'viagem', 'evento', 'outro'])->nullable();
+  $table->text('observacoes')->nullable();
+  $table->unsignedBigInteger('marcado_por');
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_passageiro')->references('id_passageiro')->on('passageiro')->cascadeOnDelete();
+  $table->foreign('id_vinculo')->references('id_vinculo')->on('vinculo')->restrictOnDelete();
+  $table->foreign('marcado_por')->references('id_usuario')->on('usuario')->restrictOnDelete();
+UNIQUES / CONSTRAINTS:
+  $table->unique(['id_passageiro', 'data']);
+INDEXES:
+  $table->index(['id_passageiro', 'data']);
+  $table->index(['id_vinculo', 'vai']);
+
+TABLE: rota (2026_04_01_000016_create_rota_table.php)
+FIELDS:
+  $table->bigIncrements('id_rota');
+  $table->unsignedBigInteger('id_van');
+  $table->unsignedBigInteger('id_disponibilidade');
+  $table->date('data');
+  $table->enum('status', ['planejada', 'em_andamento', 'concluida', 'cancelada'])->default('planejada');
+  $table->dateTime('horario_inicio_previsto')->nullable();
+  $table->dateTime('horario_inicio_real')->nullable();
+  $table->dateTime('horario_fim_previsto')->nullable();
+  $table->dateTime('horario_fim_real')->nullable();
+  $table->decimal('distancia_km', 10, 2)->nullable();
+  $table->unsignedInteger('tempo_decorrido_minutos')->nullable();
+  $table->text('observacoes')->nullable();
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_van')->references('id_van')->on('van')->restrictOnDelete();
+  $table->foreign('id_disponibilidade')->references('id_disponibilidade')->on('disponibilidade')->restrictOnDelete();
+INDEXES:
+  $table->index(['id_van', 'data']);
+  $table->index(['id_disponibilidade', 'data']);
+  $table->index('status');
+
+TABLE: parada (2026_04_01_000017_create_parada_table.php)
+FIELDS:
+  $table->bigIncrements('id_parada');
+  $table->unsignedBigInteger('id_rota');
+  $table->unsignedBigInteger('id_endereco');
+  $table->unsignedInteger('ordem');
+  $table->enum('tipo', ['embarque', 'desembarque']);
+  $table->time('horario_previsto')->nullable();
+  $table->time('horario_real')->nullable();
+  $table->text('observacoes')->nullable();
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_rota')->references('id_rota')->on('rota')->cascadeOnDelete();
+  $table->foreign('id_endereco')->references('id_endereco')->on('endereco')->restrictOnDelete();
+UNIQUES / CONSTRAINTS:
+  $table->unique(['id_rota', 'ordem']);
+INDEXES:
+  $table->index('id_rota');
+
+TABLE: parada_passageiro (2026_04_01_000018_create_parada_passageiro_table.php)
+FIELDS:
+  $table->bigIncrements('id_parada_passageiro');
+  $table->unsignedBigInteger('id_parada');
+  $table->unsignedBigInteger('id_passageiro');
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_parada')->references('id_parada')->on('parada')->cascadeOnDelete();
+  $table->foreign('id_passageiro')->references('id_passageiro')->on('passageiro')->restrictOnDelete();
+UNIQUES / CONSTRAINTS:
+  $table->unique(['id_parada', 'id_passageiro']);
+INDEXES:
+  $table->index('id_passageiro');
+
+TABLE: localizacao (2026_04_01_000019_create_localizacao_table.php)
+FIELDS:
+  $table->bigIncrements('id_localizacao');
+  $table->unsignedBigInteger('id_rota');
+  $table->unsignedBigInteger('id_van');
+  $table->decimal('latitude', 10, 7);
+  $table->decimal('longitude', 10, 7);
+  $table->decimal('altitude', 8, 2)->nullable();
+  $table->decimal('precisao_metros', 6, 2)->nullable();
+  $table->enum('fonte_localizacao', ['gps', 'rede', 'fusao'])->default('gps');
+  $table->unsignedInteger('numero_satelites')->nullable();
+  $table->dateTime('timestamp_captura');
+  $table->timestamps();
+FOREIGN KEYS:
+  $table->foreign('id_rota')->references('id_rota')->on('rota')->cascadeOnDelete();
+  $table->foreign('id_van')->references('id_van')->on('van')->restrictOnDelete();
+INDEXES:
+  $table->index(['id_rota', 'timestamp_captura']);
+  $table->index(['id_van', 'timestamp_captura']);
+  $table->index('created_at');
+
+TABLE: sessions (2026_04_04_235831_create_sessions_table.php)
+FIELDS:
+  $table->string('id')->primary();
+  $table->string('ip_address', 45)->nullable();
+  $table->text('user_agent')->nullable();
+  $table->longText('payload');
+INDEXES:
+  $table->foreignId('user_id')->nullable()->index();
+  $table->integer('last_activity')->index();

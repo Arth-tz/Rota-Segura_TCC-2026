@@ -1,0 +1,533 @@
+TABLES SUMMARY
+===============
+
+TABLE: cache
+  key - varchar(255) - PK
+  value - mediumtext
+  expiration - int
+  INDEXES:
+    cache_expiration_index (INDEX) - expiration
+
+TABLE: cache_locks
+  key - varchar(255) - PK
+  owner - varchar(255)
+  expiration - int
+  INDEXES:
+    cache_locks_expiration_index (INDEX) - expiration
+
+TABLE: destino
+  id_destino - bigint unsigned - PK | auto_increment
+  id_endereco - bigint unsigned - UNIQUE
+  nome - varchar(150)
+  tipo - enum('escola','atividade','outro')
+  ativo - tinyint(1) - default=1
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_endereco -> endereco.id_endereco (muitos para um)
+  INDEXES:
+    destino_ativo_index (INDEX) - ativo
+    destino_id_endereco_unique (UNIQUE) - id_endereco
+    destino_tipo_index (INDEX) - tipo
+
+TABLE: disponibilidade
+  id_disponibilidade - bigint unsigned - PK | auto_increment
+  id_van - bigint unsigned
+  nome - varchar(100) - comment='Ex: Manhã ida, Tarde volta, Treino ter/qui'
+  turno - enum('manha','tarde','noite')
+  preco_mensal - decimal(8,2)
+  capacidade_total - int unsigned
+  ativa - tinyint(1) - default=1
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_van -> van.id_van (muitos para um)
+  INDEXES:
+    disponibilidade_id_van_ativa_index (INDEX) - id_van, ativa
+
+TABLE: disponibilidade_dia
+  id_disponibilidade_dia - bigint unsigned - PK | auto_increment
+  id_disponibilidade - bigint unsigned
+  dia_semana - enum('seg','ter','qua','qui','sex','sab','dom')
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_disponibilidade -> disponibilidade.id_disponibilidade (muitos para um)
+  INDEXES:
+    disponibilidade_dia_dia_semana_index (INDEX) - dia_semana
+    uk_disponibilidade_dia (UNIQUE) - id_disponibilidade, dia_semana
+
+TABLE: disponibilidade_parada
+  id_disponibilidade_parada - bigint unsigned - PK | auto_increment
+  id_disponibilidade - bigint unsigned
+  id_endereco - bigint unsigned // pq endereco se o nome é disponilibidade_parada¿
+  ordem - int unsigned
+  tipo - enum('embarque','desembarque')
+  horario_previsto - time
+  ativa - tinyint(1) - default=1
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_disponibilidade -> disponibilidade.id_disponibilidade (muitos para um)
+    id_endereco -> endereco.id_endereco (muitos para um)
+  INDEXES:
+    disponibilidade_parada_id_disponibilidade_ordem_index (INDEX) - id_disponibilidade, ordem
+    disponibilidade_parada_id_disponibilidade_ordem_unique (UNIQUE) - id_disponibilidade, ordem
+    disponibilidade_parada_id_endereco_foreign (INDEX) - id_endereco
+
+TABLE: disponibilidade_passageiro
+  id_disponibilidade_passageiro - bigint unsigned - PK | auto_increment
+  id_passageiro - bigint unsigned
+  id_vinculo - bigint unsigned // pq vinculo se o nome é disponibilidade_passaegiro
+  data - date
+  vai - tinyint(1) - default=1
+  motivo_falta - enum('doenca','feriado','viagem','evento','outro') - nullable
+  observacoes - text - nullable
+  marcado_por - bigint unsigned
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_passageiro -> passageiro.id_passageiro (muitos para um)
+    id_vinculo -> vinculo.id_vinculo (muitos para um)
+    marcado_por -> usuario.id_usuario (muitos para um)
+  INDEXES:
+    disponibilidade_passageiro_id_passageiro_data_index (INDEX) - id_passageiro, data
+    disponibilidade_passageiro_id_passageiro_data_unique (UNIQUE) - id_passageiro, data
+    disponibilidade_passageiro_id_vinculo_vai_index (INDEX) - id_vinculo, vai
+    disponibilidade_passageiro_marcado_por_foreign (INDEX) - marcado_por
+
+TABLE: endereco
+  id_endereco - bigint unsigned - PK | auto_increment
+  logradouro - varchar(150)
+  numero - varchar(10) - nullable
+  complemento - varchar(100) - nullable
+  bairro - varchar(100)
+  cidade - varchar(100)
+  estado - char(2)
+  cep - char(8)
+  latitude - decimal(10,7) - nullable
+  longitude - decimal(10,7) - nullable
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  INDEXES:
+    endereco_cep_index (INDEX) - cep
+    endereco_cidade_estado_index (INDEX) - cidade, estado
+
+TABLE: failed_jobs
+  id - bigint unsigned - PK | auto_increment
+  uuid - varchar(255) - UNIQUE
+  connection - text
+  queue - text
+  payload - longtext
+  exception - longtext
+  failed_at - timestamp - default=CURRENT_TIMESTAMP | DEFAULT_GENERATED
+  INDEXES:
+    failed_jobs_uuid_unique (UNIQUE) - uuid
+
+TABLE: job_batches
+  id - varchar(255) - PK
+  name - varchar(255)
+  total_jobs - int
+  pending_jobs - int
+  failed_jobs - int
+  failed_job_ids - longtext
+  options - mediumtext - nullable
+  cancelled_at - int - nullable
+  created_at - int
+  finished_at - int - nullable
+
+TABLE: jobs
+  id - bigint unsigned - PK | auto_increment
+  queue - varchar(255)
+  payload - longtext
+  attempts - tinyint unsigned
+  reserved_at - int unsigned - nullable
+  available_at - int unsigned
+  created_at - int unsigned
+  INDEXES:
+    jobs_queue_index (INDEX) - queue
+
+TABLE: localizacao
+  id_localizacao - bigint unsigned - PK | auto_increment
+  id_rota - bigint unsigned
+  id_van - bigint unsigned
+  latitude - decimal(10,7)
+  longitude - decimal(10,7)
+  altitude - decimal(8,2) - nullable
+  precisao_metros - decimal(6,2) - nullable
+  fonte_localizacao - enum('gps','rede','fusao') - nullable - default=gps
+  timestamp_captura - datetime
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_rota -> rota.id_rota (muitos para um)
+    id_van -> van.id_van (muitos para um)
+  INDEXES:
+    localizacao_created_at_index (INDEX) - created_at
+    localizacao_id_rota_timestamp_captura_index (INDEX) - id_rota, timestamp_captura
+    localizacao_id_van_timestamp_captura_index (INDEX) - id_van, timestamp_captura
+
+TABLE: migrations
+  id - int unsigned - PK | auto_increment
+  migration - varchar(255)
+  batch - int
+
+TABLE: motorista
+  id_motorista - bigint unsigned - PK | auto_increment
+  id_usuario - bigint unsigned – UNIQUE // pq usuario e nao pessoa¿
+  cnh_numero - varchar(20) - UNIQUE
+  cnh_categoria - varchar(5)
+  cnh_validade - date
+  cnh_foto_url - varchar(255) - nullable
+  status_aprovacao - enum('pendente','aprovado','rejeitado') - default=pendente
+  motivo_rejeicao - text - nullable
+  data_avaliacao_documento - timestamp - nullable
+  id_usuario_avaliador - bigint unsigned - nullable
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_usuario_avaliador -> usuario.id_usuario (muitos para um)
+    id_usuario -> usuario.id_usuario (um para um)
+  INDEXES:
+    motorista_cnh_numero_unique (UNIQUE) - cnh_numero
+    motorista_cnh_validade_index (INDEX) - cnh_validade
+    motorista_id_usuario_avaliador_foreign (INDEX) - id_usuario_avaliador
+    motorista_id_usuario_unique (UNIQUE) - id_usuario
+    motorista_status_aprovacao_index (INDEX) - status_aprovacao
+
+TABLE: parada
+  id_parada - bigint unsigned - PK | auto_increment
+  id_rota - bigint unsigned // pq¿
+  id_endereco - bigint unsigned //pq¿
+  ordem - int unsigned
+  tipo - enum('embarque','desembarque')
+  horario_previsto - time - nullable
+  horario_real - time - nullable
+  observacoes - text - nullable
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_endereco -> endereco.id_endereco (muitos para um)
+    id_rota -> rota.id_rota (muitos para um)
+  INDEXES:
+    parada_id_endereco_foreign (INDEX) - id_endereco
+    parada_id_rota_index (INDEX) - id_rota
+    parada_id_rota_ordem_unique (UNIQUE) - id_rota, ordem
+
+TABLE: parada_passageiro
+  id_parada_passageiro - bigint unsigned - PK | auto_increment
+  id_parada - bigint unsigned
+  id_passageiro - bigint unsigned
+  embarque_em - datetime - nullable
+  desembarque_em - datetime - nullable
+  marcado_por - bigint unsigned - nullable
+  metodo_confirmacao - enum('motorista_manual','gps','qr','responsavel') - default='motorista_manual'
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_parada -> parada.id_parada (muitos para um)
+    id_passageiro -> passageiro.id_passageiro (muitos para um)
+    marcado_por -> usuario.id_usuario (muitos para um)
+  INDEXES:
+    parada_passageiro_id_parada_id_passageiro_unique (UNIQUE) - id_parada, id_passageiro
+    parada_passageiro_id_passageiro_index (INDEX) - id_passageiro
+
+TABLE: passageiro
+  id_passageiro - bigint unsigned - PK | auto_increment
+  id_pessoa - bigint unsigned - UNIQUE
+  -- REMOVED: id_usuario (passageiro não terá login próprio)
+  observacoes_medicas - text - nullable
+  ativo - tinyint(1) - default=1
+  data_inscricao - date - default=CURRENT_DATE
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_pessoa -> pessoa.id_pessoa (um para um)
+  INDEXES:
+    passageiro_ativo_index (INDEX) - ativo
+    passageiro_id_pessoa_unique (UNIQUE) - id_pessoa
+
+TABLE: passageiro_endereco
+  id_passageiro_endereco - bigint unsigned - PK | auto_increment
+  id_passageiro - bigint unsigned
+  id_endereco - bigint unsigned
+  tipo - enum('embarque','desembarque','residencia')
+  principal - tinyint(1) - default=0
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_endereco -> endereco.id_endereco (muitos para um)
+    id_passageiro -> passageiro.id_passageiro (muitos para um)
+  INDEXES:
+    passageiro_endereco_id_endereco_foreign (INDEX) - id_endereco
+    passageiro_endereco_id_passageiro_id_endereco_tipo_unique (UNIQUE) - id_passageiro, id_endereco, tipo
+    passageiro_endereco_id_passageiro_principal_index (INDEX) - id_passageiro, principal
+
+TABLE: pessoa
+  id_pessoa - bigint unsigned - PK | auto_increment
+  nome - varchar(150)
+  cpf - char(11) - UNIQUE
+  data_nascimento - date
+  telefone - varchar(20) - nullable
+  foto_url - varchar(255) - nullable
+  foto_upload_data - timestamp - nullable
+  ativo - tinyint(1) - default=1
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  INDEXES:
+    pessoa_ativo_index (INDEX) - ativo
+    pessoa_cpf_index (INDEX) - cpf
+    pessoa_cpf_unique (UNIQUE) - cpf
+
+TABLE: responsavel
+  id_responsavel - bigint unsigned - PK | auto_increment
+  id_usuario - bigint unsigned – UNIQUE //devo dar usuario ou pessoa como FK para resp e motorista¿
+  tipo_responsavel - enum('pai','mae','tutor','representante_legal','autoresponsavel') - default=pai
+  telefone_emergencia - varchar(20) - nullable
+  data_responsavel_ate - date - nullable
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_usuario -> usuario.id_usuario (um para um)
+  INDEXES:
+    responsavel_id_usuario_unique (UNIQUE) - id_usuario
+    responsavel_tipo_responsavel_index (INDEX) - tipo_responsavel
+
+TABLE: responsavel_passageiro
+  id_responsavel_passageiro - bigint unsigned - PK | auto_increment
+  id_responsavel - bigint unsigned
+  id_passageiro - bigint unsigned
+  data_inicio - date - default=CURRENT_DATE
+  data_fim - date - nullable
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_passageiro -> passageiro.id_passageiro (muitos para um)
+    id_responsavel -> responsavel.id_responsavel (muitos para um)
+  INDEXES:
+    responsavel_passageiro_id_passageiro_data_fim_index (INDEX) - id_passageiro, data_fim
+    responsavel_passageiro_id_responsavel_foreign (INDEX) - id_responsavel
+
+TABLE: rota
+  id_rota - bigint unsigned - PK | auto_increment
+  id_van - bigint unsigned // pq¿
+  id_disponibilidade - bigint unsigned //pq¿
+  data - date
+  status - enum('planejada','em_andamento','concluida','cancelada') - default=planejada
+  horario_inicio_previsto - datetime - nullable
+  horario_inicio_real - datetime - nullable
+  horario_fim_previsto - datetime - nullable
+  horario_fim_real - datetime - nullable
+  distancia_km - decimal(10,2) - nullable
+  tempo_decorrido_minutos - int unsigned - nullable
+  observacoes - text - nullable
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_disponibilidade -> disponibilidade.id_disponibilidade (muitos para um)
+    id_van -> van.id_van (muitos para um)
+  INDEXES:
+    rota_id_disponibilidade_data_index (INDEX) - id_disponibilidade, data
+    rota_id_van_data_index (INDEX) - id_van, data
+    rota_status_index (INDEX) - status
+
+TABLE: sessions
+  id - varchar(255) - PK
+  user_id - bigint unsigned - nullable
+  ip_address - varchar(45) - nullable
+  user_agent - text - nullable
+  payload - longtext
+  last_activity - int
+  INDEXES:
+    sessions_last_activity_index (INDEX) - last_activity
+    sessions_user_id_index (INDEX) - user_id
+
+TABLE: solicitacao
+  id_solicitacao - bigint unsigned - PK | auto_increment
+//pq de todas essas FKs¿
+  id_van - bigint unsigned
+  id_passageiro - bigint unsigned
+  id_responsavel - bigint unsigned - nullable
+  id_usuario_solicitante - bigint unsigned
+  tipo_solicitante - enum('responsavel','passageiro','admin') - default=responsavel
+  status - enum('pendente','aceita','recusada','cancelada') - default=pendente
+  mensagem - text - nullable
+  motivo_recusa - text - nullable
+  data_solicitacao - datetime - default=CURRENT_TIMESTAMP | DEFAULT_GENERATED
+  data_resposta - datetime - nullable
+  cancelado_em - datetime - nullable
+  cancelado_por - bigint unsigned - nullable
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    cancelado_por -> usuario.id_usuario (muitos para um)
+    id_passageiro -> passageiro.id_passageiro (muitos para um)
+    id_responsavel -> responsavel.id_responsavel (muitos para um)
+    id_usuario_solicitante -> usuario.id_usuario (muitos para um)
+    id_van -> van.id_van (muitos para um)
+  INDEXES:
+    solicitacao_cancelado_por_foreign (INDEX) - cancelado_por
+    solicitacao_data_solicitacao_index (INDEX) - data_solicitacao
+    solicitacao_id_passageiro_foreign (INDEX) - id_passageiro
+    solicitacao_id_responsavel_status_index (INDEX) - id_responsavel, status
+    solicitacao_id_usuario_solicitante_foreign (INDEX) - id_usuario_solicitante
+    solicitacao_id_van_status_index (INDEX) - id_van, status
+
+TABLE: solicitacao_disponibilidade
+  id_solicitacao_disponibilidade - bigint unsigned - PK | auto_increment
+  id_solicitacao - bigint unsigned
+  id_disponibilidade - bigint unsigned
+  preco_mensal - decimal(8,2) - comment='Preço do trajeto no momento da solicitação'
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_disponibilidade -> disponibilidade.id_disponibilidade (muitos para um)
+    id_solicitacao -> solicitacao.id_solicitacao (muitos para um)
+  INDEXES:
+    solicitacao_disponibilidade_id_disponibilidade_index (INDEX) - id_disponibilidade
+    uk_solicitacao_disponibilidade (UNIQUE) - id_solicitacao, id_disponibilidade
+
+TABLE: usuario
+  id_usuario - bigint unsigned - PK | auto_increment
+  id_pessoa - bigint unsigned - UNIQUE
+  email - varchar(150) - UNIQUE
+  senha_hash - varchar(255)
+  role - enum('admin','motorista','responsavel','passageiro') - default=responsavel
+  ativo - tinyint(1) - default=1
+  ultimo_login - timestamp - nullable
+  tentativas_falhas - int unsigned - default=0
+  bloqueado_ate - timestamp - nullable
+  remember_token - varchar(100) - nullable
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_pessoa -> pessoa.id_pessoa (um para um)
+  INDEXES:
+    usuario_ativo_index (INDEX) - ativo
+    usuario_email_ativo_index (INDEX) - email, ativo
+    usuario_email_unique (UNIQUE) - email
+    usuario_id_pessoa_unique (UNIQUE) - id_pessoa
+    usuario_role_index (INDEX) - role
+
+TABLE: van
+  id_van - bigint unsigned - PK | auto_increment
+  id_motorista - bigint unsigned
+  placa - varchar(10) - UNIQUE
+  modelo - varchar(100) - nullable
+  marca - varchar(100) - nullable
+  ano_fabricacao - year - nullable
+  cor - varchar(50) - nullable
+  capacidade_passageiros - int unsigned
+  status_aprovacao - enum('pendente','aprovado','rejeitado') - default=pendente
+  status_operacional - enum('ativa','manutencao','inativa') - default=ativa
+  motivo_rejeicao - text - nullable
+  id_usuario_avaliador - bigint unsigned - nullable
+  data_avaliacao - timestamp - nullable
+  foto_url - varchar(255) - nullable
+  crlv_url - varchar(255) - nullable
+  crlv_validade - date - nullable
+  seguro_url - varchar(255) - nullable
+  seguro_validade - date - nullable
+  ipva_comprovante_url - varchar(255) - nullable
+  ipva_validade - date - nullable
+  documentacao_completa - tinyint(1) - default=0
+  data_ultima_inspecao - date - nullable
+  proxima_inspecao_prevista - date - nullable
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_motorista -> motorista.id_motorista (muitos para um)
+    id_usuario_avaliador -> usuario.id_usuario (muitos para um)
+  INDEXES:
+    van_crlv_validade_index (INDEX) - crlv_validade
+    van_documentacao_completa_index (INDEX) - documentacao_completa
+    van_id_motorista_foreign (INDEX) - id_motorista
+    van_id_usuario_avaliador_foreign (INDEX) - id_usuario_avaliador
+    van_placa_unique (UNIQUE) - placa
+    van_status_aprovacao_index (INDEX) - status_aprovacao
+    van_status_operacional_index (INDEX) - status_operacional
+
+TABLE: vinculo
+  id_vinculo - bigint unsigned - PK | auto_increment
+  id_van - bigint unsigned
+  id_passageiro - bigint unsigned
+  id_solicitacao - bigint unsigned - UNIQUE
+  preco_total - decimal(8,2) - comment='Soma dos preços dos trajetos aceitos'
+  status - enum('ativo','suspenso','encerrado') - default=ativo
+  data_inicio - date
+  data_fim - date - nullable
+  observacoes - text - nullable
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_passageiro -> passageiro.id_passageiro (muitos para um)
+    id_solicitacao -> solicitacao.id_solicitacao (um para um)
+    id_van -> van.id_van (muitos para um)
+  INDEXES:
+    vinculo_id_passageiro_status_index (INDEX) - id_passageiro, status
+    vinculo_id_solicitacao_unique (UNIQUE) - id_solicitacao
+    vinculo_id_van_foreign (INDEX) - id_van
+    vinculo_status_index (INDEX) - status
+
+TABLE: vinculo_disponibilidade
+  id_vinculo_disponibilidade - bigint unsigned - PK | auto_increment
+  id_vinculo - bigint unsigned
+  id_disponibilidade - bigint unsigned
+  preco_mensal - decimal(8,2) - comment='Preço do trajeto acordado no vínculo'
+  created_at - timestamp - nullable
+  updated_at - timestamp - nullable
+  FKs:
+    id_disponibilidade -> disponibilidade.id_disponibilidade (muitos para um)
+    id_vinculo -> vinculo.id_vinculo (muitos para um)
+  INDEXES:
+    uk_vinculo_disponibilidade (UNIQUE) - id_vinculo, id_disponibilidade
+    vinculo_disponibilidade_id_disponibilidade_index (INDEX) - id_disponibilidade
+
+Resumo de cada tabela
+________________________________________
+pessoa Entidade base de qualquer ser humano no sistema. Guarda dados civis — nome, CPF, data de nascimento, telefone, foto. Usada sempre que precisar de dados pessoais, independente do papel da pessoa no sistema. Criada no cadastro de responsável, motorista ou passageiro.
+________________________________________
+usuario Credenciais de acesso ao sistema. Quem tem usuario pode fazer login. Guarda email, senha, role e dados de segurança como tentativas de login e bloqueio. Criada junto com o cadastro de responsável ou motorista. Passageiros não têm usuario.
+________________________________________
+responsavel Perfil específico de quem cuida de um passageiro. Herda de usuario. Guarda o tipo de responsabilidade (pai, mãe, tutor) e dados de emergência. Criado no cadastro de responsável. Usado em todo fluxo de solicitação de vaga e acompanhamento.
+________________________________________
+motorista Perfil específico de quem dirige a van. Herda de usuario. Guarda dados da CNH e status de aprovação pelo admin. Criado no cadastro de motorista. Usado em aprovação de documentação, criação de trajetos e execução de rotas.
+________________________________________
+passageiro Quem usa o transporte. Não tem login. Herda de pessoa. Guarda observações médicas e status ativo/inativo. Criado pelo responsável. Usado em solicitações, vínculos, rotas e paradas.
+________________________________________
+endereco Qualquer localização geográfica do sistema. Guarda logradouro, bairro, cidade, CEP e coordenadas GPS. Reutilizável — o mesmo endereço pode ser usado por múltiplos passageiros, paradas e destinos. Criado quando responsável cadastra endereços do passageiro ou motorista cadastra paradas do trajeto.
+________________________________________
+destino Um local com nome e tipo — escola, academia, outro. Sempre vinculado a um endereço. Representa o destino final do passageiro, não apenas um ponto geográfico. Criado pelo responsável no cadastro do passageiro. Usado no marketplace para o responsável filtrar vans que atendem aquela escola.
+________________________________________
+van O veículo do motorista com toda sua documentação. Guarda dados do veículo, status de aprovação pelo admin e documentos como CRLV e seguro. A flag documentacao_completa é calculada automaticamente por trigger. Criada pelo motorista após cadastro. Só aparece no marketplace quando aprovada e com documentação completa.
+________________________________________
+disponibilidade Um trajeto que o motorista oferece. Tem nome, turno, preço mensal e capacidade. Exemplo: "Manhã ida", "Tarde volta". Um motorista pode ter múltiplas disponibilidades para a mesma van. Criada pelo motorista no dashboard. É o coração do marketplace — o responsável busca por disponibilidades.
+________________________________________
+disponibilidade_dia Os dias da semana em que um trajeto acontece. Separada de disponibilidade para permitir combinações livres de dias. Exemplo: "Treino" acontece só terça e quinta. Criada junto com a disponibilidade. Usada nos filtros do marketplace.
+________________________________________
+disponibilidade_parada As paradas de um trajeto em ordem. Cada parada tem um endereço, horário previsto e tipo (embarque ou desembarque). Define o roteiro padrão do motorista antes de qualquer rota real acontecer. Criada pelo motorista ao cadastrar o trajeto. Usada para gerar as paradas reais quando a rota é executada.
+________________________________________
+responsavel_passageiro Relaciona responsável com passageiro. N:N porque um passageiro pode ter pai e mãe cadastrados, e um responsável pode ter múltiplos filhos. Tem data de início e fim para histórico. Criada quando responsável cadastra um passageiro. Usada para saber quem pode ver e gerenciar cada passageiro.
+________________________________________
+passageiro_endereco Relaciona passageiro com seus endereços. Um passageiro pode ter múltiplos endereços de embarque, desembarque e residência. O campo principal indica o endereço preferencial de cada tipo. Criada no cadastro de endereços do passageiro. Usada pelo motorista para saber onde buscar e deixar.
+________________________________________
+solicitacao O pedido formal de vaga numa van. Criada quando responsável clica em "Solicitar vaga" no marketplace. Tem status que evolui: pendente → aceita ou recusada. Quando aceita gera um vínculo. Tem rastreabilidade completa de quem pediu, para quem, em qual van, e se foi cancelado por quem.
+________________________________________
+solicitacao_disponibilidade Pivot que registra quais trajetos foram solicitados e o preço de cada um no momento da solicitação. Um responsável pode solicitar "Manhã ida" + "Tarde volta" numa mesma solicitação. O preço é congelado aqui para não ser afetado por mudanças futuras.
+________________________________________
+vinculo O contrato ativo entre passageiro e van. Criado quando motorista aceita uma solicitação. Tem status que pode ser ativo, suspenso ou encerrado. Guarda o preço total mensal acordado. É o registro oficial de que aquele passageiro usa aquela van.
+________________________________________
+vinculo_disponibilidade Pivot que registra quais trajetos estão ativos no vínculo e o preço acordado de cada um. Similar a solicitacao_disponibilidade mas para o vínculo confirmado. Necessário porque o motorista pode aceitar apenas alguns dos trajetos solicitados.
+________________________________________
+disponibilidade_passageiro Registro de presença ou falta de um passageiro em uma data específica dentro de um vínculo ativo. O responsável marca quando o filho não vai. O motorista vê no dashboard quem vai ou não vai no dia. Criada quando responsável marca falta ou quando sistema registra presença automaticamente.
+________________________________________
+rota A execução real de um trajeto num dia específico. Gerada a partir de uma disponibilidade. Tem status que evolui em tempo real: planejada → em andamento → concluída. Guarda horários reais versus previstos e distância percorrida. Criada pelo sistema automaticamente ou pelo motorista ao iniciar o dia.
+________________________________________
+parada Um ponto de parada real dentro de uma rota em execução. Gerada a partir das disponibilidade_parada do trajeto. Tem horário previsto e horário real. É aqui que o motorista confirma embarque e desembarque. Usada para rastrear onde a van está e o que já aconteceu na rota.
+________________________________________
+parada_passageiro Registro de embarque ou desembarque de um passageiro específico numa parada. Guarda quando embarcou, quando desembarcou, quem confirmou e como foi confirmado. É o coração da segurança do sistema — o pai recebe notificação quando esse registro é criado.
+________________________________________
+localizacao Posição GPS da van em tempo real durante uma rota. Inserida continuamente pelo app do motorista a cada poucos segundos. Nunca atualizada — sempre inserida. Usada pelo responsável para ver a van no mapa. Limpa automaticamente após 30 dias pelo event do banco. // isso nao pesaria DEMAIS??? pense que varios motoristas diariamente podem ter vaaarias rotas diferentes
+
+//muitas tabelas tem nomes que sao nomes de duas tablas juntas (tabelas pivot), no entanto em muitas delas o nome é o nome de duas tabelas em que uma delas nao é sua FK
+

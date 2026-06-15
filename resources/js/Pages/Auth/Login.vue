@@ -36,7 +36,7 @@ const submit = () => {
             <div class="lg-aside__blob lg-aside__blob--2"></div>
             <div class="lg-aside__dots"></div>
 
-            <Link href="http://localhost/rota-segura/public/" class="lg-aside__logo">
+            <Link :href="route('home')" class="lg-aside__logo">
                 <div class="lg-aside__logo-ring">
                     <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Logo Rota Segura" class="lg-aside__logo-img" />
                 </div>
@@ -77,7 +77,7 @@ const submit = () => {
             <div class="lg-form-wrap">
 
                 <!-- Voltar -->
-                <Link href="http://localhost/rota-segura/public/" class="lg-back">
+                <Link :href="route('home')" class="lg-back">
                     <svg xmlns="http://www.w3.org/2000/svg" class="lg-back__icon" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
                     Voltar ao início
                 </Link>
@@ -186,7 +186,7 @@ const submit = () => {
 
                 <p class="lg-register-hint">
                     Ainda não tem conta?
-                    <Link href="http://localhost/rota-segura/public/" class="lg-register-link">Cadastre-se</Link>
+                    <Link :href="route('home')" class="lg-register-link">Cadastre-se</Link>
                 </p>
 
             </div>
@@ -248,11 +248,11 @@ const submit = () => {
 .lg-aside__logo { display: flex; align-items: center; gap: 10px; text-decoration: none; position: relative; z-index: 2; transition: opacity 0.2s; }
 .lg-aside__logo:hover { opacity: 0.82; }
 .lg-aside__logo-ring {
-    width: 36px; height: 36px; border-radius: 50%;
+    width: 44px; height: 44px; border-radius: 50%;
     background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25);
     display: flex; align-items: center; justify-content: center;
 }
-.lg-aside__logo-img { width: 22px; height: 22px; object-fit: contain; }
+.lg-aside__logo-img { width: 28px; height: 28px; object-fit: contain; }
 .lg-aside__logo-text { color: #fff; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1.05rem; }
 
 .lg-aside__body { position: relative; z-index: 2; }

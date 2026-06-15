@@ -14,6 +14,7 @@ class Rota extends Model
 
     protected $fillable = [
         'id_van',
+        'id_disponibilidade',
         'data',
         'status',
         'horario_inicio_previsto',
@@ -37,6 +38,11 @@ class Rota extends Model
     public function van()
     {
         return $this->belongsTo(Van::class, 'id_van', 'id_van');
+    }
+
+    public function disponibilidade()
+    {
+        return $this->belongsTo(Disponibilidade::class, 'id_disponibilidade', 'id_disponibilidade');
     }
 
     public function paradas()

@@ -26,10 +26,11 @@ return new class extends Migration {
                 v.modelo,
                 v.capacidade_passageiros,
                 d.id_disponibilidade,
-                d.dia_semana,
+                d.nome as nome_trajeto,
                 d.turno,
                 d.preco_mensal,
                 d.capacidade_total,
+                GROUP_CONCAT(DISTINCT dd.dia_semana ORDER BY FIELD(dd.dia_semana,'seg','ter','qua','qui','sex','sab','dom') SEPARATOR ',') as dias_semana,
                 COUNT(DISTINCT vi.id_vinculo) as passageiros_confirmados,
                 d.capacidade_total - COUNT(DISTINCT vi.id_vinculo) as vagas_disponiveis
             FROM van v
@@ -37,7 +38,9 @@ return new class extends Migration {
             JOIN usuario u ON m.id_usuario = u.id_usuario
             JOIN pessoa p ON u.id_pessoa = p.id_pessoa
             JOIN disponibilidade d ON v.id_van = d.id_van
-            LEFT JOIN vinculo vi ON v.id_van = vi.id_van AND vi.status = 'ativo'
+            JOIN disponibilidade_dia dd ON d.id_disponibilidade = dd.id_disponibilidade
+            LEFT JOIN vinculo_disponibilidade vd ON d.id_disponibilidade = vd.id_disponibilidade
+            LEFT JOIN vinculo vi ON vd.id_vinculo = vi.id_vinculo AND vi.status = 'ativo'
             WHERE v.status_operacional = 'ativa'
             AND v.documentacao_completa = true
             AND d.ativa = true

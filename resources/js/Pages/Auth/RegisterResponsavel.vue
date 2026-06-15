@@ -53,9 +53,9 @@ function submit() {
     <Head title="Cadastro de Responsável" />
 
     <div class="min-h-screen bg-slate-50 flex">
-        <aside class="hidden lg:flex lg:w-5/12 bg-blue-700 text-white flex-col justify-between p-10 rounded-tr-3xl rounded-br-3xl">
+        <aside class="hidden lg:flex lg:w-4/12 bg-blue-700 flex-col justify-between p-12 rounded-tr-3xl rounded-br-3xl sticky top-0 h-screen overflow-y-auto bg-[radial-gradient(circle_at_top_left,_#3b82f6,_#1d4ed8_60%)] z-10 shadow-[10px_0_50px_-15px_rgba(0,0,0,0.3)]">
             <Link :href="route('home')" class="inline-flex items-center">
-                <img src="/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-8 w-auto">
+                <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-10 w-auto">
             </Link>
             <div>
                 <p class="text-xs uppercase tracking-widest text-blue-200 mb-3">Para responsáveis</p>
@@ -76,7 +76,7 @@ function submit() {
                 <form @submit.prevent="submit" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Nome completo</label>
-                        <input v-model="form.nome" type="text" class="w-full rounded-lg border-slate-300" placeholder="Arthur Trentin" required>
+                        <input v-model="form.nome" type="text" class="w-full rounded-lg border-slate-300" placeholder="Nome Completo" required>
                         <p v-if="form.errors.nome" class="text-red-600 text-xs mt-1">{{ form.errors.nome }}</p>
                     </div>
 

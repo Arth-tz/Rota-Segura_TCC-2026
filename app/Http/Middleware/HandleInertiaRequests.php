@@ -30,17 +30,16 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $usuario = $request->user()?->loadMissing('pessoa');
-
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $usuario ? [
-                    'id_usuario' => $usuario->id_usuario,
-                    'email' => $usuario->email,
-                    'role' => $usuario->role,
-                    'nome' => $usuario->pessoa?->nome,
-                    'id_pessoa' => $usuario->id_pessoa,
+                'user' => $request->user() ? [
+                    'id_usuario' => $request->user()->id_usuario,
+                    'email'      => $request->user()->email,
+                    'role'       => $request->user()->role,
+                    'nome'       => $request->user()->pessoa?->nome,
+                    'foto_url'   => $request->user()->pessoa?->foto_url,
+                    'telefone'   => $request->user()->pessoa?->telefone,
                 ] : null,
             ],
             'ziggy' => fn () => [
@@ -48,5 +47,5 @@ class HandleInertiaRequests extends Middleware
                 'location' => $request->url(),
             ],
         ];
-    }
+    }   
 }

@@ -1,24 +1,23 @@
 <script setup>
-import { useForm, Link, Head } from '@inertiajs/vue3'
-import { ref, onMounted } from 'vue'
+import { Head, Link, useForm } from '@inertiajs/vue3'
+import { onMounted, ref } from 'vue'
 
 defineProps({
     status: {
         type: String,
     },
-});
+})
 
 const form = useForm({
     email: '',
-});
+})
 
 const pageVisible = ref(false)
-const showPassword = ref(false)
 onMounted(() => setTimeout(() => pageVisible.value = true, 80))
 
 const submit = () => {
-    form.post(route('password.email'));
-};
+    form.post(route('password.email'))
+}
 </script>
 
 <template>
@@ -33,7 +32,7 @@ const submit = () => {
             <div class="lg-aside__blob lg-aside__blob--2"></div>
             <div class="lg-aside__dots"></div>
 
-            <Link href="http://localhost/rota-segura/public/" class="lg-aside__logo">
+            <Link :href="route('home')" class="lg-aside__logo">
                 <div class="lg-aside__logo-ring">
                     <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Logo Rota Segura" class="lg-aside__logo-img" />
                 </div>
@@ -41,28 +40,9 @@ const submit = () => {
             </Link>
 
             <div class="lg-aside__body">
-                <h2 class="lg-aside__title">Esqueceu sua senha?</h2>
-                <p class="lg-aside__sub">Sem problemas! Apenas diga-nos seu e-mail cadastrado e te enviaremos uma mensagem com o link para trocar sua senha!</p>
-                <div class="lg-aside__perks">
-                    <div class="lg-aside__perk">
-                        <div class="lg-aside__perk-icon">
-                           1
-                        </div>
-                        <span>Digite seu e-mail</span>
-                    </div>
-                    <div class="lg-aside__perk">
-                        <div class="lg-aside__perk-icon">
-                           2
-                        </div>
-                        <span>Enviaremos um email com um link</span>
-                    </div>
-                    <div class="lg-aside__perk">
-                        <div class="lg-aside__perk-icon">
-                            3
-                        </div>
-                        <span>Acesse o link e mude sua senha!</span>
-                    </div>
-                </div>
+                <div class="lg-aside__tag">Recuperação de acesso</div>
+                <h2 class="lg-aside__title">Vamos te enviar um link seguro</h2>
+                <p class="lg-aside__sub">Informe o e-mail cadastrado. Se ele existir na plataforma, você receberá as instruções para criar uma nova senha.</p>
             </div>
 
             <p class="lg-aside__copy">© 2026 Rota Segura</p>
@@ -73,9 +53,9 @@ const submit = () => {
             <div class="lg-form-wrap">
 
                 <!-- Voltar -->
-                <Link href="http://localhost/rota-segura/public/" class="lg-back">
+                <Link :href="route('login')" class="lg-back">
                     <svg xmlns="http://www.w3.org/2000/svg" class="lg-back__icon" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18"/></svg>
-                    Voltar ao início
+                    Voltar para entrar
                 </Link>
 
                 <!-- Logo mobile -->
@@ -88,8 +68,8 @@ const submit = () => {
 
                 <!-- Heading -->
                 <div class="lg-heading">
-                    <h1 class="lg-heading__title">Esqueci Minha Senha</h1>
-                    <p class="lg-heading__sub">Digite seu email e recupere sua senha.</p>
+                    <h1 class="lg-heading__title">Esqueci minha senha</h1>
+                    <p class="lg-heading__sub">Digite seu e-mail para receber o link de redefinição.</p>
                 </div>
 
                 <!-- Status (ex: link de redefinição enviado) -->
@@ -121,14 +101,14 @@ const submit = () => {
                     <!-- Submit -->
                     <button type="submit" :disabled="form.processing" class="lg-submit">
                         <span v-if="!form.processing" class="lg-submit__inner">
-                            Link de Reset de senha
+                            Enviar link de redefinição
                         </span>
                         <span v-else class="lg-submit__spinner">
                             <svg class="lg-spin" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
                             </svg>
-                            Entrando...
+                            Enviando...
                         </span>
                     </button>
                 </form>
@@ -192,11 +172,11 @@ const submit = () => {
 .lg-aside__logo { display: flex; align-items: center; gap: 10px; text-decoration: none; position: relative; z-index: 2; transition: opacity 0.2s; }
 .lg-aside__logo:hover { opacity: 0.82; }
 .lg-aside__logo-ring {
-    width: 36px; height: 36px; border-radius: 50%;
+    width: 44px; height: 44px; border-radius: 50%;
     background: rgba(255,255,255,0.18); border: 1px solid rgba(255,255,255,0.25);
     display: flex; align-items: center; justify-content: center;
 }
-.lg-aside__logo-img { width: 22px; height: 22px; object-fit: contain; }
+.lg-aside__logo-img { width: 28px; height: 28px; object-fit: contain; }
 .lg-aside__logo-text { color: #fff; font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 1.05rem; }
 
 .lg-aside__body { position: relative; z-index: 2; }

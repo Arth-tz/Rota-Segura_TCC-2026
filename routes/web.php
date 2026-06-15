@@ -47,12 +47,28 @@ Route::middleware(['auth', 'role:admin'/*, 'verified' //isso aqui faria validaca
 });
 
 //-- Rota com autenticação para dashboard de reponsavel (controller ResponsavelDashboard)
-Route::middleware(['auth', 'role:responsavel'/*, 'verified' //isso aqui faria validacao de email (mandaria cod para confirmacao no email*/ ])->prefix('responsavel')->name('responsavel.')->group(function(){
+Route::middleware(['auth', 'role:responsavel'])->prefix('responsavel')->name('responsavel.')->group(function(){
+    
+    // Dashboard
     Route::get('/dashboard', [ResponsavelDashboard::class, 'index'])->name('dashboard');
+
+    // Passageiro — cadastro inicial (onboarding)
     Route::get('/passageiros/criar', [PassageiroController::class, 'create'])->name('passageiros.create');
     Route::post('/passageiros/essencial', [PassageiroController::class, 'storeEssencial'])->name('passageiros.store.essencial');
     Route::get('/passageiros/criar/enderecos', [PassageiroController::class, 'createEnderecos'])->name('passageiros.create.enderecos');
     Route::post('/passageiros', [PassageiroController::class, 'store'])->name('passageiros.store');
+
+    // Passageiro — adicionar pelo dashboard (após onboarding)
+    Route::get('/passageiros/adicionar', [PassageiroController::class, 'adicionar'])->name('passageiros.adicionar');
+    Route::post('/passageiros/adicionar', [PassageiroController::class, 'storeCompleto'])->name('passageiros.adicionar.store');
+
+    // Passageiro — gestão (detalhes, edição, exclusão)
+    Route::get('/passageiros/{id}', [PassageiroController::class, 'show'])->name('passageiros.show');
+    Route::get('/passageiros/{id}/editar', [PassageiroController::class, 'edit'])->name('passageiros.edit');
+    Route::put('/passageiros/{id}', [PassageiroController::class, 'update'])->name('passageiros.update');
+    Route::get('/passageiros/{id}/enderecos', [PassageiroController::class, 'editEnderecos'])->name('passageiros.enderecos');
+    Route::put('/passageiros/{id}/enderecos', [PassageiroController::class, 'updateEnderecos'])->name('passageiros.enderecos.update');
+    Route::put('/passageiros/{id}/desativar', [PassageiroController::class, 'desativar'])->name('passageiros.desativar');
 });
 
 //-- Rota com autenticação para dashboard de Motorista (controller MotoristaDashboard)
