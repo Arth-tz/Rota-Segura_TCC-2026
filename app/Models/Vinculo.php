@@ -51,7 +51,7 @@ class Vinculo extends Model
             'vinculo_disponibilidade',
             'id_vinculo',
             'id_disponibilidade'
-        )->withPivot('preco_mensal')->withTimestamps();
+        )->withPivot('preco_mensal', 'dias_contratados')->withTimestamps();
     }
 
     public function disponibilidadePassageiros()

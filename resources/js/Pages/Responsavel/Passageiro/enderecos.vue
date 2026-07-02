@@ -1,6 +1,7 @@
 ﻿<script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { ref } from 'vue'
+import { MapPinIcon, LightBulbIcon } from '@heroicons/vue/24/outline'
 
 // ─── FORM ────────────────────────────────────────────────────────────────────
 // Simplificado: apenas origem (de onde sai) e destino (para onde vai)
@@ -160,8 +161,9 @@ function submit() {
                     </div>
                 </div>
 
-                <p class="text-blue-200 text-xs mt-6">
-                    💡 Você pode adicionar mais endereços e rotas no seu perfil depois.
+                <p class="text-blue-200 text-xs mt-6 flex items-start gap-1.5">
+                    <LightBulbIcon class="w-3.5 h-3.5 mt-0.5 shrink-0" />
+                    Você pode adicionar mais endereços e rotas no seu perfil depois.
                 </p>
             </div>
 
@@ -207,7 +209,7 @@ function submit() {
                             <div class="relative">
                                 <input
                                     type="text"
-                                    placeholder="🔍 Buscar endereço..."
+                                    placeholder="Buscar endereço..."
                                     class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
                                     @input="buscarEndereco('embarque', $event.target.value)"
                                     @blur="fecharSugestoes('embarque')"
@@ -219,30 +221,37 @@ function submit() {
                                     <li
                                         v-for="s in sugestoes['embarque']" :key="s.place_id"
                                         @mousedown="selecionarSugestao('embarque', s)"
-                                        class="px-4 py-3 text-sm text-slate-700 hover:bg-emerald-50 cursor-pointer border-b border-slate-100 last:border-0 transition"
+                                        class="px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer border-b border-slate-100 last:border-0 transition flex items-center gap-2"
                                     >
-                                        📍 {{ s.display_name }}
+                                        <MapPinIcon class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                        <span class="truncate">{{ s.display_name }}</span>
                                     </li>
                                 </ul>
                             </div>
 
                             <!-- Campos -->
-                            <div class="grid grid-cols-3 gap-2">
-                                <input v-model="form.embarque_logradouro" placeholder="Logradouro" required
-                                    class="col-span-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
-                                    :class="{'border-red-400': form.errors.embarque_logradouro}" />
-                                <input v-model="form.embarque_numero" placeholder="Nº"
-                                    class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition" />
-                                <input v-model="form.embarque_complemento" placeholder="Complemento"
-                                    class="col-span-3 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition" />
-                                <input v-model="form.embarque_bairro" placeholder="Bairro" required
-                                    class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition" />
-                                <input v-model="form.embarque_cidade" placeholder="Cidade" required
-                                    class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition" />
-                                <input v-model="form.embarque_estado" placeholder="UF" maxlength="2" required
-                                    class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition uppercase" />
-                                <input v-model="form.embarque_cep" @input="maskCep('embarque_cep', $event)" placeholder="CEP" required
-                                    class="col-span-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition" />
+                            <div class="space-y-2">
+                                <div class="grid grid-cols-[1fr_5rem] gap-2">
+                                    <input v-model="form.embarque_logradouro" placeholder="Logradouro" required
+                                        class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition"
+                                        :class="{'border-red-400': form.errors.embarque_logradouro}" />
+                                    <input v-model="form.embarque_numero" placeholder="Nº"
+                                        class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition" />
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <input v-model="form.embarque_complemento" placeholder="Complemento"
+                                        class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition" />
+                                    <input v-model="form.embarque_bairro" placeholder="Bairro" required
+                                        class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition" />
+                                </div>
+                                <div class="grid grid-cols-[1fr_3.5rem_1fr] gap-2">
+                                    <input v-model="form.embarque_cidade" placeholder="Cidade" required
+                                        class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition" />
+                                    <input v-model="form.embarque_estado" placeholder="UF" maxlength="2" required
+                                        class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition uppercase" />
+                                    <input v-model="form.embarque_cep" @input="maskCep('embarque_cep', $event)" placeholder="CEP" required
+                                        class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition" />
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -269,9 +278,9 @@ function submit() {
 
                         <div class="p-6 space-y-4">
                             <!-- Nome e tipo do destino -->
-                            <div class="grid grid-cols-3 gap-2">
+                            <div class="grid grid-cols-[1fr_auto] gap-2">
                                 <input v-model="form.destino_nome" placeholder="Nome do destino (ex: Escola Municipal ABC)" required
-                                    class="col-span-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition"
+                                    class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition"
                                     :class="{'border-red-400': form.errors.destino_nome}" />
                                 <select v-model="form.destino_tipo" required
                                     class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition">
@@ -285,7 +294,7 @@ function submit() {
                             <div class="relative">
                                 <input
                                     type="text"
-                                    placeholder="🔍 Buscar endereço do destino..."
+                                    placeholder="Buscar endereço do destino..."
                                     class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition"
                                     @input="buscarEndereco('destino', $event.target.value)"
                                     @blur="fecharSugestoes('destino')"
@@ -297,30 +306,37 @@ function submit() {
                                     <li
                                         v-for="s in sugestoes['destino']" :key="s.place_id"
                                         @mousedown="selecionarSugestao('destino', s)"
-                                        class="px-4 py-3 text-sm text-slate-700 hover:bg-red-50 cursor-pointer border-b border-slate-100 last:border-0 transition"
+                                        class="px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer border-b border-slate-100 last:border-0 transition flex items-center gap-2"
                                     >
-                                        📍 {{ s.display_name }}
+                                        <MapPinIcon class="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                                        <span class="truncate">{{ s.display_name }}</span>
                                     </li>
                                 </ul>
                             </div>
 
                             <!-- Campos -->
-                            <div class="grid grid-cols-3 gap-2">
-                                <input v-model="form.destino_logradouro" placeholder="Logradouro" required
-                                    class="col-span-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition"
-                                    :class="{'border-red-400': form.errors.destino_logradouro}" />
-                                <input v-model="form.destino_numero" placeholder="Nº"
-                                    class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
-                                <input v-model="form.destino_complemento" placeholder="Complemento"
-                                    class="col-span-3 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
-                                <input v-model="form.destino_bairro" placeholder="Bairro" required
-                                    class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
-                                <input v-model="form.destino_cidade" placeholder="Cidade" required
-                                    class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
-                                <input v-model="form.destino_estado" placeholder="UF" maxlength="2" required
-                                    class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition uppercase" />
-                                <input v-model="form.destino_cep" @input="maskCep('destino_cep', $event)" placeholder="CEP" required
-                                    class="col-span-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
+                            <div class="space-y-2">
+                                <div class="grid grid-cols-[1fr_5rem] gap-2">
+                                    <input v-model="form.destino_logradouro" placeholder="Logradouro" required
+                                        class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition"
+                                        :class="{'border-red-400': form.errors.destino_logradouro}" />
+                                    <input v-model="form.destino_numero" placeholder="Nº"
+                                        class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                                    <input v-model="form.destino_complemento" placeholder="Complemento"
+                                        class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
+                                    <input v-model="form.destino_bairro" placeholder="Bairro" required
+                                        class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
+                                </div>
+                                <div class="grid grid-cols-[1fr_3.5rem_1fr] gap-2">
+                                    <input v-model="form.destino_cidade" placeholder="Cidade" required
+                                        class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
+                                    <input v-model="form.destino_estado" placeholder="UF" maxlength="2" required
+                                        class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition uppercase" />
+                                    <input v-model="form.destino_cep" @input="maskCep('destino_cep', $event)" placeholder="CEP" required
+                                        class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
+                                </div>
                             </div>
                         </div>
                     </div>

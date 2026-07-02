@@ -1,7 +1,9 @@
 ﻿<script setup>
-import { ref, computed } from 'vue'
+import { Link } from '@inertiajs/vue3'
+import { ref, computed, onMounted } from 'vue'
 import { Head, usePage } from '@inertiajs/vue3'
 
+import FlashMessage     from '@/Components/UI/FlashMessage.vue'
 import Sidebar    from '@/Components/Responsavel/Layout/Sidebar.vue'
 import BottomNav  from '@/Components/Responsavel/Layout/BottomNav.vue'
 import SecaoInicio      from '@/Components/Responsavel/Dashboard/SecaoInicio.vue'
@@ -32,9 +34,10 @@ const titulos = {
 <template>
     <Head title="Dashboard — Responsável" />
 
+    <FlashMessage />
     <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
-    <div class="min-h-screen flex bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.16),_transparent_25%),radial-gradient(circle_at_bottom_left,_rgba(59,130,246,0.18),_transparent_24%)]">
+    <div class="min-h-screen flex bg-gradient-to-r from-sky-700 via-blue-600 to-blue-700">
 
         <!-- Sidebar — só desktop -->
         <Sidebar
@@ -44,21 +47,16 @@ const titulos = {
         />
 
         <!-- Conteúdo principal -->
-        <div class="flex-1 flex flex-col min-w-0">
+        <div class="flex-1 flex flex-col min-w-0 bg-white">
 
             <!-- Header -->
-            <header class="bg-gradient-to-r from-sky-700 via-blue-600 to-blue-700 text-white px-6 py-5 sticky top-0 z-10 shadow-2xl shadow-slate-900/10 border-b border-blue-700/80">
-                <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                    <div class="space-y-2">
-                        <p class="text-xs uppercase tracking-[0.25em] text-sky-200/80">Painel do responsável</p>
-                        <h2 class="text-2xl md:text-3xl font-bold" style="font-family:'Sora',sans-serif;">
+            <header class="bg-blue-600 text-white px-6 py-4 sticky top-0 z-10 shadow-md border-b border-blue-700/50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-xs uppercase tracking-widest text-blue-300 font-medium">Responsável</p>
+                        <h2 class="text-xl font-bold mt-0.5" style="font-family:'Sora',sans-serif;">
                             {{ titulos[secaoAtiva] }}
                         </h2>
-                        <p class="text-sm text-sky-100/90 max-w-2xl">Acompanhe passageiros, organize rotas e acesse as ações mais importantes do seu painel.</p>
-                    </div>
-                    <div class="flex flex-wrap gap-3">
-                        <span class="rounded-full bg-white/10 px-4 py-2 text-xs uppercase tracking-[0.24em] text-sky-100">Mais azul, menos branco</span>
-                        <span class="rounded-full bg-white/10 px-4 py-2 text-xs uppercase tracking-[0.24em] text-sky-100">Experiência mais fluida</span>
                     </div>
                 </div>
             </header>
@@ -76,7 +74,6 @@ const titulos = {
                 />
                 <SecaoBuscar
                     v-else-if="secaoAtiva === 'buscar'"
-                    :passageiros="passageiros"
                 />
                 <SecaoPerfil
                     v-else-if="secaoAtiva === 'perfil'"
@@ -92,3 +89,9 @@ const titulos = {
         />
     </div>
 </template>
+
+<style>
+html, body {
+  background: linear-gradient(to right, #0ea5e9, #2563eb, #1e40af);
+}
+</style>

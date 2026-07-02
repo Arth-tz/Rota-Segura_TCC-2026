@@ -1,48 +1,59 @@
 <script setup>
-defineProps({
-    passageiros: { type: Array, default: () => [] },
-})
+import { Link } from '@inertiajs/vue3'
+import { MagnifyingGlassIcon, ArrowRightIcon, FunnelIcon, ShieldCheckIcon, MapPinIcon } from '@heroicons/vue/24/outline'
 </script>
 
 <template>
-    <div class="space-y-6">
-        <div class="grid gap-4 xl:grid-cols-[1fr_0.85fr]">
-            <div class="rounded-[2rem] bg-gradient-to-br from-sky-700 via-blue-600 to-indigo-600 p-6 text-white shadow-2xl shadow-slate-900/10">
-                <div class="space-y-4">
-                    <p class="text-xs uppercase tracking-[0.24em] text-sky-100/80">Buscar vans</p>
-                    <h3 class="text-3xl font-semibold">Encontre a van ideal</h3>
-                    <p class="max-w-xl text-sm leading-6 text-sky-100/85">Use filtros por turno, dia e região para achar opções com transporte escolar seguro e recomendado para sua família.</p>
+    <div class="space-y-4">
+
+        <!-- Hero -->
+        <div class="rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 p-6 text-white shadow-lg">
+            <div class="flex items-center gap-2 mb-1">
+                <MagnifyingGlassIcon class="w-5 h-5 text-blue-300" />
+                <p class="text-xs uppercase tracking-widest text-blue-300 font-medium">Marketplace</p>
+            </div>
+            <h3 class="text-2xl font-bold mt-1" style="font-family:'Sora',sans-serif;">Encontre a van ideal</h3>
+            <p class="mt-2 text-sm text-blue-200 max-w-md">
+                Busque por nome do motorista, bairro, escola, turno ou dias da semana. Resultados carregados por página — sem travamentos.
+            </p>
+            <Link :href="route('responsavel.marketplace')"
+                class="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-50 transition shadow-sm"
+                style="font-family:'Sora',sans-serif;">
+                Abrir marketplace
+                <ArrowRightIcon class="w-4 h-4" />
+            </Link>
+        </div>
+
+        <!-- Destaques do que é possível fazer -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 flex items-start gap-3 shadow-sm">
+                <div class="w-9 h-9 rounded-xl bg-blue-100 flex items-center justify-center shrink-0">
+                    <FunnelIcon class="w-4 h-4 text-blue-600" />
                 </div>
-                <div class="mt-6 grid gap-3 sm:grid-cols-2">
-                    <div class="rounded-3xl bg-white/10 p-4">
-                        <p class="text-xs uppercase tracking-[0.2em] text-sky-100/80">Por turno</p>
-                        <p class="mt-2 text-sm text-sky-100/85">Manhã, tarde e noite para encaixar no melhor horário.</p>
-                    </div>
-                    <div class="rounded-3xl bg-white/10 p-4">
-                        <p class="text-xs uppercase tracking-[0.2em] text-sky-100/80">Por dia</p>
-                        <p class="mt-2 text-sm text-sky-100/85">Escolha o dia da semana que funciona melhor para o seu trajeto.</p>
-                    </div>
+                <div>
+                    <p class="text-sm font-semibold text-slate-800">Filtros avançados</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Turno, bairro, escola, dias da semana e nome do motorista</p>
                 </div>
             </div>
-            <div class="grid gap-4">
-                <div class="rounded-[1.75rem] bg-white/90 p-6 shadow-xl shadow-slate-900/5">
-                    <p class="text-sm uppercase tracking-[0.24em] text-sky-600">Próximo passo</p>
-                    <h4 class="mt-3 text-xl font-semibold text-slate-900">Ainda em desenvolvimento</h4>
-                    <p class="mt-2 text-sm text-slate-600">Em breve você poderá filtrar e comparar vans disponíveis diretamente do seu dashboard.</p>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 flex items-start gap-3 shadow-sm">
+                <div class="w-9 h-9 rounded-xl bg-emerald-100 flex items-center justify-center shrink-0">
+                    <ShieldCheckIcon class="w-4 h-4 text-emerald-600" />
                 </div>
-                <div class="rounded-[1.75rem] bg-white/90 p-6 shadow-xl shadow-slate-900/5">
-                    <p class="text-sm uppercase tracking-[0.24em] text-sky-600">Dica de uso</p>
-                    <p class="mt-3 text-sm text-slate-600">Quando tiver passageiros cadastrados, volte aqui para iniciar a busca e solicitar a melhor opção para o trajeto.</p>
+                <div>
+                    <p class="text-sm font-semibold text-slate-800">Somente verificados</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Apenas motoristas e vans aprovados pelo administrador</p>
+                </div>
+            </div>
+            <div class="rounded-2xl border border-slate-200 bg-white p-4 flex items-start gap-3 shadow-sm">
+                <div class="w-9 h-9 rounded-xl bg-amber-100 flex items-center justify-center shrink-0">
+                    <MapPinIcon class="w-4 h-4 text-amber-600" />
+                </div>
+                <div>
+                    <p class="text-sm font-semibold text-slate-800">Por região</p>
+                    <p class="text-xs text-slate-500 mt-0.5">Filtre por bairros e escolas atendidos por cada trajeto</p>
                 </div>
             </div>
         </div>
 
-        <!-- Placeholder marketplace -->
-        <div class="rounded-[2rem] border border-dashed border-sky-200/50 bg-white/95 p-10 text-center shadow-xl">
-            <p class="text-4xl mb-3">⚡</p>
-            <h3 class="text-2xl font-semibold text-slate-900">Marketplace em breve</h3>
-            <p class="mt-3 text-sm text-slate-500">Estamos preparando uma experiência de busca de vans inteira dentro do painel.</p>
-            <p class="mt-2 text-sm text-slate-500">Assim que estiver pronto, você poderá comparar motoristas, preços e disponibilidade sem sair do dashboard.</p>
-        </div>
     </div>
 </template>

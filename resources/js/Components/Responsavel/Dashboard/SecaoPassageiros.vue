@@ -1,51 +1,61 @@
 <script setup>
 import { Link } from '@inertiajs/vue3'
+import { computed } from 'vue'
+import { UserPlusIcon } from '@heroicons/vue/24/outline'
 import CardPassageiro from '@/Components/Responsavel/Dashboard/CardPassageiro.vue'
 
-defineProps({
+const props = defineProps({
     passageiros: { type: Array, default: () => [] },
 })
 
 const emit = defineEmits(['buscar-van'])
+
+const comVan   = computed(() => props.passageiros.filter(p => p.status === 'vinculo_ativo').length)
+const semVan   = computed(() => props.passageiros.filter(p => p.status !== 'vinculo_ativo').length)
+const pendente = computed(() => props.passageiros.filter(p => p.status === 'solicitacao_pendente').length)
 </script>
 
 <template>
     <div class="space-y-4">
 
-        <div class="rounded-[2rem] bg-gradient-to-r from-sky-700 via-blue-600 to-blue-500 p-6 text-white shadow-2xl shadow-slate-900/10">
-            <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-                <div>
-                    <p class="text-xs uppercase tracking-[0.24em] text-sky-100/80">Seção de passageiros</p>
-                    <h3 class="mt-2 text-2xl font-semibold">Meus passageiros</h3>
-                    <p class="mt-2 text-sm text-sky-100/80 max-w-xl">Veja todos os seus passageiros cadastrados no painel, acompanhe o status e adicione novos perfis com rapidez.</p>
-                </div>
+        <!-- Header com stats reais -->
+        <div class="rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 p-5 text-white shadow-lg">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <h3 class="text-lg font-bold" style="font-family:'Sora',sans-serif;">Meus passageiros</h3>
                 <Link
                     :href="route('responsavel.passageiros.adicionar')"
-                    class="inline-flex items-center justify-center rounded-full bg-white px-5 py-3 text-sm font-semibold text-sky-700 shadow-lg shadow-slate-900/10 hover:bg-slate-100 transition"
+                    class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50 transition self-start sm:self-auto"
                     style="font-family:'Sora',sans-serif;"
                 >
-                    + Adicionar passageiro
+                    <UserPlusIcon class="w-4 h-4" />
+                    Adicionar
                 </Link>
             </div>
 
-            <div class="mt-5 grid gap-3 sm:grid-cols-3">
-                <div class="rounded-3xl bg-white/10 p-4">
-                    <p class="text-xs uppercase tracking-[0.2em] text-sky-100/80">Cadastrados</p>
-                    <p class="mt-2 text-3xl font-semibold">{{ passageiros.length }}</p>
+            <div class="mt-4 grid grid-cols-3 gap-3">
+                <div class="rounded-xl bg-white/10 px-4 py-3 text-center">
+                    <p class="text-2xl font-bold">{{ passageiros.length }}</p>
+                    <p class="text-xs text-blue-200 mt-0.5">total</p>
                 </div>
-                <div class="rounded-3xl bg-white/10 p-4">
-                    <p class="text-xs uppercase tracking-[0.2em] text-sky-100/80">Organização</p>
-                    <p class="mt-2 text-sm text-sky-100/90">Acesse os detalhes e gerencie cada passageiro com um único clique.</p>
+                <div class="rounded-xl bg-white/10 px-4 py-3 text-center">
+                    <p class="text-2xl font-bold">{{ comVan }}</p>
+                    <p class="text-xs text-blue-200 mt-0.5">com van</p>
                 </div>
-                <div class="rounded-3xl bg-white/10 p-4">
-                    <p class="text-xs uppercase tracking-[0.2em] text-sky-100/80">Próximo passo</p>
-                    <p class="mt-2 text-sm text-sky-100/90">Se precisar, escolha o passageiro e comece a buscar vans disponíveis.</p>
+                <div class="rounded-xl bg-white/10 px-4 py-3 text-center">
+                    <p class="text-2xl font-bold">{{ semVan }}</p>
+                    <p class="text-xs text-blue-200 mt-0.5">sem van</p>
                 </div>
             </div>
         </div>
 
-        <!-- Lista de passageiros -->
-        <div class="space-y-4">
+        <!-- Alerta pendentes -->
+        <div v-if="pendente > 0" class="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+            <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></div>
+            {{ pendente === 1 ? '1 solicitação aguarda' : `${pendente} solicitações aguardam` }} aprovação do motorista.
+        </div>
+
+        <!-- Lista -->
+        <div class="space-y-3">
             <CardPassageiro
                 v-for="p in passageiros"
                 :key="p.id_passageiro"
@@ -56,19 +66,20 @@ const emit = defineEmits(['buscar-van'])
         </div>
 
         <!-- Empty state -->
-        <div v-if="!passageiros.length" class="rounded-[2rem] border border-dashed border-slate-200/60 bg-white/95 p-8 text-center shadow-xl">
-            <p class="text-xs uppercase tracking-[0.24em] text-sky-600">Sem passageiros</p>
-            <h3 class="mt-3 text-2xl font-semibold text-slate-900">Ainda não há nenhum passageiro cadastrado</h3>
-            <p class="mt-3 text-sm text-slate-500">Adicione um passageiro agora para começar a usar todos os recursos disponíveis.</p>
-            <div class="mt-6">
-                <Link
-                    :href="route('responsavel.passageiros.adicionar')"
-                    class="inline-flex items-center justify-center rounded-full bg-blue-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 hover:bg-blue-700 transition"
-                    style="font-family:'Sora',sans-serif;"
-                >
-                    Cadastrar primeiro passageiro
-                </Link>
+        <div v-if="!passageiros.length" class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-blue-200 bg-blue-50/50 py-14 px-6 text-center">
+            <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center mb-4">
+                <UserPlusIcon class="w-6 h-6 text-blue-500" />
             </div>
+            <p class="font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Nenhum passageiro cadastrado</p>
+            <p class="mt-1 text-sm text-slate-500">Adicione passageiros para gerenciá-los aqui.</p>
+            <Link
+                :href="route('responsavel.passageiros.adicionar')"
+                class="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition shadow-sm"
+                style="font-family:'Sora',sans-serif;"
+            >
+                <UserPlusIcon class="w-4 h-4" />
+                Adicionar passageiro
+            </Link>
         </div>
 
     </div>

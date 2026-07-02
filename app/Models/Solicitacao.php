@@ -65,6 +65,6 @@ class Solicitacao extends Model
             'solicitacao_disponibilidade',
             'id_solicitacao',
             'id_disponibilidade'
-        )->withPivot('preco_mensal')->withTimestamps();
+        )->withPivot('preco_mensal', 'dias_contratados')->withTimestamps();
     }
 }

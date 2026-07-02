@@ -42,6 +42,11 @@ class HandleInertiaRequests extends Middleware
                     'telefone'   => $request->user()->pessoa?->telefone,
                 ] : null,
             ],
+            'flash' => [
+                'sucesso' => fn () => $request->session()->get('sucesso'),
+                'aviso'   => fn () => $request->session()->get('aviso'),
+                'erro'    => fn () => $request->session()->get('erro'),
+            ],
             'ziggy' => fn () => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),

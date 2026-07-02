@@ -1,6 +1,8 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, useForm, router } from '@inertiajs/vue3'
+import { FlagIcon, HomeIcon, AcademicCapIcon } from '@heroicons/vue/24/outline'
+import EnderecoSection from '@/Components/Responsavel/EnderecoSection.vue'
 
 const props = defineProps({
     passageiro: { type: Object, required: true },
@@ -86,57 +88,6 @@ function removerDestino(index) {
     destinos.value.splice(index, 1)
 }
 
-// ─── AUTOCOMPLETE NOMINATIM ──────────────────────────────────────────────────
-const sugestoes = ref({})
-const loadings  = ref({})
-let timers = {}
-
-async function buscarEndereco(chave, query) {
-    if (!query || query.length < 4) { sugestoes.value[chave] = []; return }
-    loadings.value[chave] = true
-    clearTimeout(timers[chave])
-    timers[chave] = setTimeout(async () => {
-        try {
-            const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&countrycodes=br`
-            const res  = await fetch(url, { headers: { 'Accept-Language': 'pt-BR' } })
-            sugestoes.value[chave] = await res.json()
-        } catch { sugestoes.value[chave] = [] }
-        finally { loadings.value[chave] = false }
-    }, 500)
-}
-
-const estadosUF = {
-    'Acre':'AC','Alagoas':'AL','Amapá':'AP','Amazonas':'AM','Bahia':'BA',
-    'Ceará':'CE','Distrito Federal':'DF','Espírito Santo':'ES','Goiás':'GO',
-    'Maranhão':'MA','Mato Grosso':'MT','Mato Grosso do Sul':'MS','Minas Gerais':'MG',
-    'Pará':'PA','Paraíba':'PB','Paraná':'PR','Pernambuco':'PE','Piauí':'PI',
-    'Rio de Janeiro':'RJ','Rio Grande do Norte':'RN','Rio Grande do Sul':'RS',
-    'Rondônia':'RO','Roraima':'RR','Santa Catarina':'SC','São Paulo':'SP',
-    'Sergipe':'SE','Tocantins':'TO'
-}
-
-function selecionarSugestao(chave, item, destino) {
-    const addr = item.address || {}
-    destino.logradouro = addr.road || addr.pedestrian || addr.footway || ''
-    destino.bairro     = addr.suburb || addr.neighbourhood || ''
-    destino.cidade     = addr.city || addr.town || addr.village || ''
-    destino.estado     = addr.state_code || estadosUF[addr.state] || ''
-    destino.cep        = (addr.postcode || '').replace('-', '')
-    destino.latitude   = item.lat || ''
-    destino.longitude  = item.lon || ''
-    sugestoes.value[chave] = []
-}
-
-function fecharSugestoes(chave) {
-    setTimeout(() => { sugestoes.value[chave] = [] }, 200)
-}
-
-function maskCep(obj, event) {
-    let v = event.target.value.replace(/\D/g, '').slice(0, 8)
-    if (v.length > 5) v = v.replace(/^(\d{5})(\d+)$/, '$1-$2')
-    obj.cep = v
-}
-
 // ─── DESATIVAR PASSAGEIRO ────────────────────────────────────────────────────
 const confirmandoDesativar = ref(false)
 
@@ -175,17 +126,17 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
             </div>
 
             <!-- Tabs de navegação -->
-            <div class="flex gap-1 bg-white border border-slate-200 rounded-xl p-1 mb-6 shadow-sm">
+            <div class="flex gap-1 bg-white border border-slate-200 rounded-xl p-1 mb-6 shadow-sm overflow-x-auto">
                 <button
                     v-for="tab in [
-                        { key: 'dados',    label: 'Dados' },
+                        { key: 'dados',     label: 'Dados' },
                         { key: 'enderecos', label: 'Endereços' },
-                        { key: 'destinos', label: 'Destinos' },
-                        { key: 'vinculos', label: 'Vínculo' },
+                        { key: 'destinos',  label: 'Destinos' },
+                        { key: 'vinculos',  label: 'Vínculo' },
                     ]"
                     :key="tab.key"
                     @click="secaoAberta = tab.key"
-                    class="flex-1 py-2 px-3 rounded-lg text-sm font-medium transition-all"
+                    class="flex-1 min-w-[4rem] py-2.5 px-2 rounded-lg text-xs sm:text-sm font-medium transition-all whitespace-nowrap"
                     :class="secaoAberta === tab.key
                         ? 'bg-blue-600 text-white shadow-sm'
                         : 'text-slate-500 hover:text-slate-700 hover:bg-slate-50'"
@@ -211,7 +162,7 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                         <p v-if="formDados.errors.nome" class="text-red-500 text-xs mt-1">{{ formDados.errors.nome }}</p>
                     </div>
 
-                    <div class="grid grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Data de nascimento</label>
                             <input
@@ -274,10 +225,10 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                             >
                                 Desativar passageiro
                             </button>
-                            <div v-if="confirmandoDesativar" class="flex items-center gap-2">
+                            <div v-if="confirmandoDesativar" class="flex items-center gap-3">
                                 <span class="text-sm text-slate-600">Tem certeza?</span>
-                                <button type="button" @click="desativar" class="text-sm font-semibold text-red-600 hover:text-red-700">Sim, desativar</button>
-                                <button type="button" @click="confirmandoDesativar = false" class="text-sm text-slate-500">Cancelar</button>
+                                <button type="button" @click="desativar" class="text-sm font-semibold text-red-600 hover:text-red-700 px-3 py-2 min-h-[44px] rounded-lg">Sim</button>
+                                <button type="button" @click="confirmandoDesativar = false" class="text-sm text-slate-500 px-3 py-2 min-h-[44px] rounded-lg">Cancelar</button>
                             </div>
                         </div>
 
@@ -299,7 +250,10 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                 <!-- Bloco de embarques -->
                 <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                     <div class="flex items-center justify-between mb-4">
+                        <div class="flex items-center gap-2">
+                        <MapPinIcon class="w-4 h-4 text-slate-400 shrink-0" />
                         <h2 class="text-base font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Embarques</h2>
+                    </div>
                         <button @click="adicionarEmbarque" class="text-xs font-semibold text-blue-600 hover:text-blue-700 transition">+ Adicionar</button>
                     </div>
 
@@ -314,41 +268,17 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                             </span>
                             <button v-if="embarques.length > 1" @click="removerEmbarque(index)" class="text-xs text-red-400 hover:text-red-600 transition">Remover</button>
                         </div>
-
-                        <!-- Autocomplete -->
-                        <div class="relative mb-3">
-                            <input
-                                type="text"
-                                placeholder="Buscar endereço..."
-                                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                                @input="buscarEndereco(`emb_${index}`, $event.target.value)"
-                                @blur="fecharSugestoes(`emb_${index}`)"
-                            />
-                            <ul v-if="sugestoes[`emb_${index}`]?.length" class="absolute z-20 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
-                                <li
-                                    v-for="s in sugestoes[`emb_${index}`]" :key="s.place_id"
-                                    @mousedown="selecionarSugestao(`emb_${index}`, s, emb)"
-                                    class="px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer border-b border-slate-100 last:border-0"
-                                >📍 {{ s.display_name }}</li>
-                            </ul>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-2">
-                            <input v-model="emb.logradouro" placeholder="Logradouro" class="col-span-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                            <input v-model="emb.numero" placeholder="Número" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                            <input v-model="emb.complemento" placeholder="Complemento" class="col-span-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                            <input v-model="emb.bairro" placeholder="Bairro" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                            <input v-model="emb.cidade" placeholder="Cidade" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                            <input v-model="emb.estado" placeholder="UF" maxlength="2" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition uppercase" />
-                            <input v-model="emb.cep" @input="maskCep(emb, $event)" placeholder="CEP" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                        </div>
+                        <EnderecoSection :modelValue="emb" @update:modelValue="embarques[index] = $event" />
                     </div>
                 </div>
 
                 <!-- Bloco de desembarques -->
                 <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-base font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">🏁 Desembarques</h2>
+                        <div class="flex items-center gap-2">
+                        <FlagIcon class="w-4 h-4 text-slate-400 shrink-0" />
+                        <h2 class="text-base font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Desembarques</h2>
+                    </div>
                         <button @click="adicionarDesembarque" class="text-xs font-semibold text-blue-600 hover:text-blue-700 transition">+ Adicionar</button>
                     </div>
 
@@ -363,66 +293,18 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                             </span>
                             <button v-if="desembarques.length > 1" @click="removerDesembarque(index)" class="text-xs text-red-400 hover:text-red-600 transition">Remover</button>
                         </div>
-
-                        <div class="relative mb-3">
-                            <input
-                                type="text"
-                                placeholder="Buscar endereço..."
-                                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                                @input="buscarEndereco(`des_${index}`, $event.target.value)"
-                                @blur="fecharSugestoes(`des_${index}`)"
-                            />
-                            <ul v-if="sugestoes[`des_${index}`]?.length" class="absolute z-20 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
-                                <li
-                                    v-for="s in sugestoes[`des_${index}`]" :key="s.place_id"
-                                    @mousedown="selecionarSugestao(`des_${index}`, s, des)"
-                                    class="px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer border-b border-slate-100 last:border-0"
-                                >📍 {{ s.display_name }}</li>
-                            </ul>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-2">
-                            <input v-model="des.logradouro" placeholder="Logradouro" class="col-span-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                            <input v-model="des.numero" placeholder="Número" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                            <input v-model="des.complemento" placeholder="Complemento" class="col-span-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                            <input v-model="des.bairro" placeholder="Bairro" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                            <input v-model="des.cidade" placeholder="Cidade" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                            <input v-model="des.estado" placeholder="UF" maxlength="2" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition uppercase" />
-                            <input v-model="des.cep" @input="maskCep(des, $event)" placeholder="CEP" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                        </div>
+                        <EnderecoSection :modelValue="des" @update:modelValue="desembarques[index] = $event" />
                     </div>
                 </div>
 
                 <!-- Bloco de residência -->
                 <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                    <h2 class="text-base font-semibold text-slate-800 mb-4" style="font-family:'Sora',sans-serif;">🏠 Residência</h2>
-
-                    <div class="relative mb-3">
-                        <input
-                            type="text"
-                            placeholder="Buscar endereço..."
-                            class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                            @input="buscarEndereco('residencia', $event.target.value)"
-                            @blur="fecharSugestoes('residencia')"
-                        />
-                        <ul v-if="sugestoes['residencia']?.length" class="absolute z-20 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
-                            <li
-                                v-for="s in sugestoes['residencia']" :key="s.place_id"
-                                @mousedown="selecionarSugestao('residencia', s, residencia)"
-                                class="px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer border-b border-slate-100 last:border-0"
-                            >📍 {{ s.display_name }}</li>
-                        </ul>
+                    <div class="flex items-center gap-2 mb-4">
+                        <HomeIcon class="w-4 h-4 text-slate-400 shrink-0" />
+                        <h2 class="text-base font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Residência</h2>
                     </div>
 
-                    <div class="grid grid-cols-3 gap-2">
-                        <input v-model="residencia.logradouro" placeholder="Logradouro" class="col-span-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                        <input v-model="residencia.numero" placeholder="Número" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                        <input v-model="residencia.complemento" placeholder="Complemento" class="col-span-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                        <input v-model="residencia.bairro" placeholder="Bairro" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                        <input v-model="residencia.cidade" placeholder="Cidade" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                        <input v-model="residencia.estado" placeholder="UF" maxlength="2" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition uppercase" />
-                        <input v-model="residencia.cep" @input="maskCep(residencia, $event)" placeholder="CEP" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                    </div>
+                    <EnderecoSection v-model="residencia" />
                 </div>
 
                 <!-- Botão salvar endereços -->
@@ -442,7 +324,10 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
             <div v-else-if="secaoAberta === 'destinos'" class="space-y-4">
                 <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-base font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">🎯 Destinos</h2>
+                        <div class="flex items-center gap-2">
+                        <AcademicCapIcon class="w-4 h-4 text-slate-400 shrink-0" />
+                        <h2 class="text-base font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Destinos</h2>
+                    </div>
                         <button @click="adicionarDestino" class="text-xs font-semibold text-blue-600 hover:text-blue-700 transition">+ Adicionar destino</button>
                     </div>
 
@@ -456,8 +341,8 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                             <button @click="removerDestino(index)" class="text-xs text-red-400 hover:text-red-600 transition">Remover</button>
                         </div>
 
-                        <div class="grid grid-cols-3 gap-2 mb-3">
-                            <input v-model="dest.nome" placeholder="Nome do destino" class="col-span-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
+                        <div class="grid grid-cols-[1fr_auto] gap-2 mb-3">
+                            <input v-model="dest.nome" placeholder="Nome do destino" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                             <select v-model="dest.tipo" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
                                 <option value="escola">Escola</option>
                                 <option value="atividade">Atividade</option>
@@ -465,31 +350,7 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                             </select>
                         </div>
 
-                        <div class="relative mb-3">
-                            <input
-                                type="text"
-                                placeholder="Buscar endereço do destino..."
-                                class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                                @input="buscarEndereco(`dest_${index}`, $event.target.value)"
-                                @blur="fecharSugestoes(`dest_${index}`)"
-                            />
-                            <ul v-if="sugestoes[`dest_${index}`]?.length" class="absolute z-20 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
-                                <li
-                                    v-for="s in sugestoes[`dest_${index}`]" :key="s.place_id"
-                                    @mousedown="selecionarSugestao(`dest_${index}`, s, dest)"
-                                    class="px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer border-b border-slate-100 last:border-0"
-                                >📍 {{ s.display_name }}</li>
-                            </ul>
-                        </div>
-
-                        <div class="grid grid-cols-3 gap-2">
-                            <input v-model="dest.logradouro" placeholder="Logradouro" class="col-span-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                            <input v-model="dest.numero" placeholder="Número" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                            <input v-model="dest.bairro" placeholder="Bairro" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                            <input v-model="dest.cidade" placeholder="Cidade" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                            <input v-model="dest.estado" placeholder="UF" maxlength="2" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition uppercase" />
-                            <input v-model="dest.cep" @input="maskCep(dest, $event)" placeholder="CEP" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                        </div>
+                        <EnderecoSection :modelValue="dest" @update:modelValue="destinos[index] = { ...destinos[index], ...$event }" />
                     </div>
                 </div>
 

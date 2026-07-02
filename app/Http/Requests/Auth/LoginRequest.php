@@ -49,6 +49,16 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        $user = Auth::user();
+
+        if ($user->bloqueado_ate && $user->bloqueado_ate->isFuture()) {
+            Auth::logout();
+            $minutos = (int) now()->diffInMinutes($user->bloqueado_ate, true) + 1;
+            throw ValidationException::withMessages([
+                'email' => "Conta bloqueada temporariamente. Tente novamente em {$minutos} minuto(s).",
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 

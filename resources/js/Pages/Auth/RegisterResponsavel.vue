@@ -73,28 +73,28 @@ function submit() {
                     <Link :href="route('home')" class="text-sm text-slate-600 hover:text-slate-900">Voltar</Link>
                 </div>
 
-                <form @submit.prevent="submit" class="space-y-4">
+                <form @submit.prevent="submit" autocomplete="off" class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">Nome completo</label>
-                        <input v-model="form.nome" type="text" class="w-full rounded-lg border-slate-300" placeholder="Nome Completo" required>
+                        <input v-model="form.nome" type="text" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" placeholder="Nome Completo" required>
                         <p v-if="form.errors.nome" class="text-red-600 text-xs mt-1">{{ form.errors.nome }}</p>
                     </div>
 
                     <div>
                         <label class="block text-sm font-medium text-slate-700 mb-1">E-mail</label>
-                        <input v-model="form.email" type="email" class="w-full rounded-lg border-slate-300" placeholder="voce@email.com" required>
+                        <input v-model="form.email" type="email" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" placeholder="voce@email.com" required>
                         <p v-if="form.errors.email" class="text-red-600 text-xs mt-1">{{ form.errors.email }}</p>
                     </div>
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">CPF</label>
-                            <input v-model="form.cpf" @input="maskCpf" type="text" maxlength="14" class="w-full rounded-lg border-slate-300" placeholder="000.000.000-00" required>
+                            <input v-model="form.cpf" @input="maskCpf" type="text" maxlength="14" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" placeholder="000.000.000-00" required>
                             <p v-if="form.errors.cpf" class="text-red-600 text-xs mt-1">{{ form.errors.cpf }}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Telefone</label>
-                            <input v-model="form.telefone" @input="maskTelefone" type="text" class="w-full rounded-lg border-slate-300" placeholder="(00) 00000-0000" required>
+                            <input v-model="form.telefone" @input="maskTelefone" type="text" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" placeholder="(00) 00000-0000" required>
                             <p v-if="form.errors.telefone" class="text-red-600 text-xs mt-1">{{ form.errors.telefone }}</p>
                         </div>
                     </div>
@@ -108,7 +108,7 @@ function submit() {
                             inputmode="numeric"
                             maxlength="10"
                             placeholder="DD/MM/AAAA"
-                            class="w-full rounded-lg border-slate-300"
+                            class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                             required
                         >
                         <p v-if="form.errors.data_nascimento" class="text-red-600 text-xs mt-1">{{ form.errors.data_nascimento }}</p>
@@ -117,12 +117,12 @@ function submit() {
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Senha</label>
-                            <input v-model="form.password" type="password" class="w-full rounded-lg border-slate-300" required>
+                            <input v-model="form.password" type="password" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" required>
                             <p v-if="form.errors.password" class="text-red-600 text-xs mt-1">{{ form.errors.password }}</p>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1">Confirmar senha</label>
-                            <input v-model="form.password_confirmation" type="password" class="w-full rounded-lg border-slate-300" required>
+                            <input v-model="form.password_confirmation" type="password" class="w-full rounded-xl border border-slate-300 px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" required>
                         </div>
                     </div>
 

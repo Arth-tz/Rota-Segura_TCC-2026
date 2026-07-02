@@ -110,6 +110,7 @@ class PassageiroController extends Controller
             'nome'            => 'required|string|min:2|max:150',
             'cpf'             => 'required|cpf|unique:pessoa,cpf',
             'data_nascimento' => 'required|date|before:today',
+            'telefone'        => 'nullable|string|max:20',
             'obs_medica'      => 'nullable|string|max:5000',
             // endereços são opcionais ao adicionar pelo dashboard
             'embarques'    => 'nullable|array',
@@ -130,7 +131,7 @@ class PassageiroController extends Controller
                     'nome'            => trim($request->nome),
                     'cpf'             => preg_replace('/\D/', '', $request->cpf),
                     'data_nascimento' => $request->data_nascimento,
-                    'telefone'        => null,
+                    'telefone'        => $request->telefone ? preg_replace('/\D/', '', $request->telefone) : null,
                 ]);
 
                 $passageiro = Passageiro::create([
@@ -145,12 +146,13 @@ class PassageiroController extends Controller
                     'data_fim'    => null,
                 ]);
 
-                // Salva endereços se foram preenchidos
+                $dados = $request->all();
+
                 if ($request->filled('embarques') || $request->filled('desembarques') || $request->filled('residencia')) {
-                    $this->salvarEnderecosArray($passageiro, $request->all());
+                    $dados = $this->geocodificarEnderecos($dados);
+                    $this->salvarEnderecosArray($passageiro, $dados);
                 }
 
-                // Salva destinos se foram preenchidos
                 if ($request->filled('destinos')) {
                     $this->salvarDestinos($passageiro, $request->destinos);
                 }
@@ -375,107 +377,115 @@ class PassageiroController extends Controller
     }
 
     /**
-     * Salva endereços no formato prefixado (cadastro inicial)
+     * Salva endereços no formato prefixado (onboarding — etapa 2).
+     * Converte o formato prefixado para o formato array e delega ao método unificado.
      */
     private function salvarEnderecos(Passageiro $passageiro, array $dados): void
     {
-        $tipos = [
-            'residencia'  => 'residencia',
-            'embarque'    => 'embarque',
-            'desembarque' => 'desembarque',
-        ];
+        $convertido = [];
 
-        foreach ($tipos as $prefixo => $tipo) {
+        foreach (['embarque', 'desembarque', 'residencia'] as $prefixo) {
             if (empty($dados["{$prefixo}_logradouro"])) continue;
 
-            $endereco = $this->criarEnderecoPorPrefixo($dados, $prefixo);
+            $item = [
+                'logradouro'  => $dados["{$prefixo}_logradouro"],
+                'numero'      => $dados["{$prefixo}_numero"]      ?? null,
+                'complemento' => $dados["{$prefixo}_complemento"] ?? null,
+                'bairro'      => $dados["{$prefixo}_bairro"]      ?? '',
+                'cidade'      => $dados["{$prefixo}_cidade"]      ?? '',
+                'estado'      => $dados["{$prefixo}_estado"]      ?? '',
+                'cep'         => $dados["{$prefixo}_cep"]         ?? '',
+                'latitude'    => $dados["{$prefixo}_latitude"]    ?? null,
+                'longitude'   => $dados["{$prefixo}_longitude"]   ?? null,
+            ];
 
-            PassageiroEndereco::create([
-                'id_passageiro' => $passageiro->id_passageiro,
-                'id_endereco'   => $endereco->id_endereco,
-                'tipo'          => $tipo,
-                'principal'     => true,
-            ]);
-
-            // Cria destino se for desembarque e tiver nome
-            if ($tipo === 'desembarque' && !empty($dados['destino_nome'])) {
-                $destinoEndereco = $this->criarEnderecoPorPrefixo($dados, 'destino');
-                Destino::create([
-                    'id_endereco' => $destinoEndereco->id_endereco,
-                    'nome'        => $dados['destino_nome'],
-                    'tipo'        => $dados['destino_tipo'] ?? 'escola',
-                    'ativo'       => true,
-                ]);
+            // residencia é singular; embarque/desembarque são listas
+            if ($prefixo === 'residencia') {
+                $convertido['residencia'] = [$item];
+            } else {
+                $convertido["{$prefixo}s"][] = $item;
             }
+        }
+
+        $this->salvarEnderecosArray($passageiro, $convertido);
+
+        // Destino vinculado ao desembarque do onboarding
+        if (!empty($dados['destino_nome'])) {
+            $this->salvarDestinos($passageiro, [[
+                'logradouro'  => $dados['destino_logradouro']  ?? $dados['desembarque_logradouro'] ?? '',
+                'numero'      => $dados['destino_numero']      ?? null,
+                'complemento' => $dados['destino_complemento'] ?? null,
+                'bairro'      => $dados['destino_bairro']      ?? '',
+                'cidade'      => $dados['destino_cidade']      ?? '',
+                'estado'      => $dados['destino_estado']      ?? '',
+                'cep'         => $dados['destino_cep']         ?? '',
+                'latitude'    => $dados['destino_latitude']    ?? null,
+                'longitude'   => $dados['destino_longitude']   ?? null,
+                'nome'        => $dados['destino_nome'],
+                'tipo'        => $dados['destino_tipo'] ?? 'escola',
+            ]]);
         }
     }
 
     /**
-     * Salva endereços no formato array (adicionar/editar pelo dashboard)
+     * Salva endereços no formato array (dashboard — adicionar/editar).
+     * Formato esperado: embarques[], desembarques[], residencia[] (lista com 1 item).
      */
     private function salvarEnderecosArray(Passageiro $passageiro, array $dados, bool $substituir = false): void
     {
         if ($substituir) {
-            // Remove endereços antigos antes de salvar os novos
             PassageiroEndereco::where('id_passageiro', $passageiro->id_passageiro)->delete();
         }
 
-        $tipos = ['embarques' => 'embarque', 'desembarques' => 'desembarque', 'residencia' => 'residencia'];
+        // residencia[] aceita lista mas só persiste o primeiro item válido
+        $mapa = [
+            'embarques'   => 'embarque',
+            'desembarques' => 'desembarque',
+            'residencia'  => 'residencia',
+        ];
 
-        foreach ($tipos as $chave => $tipo) {
+        foreach ($mapa as $chave => $tipo) {
             $lista = $dados[$chave] ?? [];
-            foreach ($lista as $index => $endDados) {
+
+            // Garante que residencia seja sempre uma lista
+            if ($chave === 'residencia' && is_array($lista) && !isset($lista[0])) {
+                $lista = [$lista];
+            }
+
+            $primeiroValido = true;
+
+            foreach ($lista as $endDados) {
                 if (empty($endDados['logradouro'])) continue;
 
-                // Geocodifica se não tiver coordenadas
                 if (empty($endDados['latitude']) || empty($endDados['longitude'])) {
                     $coords = $this->geocodingService->geocodeAddress($endDados);
-                    $endDados['latitude']  = $coords['latitude'] ?? null;
+                    $endDados['latitude']  = $coords['latitude']  ?? null;
                     $endDados['longitude'] = $coords['longitude'] ?? null;
                 }
 
                 $endereco = Endereco::create([
                     'logradouro'  => $endDados['logradouro'],
-                    'numero'      => $endDados['numero'] ?? null,
+                    'numero'      => $endDados['numero']      ?? null,
                     'complemento' => $endDados['complemento'] ?? null,
                     'bairro'      => $endDados['bairro'],
                     'cidade'      => $endDados['cidade'],
                     'estado'      => strtoupper($endDados['estado']),
                     'cep'         => preg_replace('/\D/', '', $endDados['cep']),
-                    'latitude'    => $endDados['latitude'] ?? null,
-                    'longitude'   => $endDados['longitude'] ?? null,
+                    'latitude'    => $endDados['latitude']    ?? null,
+                    'longitude'   => $endDados['longitude']   ?? null,
                 ]);
 
                 PassageiroEndereco::create([
                     'id_passageiro' => $passageiro->id_passageiro,
                     'id_endereco'   => $endereco->id_endereco,
                     'tipo'          => $tipo,
-                    'principal'     => $index === 0, // primeiro de cada tipo é principal
+                    'principal'     => $primeiroValido,
                 ]);
+
+                // Para residência só salva o primeiro; para os demais marca principal apenas no primeiro
+                if ($chave === 'residencia') break;
+                $primeiroValido = false;
             }
-        }
-
-        // Residência é único
-        if (!empty($dados['residencia']['logradouro'])) {
-            $res = $dados['residencia'];
-            $endereco = Endereco::create([
-                'logradouro'  => $res['logradouro'],
-                'numero'      => $res['numero'] ?? null,
-                'complemento' => $res['complemento'] ?? null,
-                'bairro'      => $res['bairro'],
-                'cidade'      => $res['cidade'],
-                'estado'      => strtoupper($res['estado']),
-                'cep'         => preg_replace('/\D/', '', $res['cep']),
-                'latitude'    => $res['latitude'] ?? null,
-                'longitude'   => $res['longitude'] ?? null,
-            ]);
-
-            PassageiroEndereco::create([
-                'id_passageiro' => $passageiro->id_passageiro,
-                'id_endereco'   => $endereco->id_endereco,
-                'tipo'          => 'residencia',
-                'principal'     => true,
-            ]);
         }
     }
 
@@ -526,15 +536,14 @@ class PassageiroController extends Controller
     }
 
     /**
-     * Enriquece coordenadas faltantes via geocoding
+     * Geocodifica endereços no formato prefixado (onboarding).
      */
     private function enriquecerCoordenadasFaltantes(array $dados): array
     {
         foreach (['residencia', 'embarque', 'desembarque', 'destino'] as $prefixo) {
-            $latitude  = $dados["{$prefixo}_latitude"]  ?? null;
-            $longitude = $dados["{$prefixo}_longitude"] ?? null;
+            if (empty($dados["{$prefixo}_logradouro"])) continue;
 
-            if ($latitude !== null && $longitude !== null) continue;
+            if (!empty($dados["{$prefixo}_latitude"]) && !empty($dados["{$prefixo}_longitude"])) continue;
 
             $resultado = $this->geocodingService->geocodeAddress([
                 'logradouro' => $dados["{$prefixo}_logradouro"] ?? null,
@@ -547,8 +556,39 @@ class PassageiroController extends Controller
 
             if ($resultado === null) continue;
 
-            $dados["{$prefixo}_latitude"]  ??= $resultado['latitude'];
-            $dados["{$prefixo}_longitude"] ??= $resultado['longitude'];
+            $dados["{$prefixo}_latitude"]  = $resultado['latitude'];
+            $dados["{$prefixo}_longitude"] = $resultado['longitude'];
+        }
+
+        return $dados;
+    }
+
+    /**
+     * Geocodifica endereços no formato array (dashboard).
+     * Percorre embarques[], desembarques[] e residencia[] e preenche coordenadas ausentes.
+     */
+    private function geocodificarEnderecos(array $dados): array
+    {
+        foreach (['embarques', 'desembarques', 'residencia'] as $chave) {
+            if (empty($dados[$chave])) continue;
+
+            $lista = $dados[$chave];
+            if (is_array($lista) && !isset($lista[0])) {
+                $lista = [$lista];
+            }
+
+            foreach ($lista as $i => $end) {
+                if (empty($end['logradouro'])) continue;
+                if (!empty($end['latitude']) && !empty($end['longitude'])) continue;
+
+                $coords = $this->geocodingService->geocodeAddress($end);
+                if ($coords) {
+                    $lista[$i]['latitude']  = $coords['latitude'];
+                    $lista[$i]['longitude'] = $coords['longitude'];
+                }
+            }
+
+            $dados[$chave] = $lista;
         }
 
         return $dados;
