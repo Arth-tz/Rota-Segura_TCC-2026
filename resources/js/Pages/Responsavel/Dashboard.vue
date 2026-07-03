@@ -10,6 +10,7 @@ import SecaoInicio      from '@/Components/Responsavel/Dashboard/SecaoInicio.vue
 import SecaoPassageiros from '@/Components/Responsavel/Dashboard/SecaoPassageiros.vue'
 import SecaoBuscar      from '@/Components/Responsavel/Dashboard/SecaoBuscar.vue'
 import SecaoPerfil      from '@/Components/Responsavel/Dashboard/SecaoPerfil.vue'
+import SecaoAcompanhar  from '@/Components/Responsavel/Dashboard/SecaoAcompanhar.vue'
 
 const props = defineProps({
     passageiros: {
@@ -26,6 +27,7 @@ const secaoAtiva = ref('inicio')
 const titulos = {
     inicio:       'Início',
     passageiros:  'Meus Passageiros',
+    acompanhar:   'Acompanhar Trajeto',
     buscar:       'Buscar Vans',
     perfil:       'Meu Perfil',
 }
@@ -74,6 +76,9 @@ const titulos = {
                 />
                 <SecaoBuscar
                     v-else-if="secaoAtiva === 'buscar'"
+                />
+                <SecaoAcompanhar
+                    v-else-if="secaoAtiva === 'acompanhar'"
                 />
                 <SecaoPerfil
                     v-else-if="secaoAtiva === 'perfil'"

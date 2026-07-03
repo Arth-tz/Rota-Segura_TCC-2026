@@ -13,7 +13,14 @@ class ParadaPassageiro extends Pivot
     protected $primaryKey = 'id_parada_passageiro';
     public $incrementing = true;
 
-    protected $fillable = ['id_parada', 'id_passageiro'];
+    protected $fillable = [
+        'id_parada',
+        'id_passageiro',
+        'embarque_em',
+        'desembarque_em',
+        'marcado_por',
+        'metodo_confirmacao',
+    ];
 
     public function parada()
     {

@@ -8,9 +8,10 @@ defineProps({
 const emit = defineEmits(['mudar'])
 
 const navItems = [
-    { key: 'inicio',      label: 'Início' },
-    { key: 'passageiros', label: 'Meus Passageiros' },
-    { key: 'perfil',      label: 'Meu Perfil' },
+    { key: 'inicio',       label: 'Início' },
+    { key: 'passageiros',  label: 'Meus Passageiros' },
+    { key: 'acompanhar',   label: 'Acompanhar' },
+    { key: 'perfil',       label: 'Meu Perfil' },
 ]
 </script>
 

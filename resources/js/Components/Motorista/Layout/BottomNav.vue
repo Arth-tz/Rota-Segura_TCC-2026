@@ -1,5 +1,5 @@
 <script setup>
-import { HomeIcon, UsersIcon, UserIcon, ClipboardDocumentListIcon } from '@heroicons/vue/24/outline'
+import { HomeIcon, UsersIcon, UserIcon, ClipboardDocumentListIcon, MapPinIcon } from '@heroicons/vue/24/outline'
 
 defineProps({
     secaoAtiva:            { type: String, required: true },
@@ -11,6 +11,7 @@ const navItems = [
     { key: 'inicio',       label: 'Início',       icon: HomeIcon },
     { key: 'solicitacoes', label: 'Solicitações',  icon: ClipboardDocumentListIcon },
     { key: 'passageiros',  label: 'Passageiros',  icon: UsersIcon },
+    { key: 'trajetos',     label: 'Trajetos',      icon: MapPinIcon },
     { key: 'perfil',       label: 'Perfil',        icon: UserIcon },
 ]
 </script>

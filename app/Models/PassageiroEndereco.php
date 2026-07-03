@@ -17,6 +17,7 @@ class PassageiroEndereco extends Model
         'id_endereco',
         'tipo',
         'principal',
+        'nome',
     ];
 
     protected $casts = [

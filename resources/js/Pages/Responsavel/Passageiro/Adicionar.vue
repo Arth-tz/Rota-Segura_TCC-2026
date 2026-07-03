@@ -3,7 +3,7 @@ import { ref } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import {
     UserIcon, PhoneIcon, MapPinIcon, HomeIcon,
-    AcademicCapIcon, FlagIcon, ChevronDownIcon, ChevronUpIcon,
+    AcademicCapIcon, ChevronDownIcon, ChevronUpIcon,
 } from '@heroicons/vue/24/outline'
 import EnderecoSection from '@/Components/Responsavel/EnderecoSection.vue'
 
@@ -24,11 +24,7 @@ const form = useForm({
     residencia_mesmo_embarque: true,
     residencia: enderecoVazio(),
 
-    destino_nome: '',
-    destino_tipo: 'escola',
-    destino: enderecoVazio(),
-
-    desembarque_diferente: false,
+    desembarque_nome: '',
     desembarque: enderecoVazio(),
 })
 
@@ -63,12 +59,9 @@ function submit() {
         residencia: data.residencia_mesmo_embarque
             ? [{ ...data.embarque }]
             : [{ ...data.residencia }],
-        destinos: data.destino.logradouro ? [{
-            ...data.destino,
-            nome: data.destino_nome,
-            tipo: data.destino_tipo,
-        }] : [],
-        desembarques: data.desembarque_diferente ? [{ ...data.desembarque }] : [],
+        desembarques: data.desembarque.logradouro
+            ? [{ ...data.desembarque, nome: data.desembarque_nome }]
+            : [],
     })).post(route('responsavel.passageiros.adicionar.store'))
 }
 
@@ -232,50 +225,16 @@ const ic = 'w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm
                     </div>
 
                     <div class="p-5 space-y-4">
-                        <!-- Nome + tipo -->
-                        <div class="grid grid-cols-1 sm:grid-cols-[1fr_9rem] gap-3">
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                                    Nome do destino
-                                </label>
-                                <input v-model="form.destino_nome" type="text"
-                                    placeholder="Ex: Escola Municipal João XXIII" :class="ic" />
-                            </div>
-                            <div>
-                                <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
-                                    Tipo
-                                </label>
-                                <select v-model="form.destino_tipo" :class="ic">
-                                    <option value="escola">Escola</option>
-                                    <option value="atividade">Atividade</option>
-                                    <option value="outro">Outro</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <EnderecoSection v-model="form.destino" />
-
-                        <!-- Desembarque diferente -->
-                        <div class="pt-3 border-t border-slate-100">
-                            <label class="flex items-start gap-3 cursor-pointer group">
-                                <input v-model="form.desembarque_diferente" type="checkbox"
-                                    class="w-4 h-4 mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500 cursor-pointer shrink-0" />
-                                <div>
-                                    <span class="text-sm font-medium text-slate-700 group-hover:text-slate-900">
-                                        Desembarque em local diferente
-                                    </span>
-                                    <p class="text-xs text-slate-400 mt-0.5">O passageiro é deixado em outro local, não na escola</p>
-                                </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">
+                                Nome do local
+                                <span class="text-slate-400 normal-case font-normal ml-1">(opcional)</span>
                             </label>
-
-                            <div v-if="form.desembarque_diferente" class="mt-4 pt-4 border-t border-slate-100 space-y-3">
-                                <div class="flex items-center gap-2">
-                                    <FlagIcon class="w-4 h-4 text-slate-400" />
-                                    <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Local de desembarque</span>
-                                </div>
-                                <EnderecoSection v-model="form.desembarque" />
-                            </div>
+                            <input v-model="form.desembarque_nome" type="text"
+                                placeholder="Ex: Escola Municipal João XXIII" :class="ic" />
                         </div>
+
+                        <EnderecoSection v-model="form.desembarque" />
                     </div>
                 </section>
 

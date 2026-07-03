@@ -7,6 +7,7 @@ import BottomNav          from '@/Components/Motorista/Layout/BottomNav.vue'
 import SecaoInicio        from '@/Components/Motorista/Dashboard/SecaoInicio.vue'
 import SecaoSolicitacoes  from '@/Components/Motorista/Dashboard/SecaoSolicitacoes.vue'
 import SecaoPassageiros   from '@/Components/Motorista/Dashboard/SecaoPassageiros.vue'
+import SecaoTrajetos      from '@/Components/Motorista/Dashboard/SecaoTrajetos.vue'
 import SecaoPerfil        from '@/Components/Motorista/Dashboard/SecaoPerfil.vue'
 import FlashMessage       from '@/Components/UI/FlashMessage.vue'
 
@@ -15,6 +16,7 @@ const props = defineProps({
     van:                   { type: Object, default: null },
     passageiros:           { type: Array,  default: () => [] },
     disponibilidades:      { type: Array,  default: () => [] },
+    trajetos:              { type: Array,  default: () => [] },
     solicitacoes:          { type: Array,  default: () => [] },
     solicitacoesPendentes: { type: Number, default: 0 },
     usuario:               { type: Object, default: null },
@@ -26,6 +28,7 @@ const titulos = {
     inicio:       'Início',
     solicitacoes: 'Solicitações',
     passageiros:  'Meus Passageiros',
+    trajetos:     'Meus Trajetos',
     perfil:       'Meu Perfil',
 }
 </script>
@@ -76,6 +79,10 @@ const titulos = {
                 <SecaoPassageiros
                     v-else-if="secaoAtiva === 'passageiros'"
                     :passageiros="passageiros"
+                />
+                <SecaoTrajetos
+                    v-else-if="secaoAtiva === 'trajetos'"
+                    :trajetos="trajetos"
                 />
                 <SecaoPerfil
                     v-else-if="secaoAtiva === 'perfil'"

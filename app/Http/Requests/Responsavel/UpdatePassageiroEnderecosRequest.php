@@ -40,6 +40,7 @@ class UpdatePassageiroEnderecosRequest extends FormRequest
 
             // Múltiplos desembarques
             'desembarques'               => ['nullable', 'array'],
+            'desembarques.*.nome'        => ['nullable', 'string', 'max:150'],
             'desembarques.*.logradouro'  => $enderecoRules['logradouro'],
             'desembarques.*.numero'      => $enderecoRules['numero'],
             'desembarques.*.complemento' => $enderecoRules['complemento'],
@@ -62,19 +63,6 @@ class UpdatePassageiroEnderecosRequest extends FormRequest
             'residencia.latitude'     => $enderecoRules['latitude'],
             'residencia.longitude'    => $enderecoRules['longitude'],
 
-            // Destinos (escola, atividade, etc)
-            'destinos'              => ['nullable', 'array'],
-            'destinos.*.nome'       => ['required_with:destinos', 'string', 'max:150'],
-            'destinos.*.tipo'       => ['required_with:destinos', 'in:escola,atividade,outro'],
-            'destinos.*.logradouro' => $enderecoRules['logradouro'],
-            'destinos.*.numero'     => $enderecoRules['numero'],
-            'destinos.*.complemento'=> $enderecoRules['complemento'],
-            'destinos.*.bairro'     => $enderecoRules['bairro'],
-            'destinos.*.cidade'     => $enderecoRules['cidade'],
-            'destinos.*.estado'     => $enderecoRules['estado'],
-            'destinos.*.cep'        => $enderecoRules['cep'],
-            'destinos.*.latitude'   => $enderecoRules['latitude'],
-            'destinos.*.longitude'  => $enderecoRules['longitude'],
         ];
     }
 }

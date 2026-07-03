@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Motorista;
 
 use App\Http\Controllers\Controller;
 use App\Models\DisponibilidadePassageiro;
+use App\Models\Rota;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -57,6 +58,58 @@ class DashboardController extends Controller
                 'bairros_atendidos'  => $d->bairros_atendidos ?? [],
                 'escolas_atendidas'  => $d->escolas_atendidas ?? [],
             ])->values()
+            : collect();
+
+        // ── Trajetos: disponibilidades ativas com passageiros ordenados ──────
+        $hoje = now()->toDateString();
+        $diaSemanaHoje = ['0'=>'dom','1'=>'seg','2'=>'ter','3'=>'qua','4'=>'qui','5'=>'sex','6'=>'sab'][now()->format('w')];
+
+        // Rotas ativas hoje (keyed by id_disponibilidade)
+        $rotasAtivas = $van
+            ? Rota::where('id_van', $van->id_van)
+                ->where('data', $hoje)
+                ->whereIn('status', ['em_andamento', 'planejada'])
+                ->with(['paradas' => fn ($q) => $q->with(['endereco', 'passageiros.pessoa'])->orderBy('ordem')])
+                ->get()
+                ->keyBy('id_disponibilidade')
+            : collect();
+
+        $trajetos = $van
+            ? $van->disponibilidades()
+                ->where('ativa', true)
+                ->with(['vinculos' => fn ($q) => $q->where('status', 'ativo')
+                    ->with(['passageiro.pessoa', 'passageiro.enderecos.endereco'])
+                    ->orderByPivot('ordem')])
+                ->get()
+                ->map(function ($d) use ($faltasHoje, $diaSemanaHoje, $rotasAtivas) {
+                    $passageiros = $d->vinculos
+                        ->filter(fn ($v) => collect(
+                            json_decode($v->pivot->dias_contratados ?? '[]', true)
+                        )->contains($diaSemanaHoje))
+                        ->map(fn ($v) => [
+                            'id_vinculo'   => $v->id_vinculo,
+                            'id_passageiro'=> $v->passageiro?->id_passageiro,
+                            'nome'         => $v->passageiro?->pessoa?->nome,
+                            'ordem'        => $v->pivot->ordem,
+                            'falta_hoje'   => $faltasHoje->has($v->id_vinculo),
+                            'embarque'     => ($v->passageiro?->enderecos ?? collect())
+                                ->where('tipo', 'embarque')->first()?->endereco?->enderecoCompleto ?? null,
+                            'desembarque'  => ($v->passageiro?->enderecos ?? collect())
+                                ->where('tipo', 'desembarque')->first()?->endereco?->enderecoCompleto ?? null,
+                        ])->values();
+
+                    $rotaAtiva = $rotasAtivas->get($d->id_disponibilidade);
+
+                    return [
+                        'id_disponibilidade' => $d->id_disponibilidade,
+                        'nome'               => $d->nome,
+                        'turno'              => $d->turno,
+                        'passageiros'        => $passageiros,
+                        'rota_ativa'         => $rotaAtiva
+                            ? RotaController::formatarRotaArray($rotaAtiva)
+                            : null,
+                    ];
+                })->values()
             : collect();
 
         $solicitacoes = $van
@@ -123,6 +176,7 @@ class DashboardController extends Controller
             ] : null,
             'passageiros'           => $passageiros,
             'disponibilidades'      => $disponibilidades,
+            'trajetos'              => $trajetos,
             'solicitacoes'          => $solicitacoes,
             'solicitacoesPendentes' => $solicitacoesPendentes,
             'usuario' => [

@@ -14,11 +14,10 @@ const form = useForm({
     embarque_cep:         '', embarque_latitude: '', embarque_longitude: '',
 
     // Destino — para onde o passageiro vai
-    destino_nome:         '',
-    destino_tipo:         'escola',
-    destino_logradouro:   '', destino_numero: '', destino_complemento: '',
-    destino_bairro:       '', destino_cidade: '', destino_estado: '',
-    destino_cep:          '', destino_latitude: '', destino_longitude: '',
+    desembarque_nome:        '',
+    desembarque_logradouro:  '', desembarque_numero: '', desembarque_complemento: '',
+    desembarque_bairro:      '', desembarque_cidade: '', desembarque_estado: '',
+    desembarque_cep:         '', desembarque_latitude: '', desembarque_longitude: '',
 })
 
 // ─── AUTOCOMPLETE NOMINATIM ──────────────────────────────────────────────────
@@ -73,7 +72,6 @@ function maskCep(field, event) {
 }
 
 function submit() {
-    // Copia origem também como residência para o backend
     form.transform(data => ({
         ...data,
         // Reutiliza o endereço de embarque como residência
@@ -86,16 +84,6 @@ function submit() {
         residencia_cep:         data.embarque_cep,
         residencia_latitude:    data.embarque_latitude,
         residencia_longitude:   data.embarque_longitude,
-        // Endereço de desembarque = mesmo que o destino
-        desembarque_logradouro:  data.destino_logradouro,
-        desembarque_numero:      data.destino_numero,
-        desembarque_complemento: data.destino_complemento,
-        desembarque_bairro:      data.destino_bairro,
-        desembarque_cidade:      data.destino_cidade,
-        desembarque_estado:      data.destino_estado,
-        desembarque_cep:         data.destino_cep,
-        desembarque_latitude:    data.destino_latitude,
-        desembarque_longitude:   data.destino_longitude,
     })).post(route('responsavel.passageiros.store'))
 }
 </script>
@@ -277,18 +265,9 @@ function submit() {
                         </div>
 
                         <div class="p-6 space-y-4">
-                            <!-- Nome e tipo do destino -->
-                            <div class="grid grid-cols-[1fr_auto] gap-2">
-                                <input v-model="form.destino_nome" placeholder="Nome do destino (ex: Escola Municipal ABC)" required
-                                    class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition"
-                                    :class="{'border-red-400': form.errors.destino_nome}" />
-                                <select v-model="form.destino_tipo" required
-                                    class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition">
-                                    <option value="escola">Escola</option>
-                                    <option value="atividade">Atividade</option>
-                                    <option value="outro">Outro</option>
-                                </select>
-                            </div>
+                            <!-- Nome do local -->
+                            <input v-model="form.desembarque_nome" placeholder="Nome do local (ex: Escola Municipal ABC)"
+                                class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
 
                             <!-- Busca autocomplete -->
                             <div class="relative">
@@ -296,16 +275,16 @@ function submit() {
                                     type="text"
                                     placeholder="Buscar endereço do destino..."
                                     class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition"
-                                    @input="buscarEndereco('destino', $event.target.value)"
-                                    @blur="fecharSugestoes('destino')"
+                                    @input="buscarEndereco('desembarque', $event.target.value)"
+                                    @blur="fecharSugestoes('desembarque')"
                                 />
-                                <div v-if="loadings['destino']" class="absolute right-3 top-3.5">
+                                <div v-if="loadings['desembarque']" class="absolute right-3 top-3.5">
                                     <svg class="animate-spin h-4 w-4 text-red-400" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/></svg>
                                 </div>
-                                <ul v-if="sugestoes['destino']?.length" class="absolute z-20 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
+                                <ul v-if="sugestoes['desembarque']?.length" class="absolute z-20 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg overflow-hidden">
                                     <li
-                                        v-for="s in sugestoes['destino']" :key="s.place_id"
-                                        @mousedown="selecionarSugestao('destino', s)"
+                                        v-for="s in sugestoes['desembarque']" :key="s.place_id"
+                                        @mousedown="selecionarSugestao('desembarque', s)"
                                         class="px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer border-b border-slate-100 last:border-0 transition flex items-center gap-2"
                                     >
                                         <MapPinIcon class="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -317,24 +296,24 @@ function submit() {
                             <!-- Campos -->
                             <div class="space-y-2">
                                 <div class="grid grid-cols-[1fr_5rem] gap-2">
-                                    <input v-model="form.destino_logradouro" placeholder="Logradouro" required
+                                    <input v-model="form.desembarque_logradouro" placeholder="Logradouro" required
                                         class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition"
-                                        :class="{'border-red-400': form.errors.destino_logradouro}" />
-                                    <input v-model="form.destino_numero" placeholder="Nº"
+                                        :class="{'border-red-400': form.errors.desembarque_logradouro}" />
+                                    <input v-model="form.desembarque_numero" placeholder="Nº"
                                         class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    <input v-model="form.destino_complemento" placeholder="Complemento"
+                                    <input v-model="form.desembarque_complemento" placeholder="Complemento"
                                         class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
-                                    <input v-model="form.destino_bairro" placeholder="Bairro" required
+                                    <input v-model="form.desembarque_bairro" placeholder="Bairro" required
                                         class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
                                 </div>
                                 <div class="grid grid-cols-[1fr_3.5rem_1fr] gap-2">
-                                    <input v-model="form.destino_cidade" placeholder="Cidade" required
+                                    <input v-model="form.desembarque_cidade" placeholder="Cidade" required
                                         class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
-                                    <input v-model="form.destino_estado" placeholder="UF" maxlength="2" required
+                                    <input v-model="form.desembarque_estado" placeholder="UF" maxlength="2" required
                                         class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition uppercase" />
-                                    <input v-model="form.destino_cep" @input="maskCep('destino_cep', $event)" placeholder="CEP" required
+                                    <input v-model="form.desembarque_cep" @input="maskCep('desembarque_cep', $event)" placeholder="CEP" required
                                         class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-red-400 focus:border-transparent transition" />
                                 </div>
                             </div>

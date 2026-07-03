@@ -39,11 +39,6 @@ class Endereco extends Model
         )->withPivot('tipo', 'principal')->withTimestamps();
     }
 
-    public function destino()
-    {
-        return $this->hasOne(Destino::class, 'id_endereco', 'id_endereco');
-    }
-
     public function getEnderecoCompletoAttribute(): string
     {
         $endereco = $this->logradouro;

@@ -14,6 +14,7 @@ const navItems = [
     { key: 'inicio',        label: 'Início' },
     { key: 'solicitacoes',  label: 'Solicitações' },
     { key: 'passageiros',   label: 'Meus Passageiros' },
+    { key: 'trajetos',      label: 'Meus Trajetos' },
     { key: 'perfil',        label: 'Meu Perfil' },
 ]
 </script>

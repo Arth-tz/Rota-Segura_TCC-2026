@@ -10,13 +10,14 @@ const emit = defineEmits(['mudar'])
 const navItems = [
     { key: 'inicio',      label: 'Início' },
     { key: 'passageiros', label: 'Passageiros' },
+    { key: 'acompanhar',  label: 'Acompanhar' },
     { key: 'perfil',      label: 'Perfil' },
 ]
 </script>
 
 <template>
     <nav class="md:hidden fixed bottom-0 inset-x-0 bg-blue-900 text-white border-t border-blue-800 z-50 safe-area-pb">
-        <div class="grid grid-cols-4">
+        <div class="grid grid-cols-5">
             <button
                 v-for="item in navItems"
                 :key="item.key"

@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, useForm, router } from '@inertiajs/vue3'
-import { FlagIcon, HomeIcon, AcademicCapIcon } from '@heroicons/vue/24/outline'
+import { FlagIcon, HomeIcon, MapPinIcon } from '@heroicons/vue/24/outline'
 import EnderecoSection from '@/Components/Responsavel/EnderecoSection.vue'
 
 const props = defineProps({
@@ -9,7 +9,7 @@ const props = defineProps({
 })
 
 // ─── SEÇÃO ATIVA ────────────────────────────────────────────────────────────
-const secaoAberta = ref('dados') // 'dados' | 'enderecos' | 'destinos' | 'vinculos'
+const secaoAberta = ref('dados') // 'dados' | 'enderecos' | 'vinculos'
 
 // ─── FORM DADOS PESSOAIS ─────────────────────────────────────────────────────
 const formDados = useForm({
@@ -31,7 +31,7 @@ const residencia   = ref(enderecosPorTipo('residencia')[0] ?? enderecoVazio())
 function enderecosPorTipo(tipo) {
     return props.passageiro.enderecos
         .filter(e => e.tipo === tipo)
-        .map(e => ({ ...e.endereco, id_passageiro_endereco: e.id_passageiro_endereco, principal: e.principal }))
+        .map(e => ({ ...e.endereco, nome: e.nome ?? '', id_passageiro_endereco: e.id_passageiro_endereco, principal: e.principal }))
 }
 
 function enderecoVazio() {
@@ -61,31 +61,7 @@ function salvarEnderecos() {
         embarques:    embarques.value,
         desembarques: desembarques.value,
         residencia:   residencia.value,
-        destinos:     destinos.value,
     })).put(route('responsavel.passageiros.enderecos.update', props.passageiro.id_passageiro))
-}
-
-// ─── DESTINOS ────────────────────────────────────────────────────────────────
-const destinos = ref(props.passageiro.destinos?.map(d => ({
-    nome:        d.nome,
-    tipo:        d.tipo,
-    logradouro:  d.endereco?.logradouro ?? '',
-    numero:      d.endereco?.numero ?? '',
-    complemento: d.endereco?.complemento ?? '',
-    bairro:      d.endereco?.bairro ?? '',
-    cidade:      d.endereco?.cidade ?? '',
-    estado:      d.endereco?.estado ?? '',
-    cep:         d.endereco?.cep ?? '',
-    latitude:    d.endereco?.latitude ?? '',
-    longitude:   d.endereco?.longitude ?? '',
-})) ?? [])
-
-function adicionarDestino() {
-    destinos.value.push({ nome: '', tipo: 'escola', logradouro: '', numero: '', complemento: '', bairro: '', cidade: '', estado: '', cep: '', latitude: '', longitude: '' })
-}
-
-function removerDestino(index) {
-    destinos.value.splice(index, 1)
 }
 
 // ─── DESATIVAR PASSAGEIRO ────────────────────────────────────────────────────
@@ -131,7 +107,6 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                     v-for="tab in [
                         { key: 'dados',     label: 'Dados' },
                         { key: 'enderecos', label: 'Endereços' },
-                        { key: 'destinos',  label: 'Destinos' },
                         { key: 'vinculos',  label: 'Vínculo' },
                     ]"
                     :key="tab.key"
@@ -293,7 +268,12 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                             </span>
                             <button v-if="desembarques.length > 1" @click="removerDesembarque(index)" class="text-xs text-red-400 hover:text-red-600 transition">Remover</button>
                         </div>
-                        <EnderecoSection :modelValue="des" @update:modelValue="desembarques[index] = $event" />
+                        <div class="mb-3">
+                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Nome do local</label>
+                            <input v-model="des.nome" placeholder="Ex: Escola Municipal João XXIII"
+                                class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
+                        </div>
+                        <EnderecoSection :modelValue="des" @update:modelValue="desembarques[index] = { ...desembarques[index], ...$event }" />
                     </div>
                 </div>
 
@@ -316,52 +296,6 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                         style="font-family:'Sora',sans-serif;"
                     >
                         {{ formEnderecos.processing ? 'Salvando...' : 'Salvar endereços' }}
-                    </button>
-                </div>
-            </div>
-
-            <!-- ── SEÇÃO: DESTINOS ────────────────────────────────────────── -->
-            <div v-else-if="secaoAberta === 'destinos'" class="space-y-4">
-                <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                    <div class="flex items-center justify-between mb-4">
-                        <div class="flex items-center gap-2">
-                        <AcademicCapIcon class="w-4 h-4 text-slate-400 shrink-0" />
-                        <h2 class="text-base font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Destinos</h2>
-                    </div>
-                        <button @click="adicionarDestino" class="text-xs font-semibold text-blue-600 hover:text-blue-700 transition">+ Adicionar destino</button>
-                    </div>
-
-                    <div v-if="destinos.length === 0" class="text-sm text-slate-400 text-center py-6">
-                        Nenhum destino cadastrado. Adicione uma escola ou atividade.
-                    </div>
-
-                    <div v-for="(dest, index) in destinos" :key="index" class="mb-6 pb-6 border-b border-slate-100 last:border-0 last:mb-0 last:pb-0">
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">Destino {{ index + 1 }}</span>
-                            <button @click="removerDestino(index)" class="text-xs text-red-400 hover:text-red-600 transition">Remover</button>
-                        </div>
-
-                        <div class="grid grid-cols-[1fr_auto] gap-2 mb-3">
-                            <input v-model="dest.nome" placeholder="Nome do destino" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
-                            <select v-model="dest.tipo" class="px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition">
-                                <option value="escola">Escola</option>
-                                <option value="atividade">Atividade</option>
-                                <option value="outro">Outro</option>
-                            </select>
-                        </div>
-
-                        <EnderecoSection :modelValue="dest" @update:modelValue="destinos[index] = { ...destinos[index], ...$event }" />
-                    </div>
-                </div>
-
-                <div class="flex justify-end">
-                    <button
-                        @click="salvarEnderecos"
-                        :disabled="formEnderecos.processing"
-                        class="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition shadow-sm shadow-blue-200"
-                        style="font-family:'Sora',sans-serif;"
-                    >
-                        {{ formEnderecos.processing ? 'Salvando...' : 'Salvar destinos' }}
                     </button>
                 </div>
             </div>

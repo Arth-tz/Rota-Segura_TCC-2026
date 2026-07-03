@@ -63,6 +63,6 @@ class Disponibilidade extends Model
             'vinculo_disponibilidade',
             'id_disponibilidade',
             'id_vinculo'
-        )->withPivot('preco_mensal')->withTimestamps();
+        )->withPivot('preco_mensal', 'dias_contratados', 'ordem')->withTimestamps();
     }
 }

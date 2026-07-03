@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Responsavel;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class StorePassageiroEnderecosRequest extends FormRequest
 {
@@ -21,23 +20,18 @@ class StorePassageiroEnderecosRequest extends FormRequest
         };
 
         $this->merge([
-            'residencia_estado' => strtoupper((string) $this->residencia_estado),
-            'embarque_estado' => strtoupper((string) $this->embarque_estado),
-            'desembarque_estado' => strtoupper((string) $this->desembarque_estado),
-            'destino_estado' => strtoupper((string) $this->destino_estado),
-            'residencia_cep' => preg_replace('/\D/', '', (string) $this->residencia_cep),
-            'embarque_cep' => preg_replace('/\D/', '', (string) $this->embarque_cep),
-            'desembarque_cep' => preg_replace('/\D/', '', (string) $this->desembarque_cep),
-            'destino_cep' => preg_replace('/\D/', '', (string) $this->destino_cep),
-            'destino_tipo' => strtolower((string) $this->destino_tipo),
-            'residencia_latitude' => $normalizarCoord($this->residencia_latitude),
+            'residencia_estado'    => strtoupper((string) $this->residencia_estado),
+            'embarque_estado'      => strtoupper((string) $this->embarque_estado),
+            'desembarque_estado'   => strtoupper((string) $this->desembarque_estado),
+            'residencia_cep'       => preg_replace('/\D/', '', (string) $this->residencia_cep),
+            'embarque_cep'         => preg_replace('/\D/', '', (string) $this->embarque_cep),
+            'desembarque_cep'      => preg_replace('/\D/', '', (string) $this->desembarque_cep),
+            'residencia_latitude'  => $normalizarCoord($this->residencia_latitude),
             'residencia_longitude' => $normalizarCoord($this->residencia_longitude),
-            'embarque_latitude' => $normalizarCoord($this->embarque_latitude),
-            'embarque_longitude' => $normalizarCoord($this->embarque_longitude),
+            'embarque_latitude'    => $normalizarCoord($this->embarque_latitude),
+            'embarque_longitude'   => $normalizarCoord($this->embarque_longitude),
             'desembarque_latitude' => $normalizarCoord($this->desembarque_latitude),
-            'desembarque_longitude' => $normalizarCoord($this->desembarque_longitude),
-            'destino_latitude' => $normalizarCoord($this->destino_latitude),
-            'destino_longitude' => $normalizarCoord($this->destino_longitude),
+            'desembarque_longitude'=> $normalizarCoord($this->desembarque_longitude),
         ]);
     }
 
@@ -86,17 +80,7 @@ class StorePassageiroEnderecosRequest extends FormRequest
             'desembarque_latitude' => $enderecoRules['latitude'],
             'desembarque_longitude' => $enderecoRules['longitude'],
 
-            'destino_nome' => ['required', 'string', 'max:150'],
-            'destino_tipo' => ['required', Rule::in(['escola', 'atividade', 'outro'])],
-            'destino_logradouro' => $enderecoRules['logradouro'],
-            'destino_numero' => $enderecoRules['numero'],
-            'destino_complemento' => $enderecoRules['complemento'],
-            'destino_bairro' => $enderecoRules['bairro'],
-            'destino_cidade' => $enderecoRules['cidade'],
-            'destino_estado' => $enderecoRules['estado'],
-            'destino_cep' => $enderecoRules['cep'],
-            'destino_latitude' => $enderecoRules['latitude'],
-            'destino_longitude' => $enderecoRules['longitude'],
+            'desembarque_nome' => ['nullable', 'string', 'max:150'],
         ];
     }
 }

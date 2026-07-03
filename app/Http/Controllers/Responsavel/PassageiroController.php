@@ -7,7 +7,6 @@ use App\Http\Requests\Responsavel\StorePassageiroEnderecosRequest;
 use App\Http\Requests\Responsavel\StorePassageiroEssencialRequest;
 use App\Http\Requests\Responsavel\UpdatePassageiroRequest;
 use App\Http\Requests\Responsavel\UpdatePassageiroEnderecosRequest;
-use App\Models\Destino;
 use App\Models\Endereco;
 use App\Models\Passageiro;
 use App\Models\PassageiroEndereco;
@@ -116,7 +115,6 @@ class PassageiroController extends Controller
             'embarques'    => 'nullable|array',
             'desembarques' => 'nullable|array',
             'residencia'   => 'nullable|array',
-            'destinos'     => 'nullable|array',
         ]);
 
         try {
@@ -153,9 +151,6 @@ class PassageiroController extends Controller
                     $this->salvarEnderecosArray($passageiro, $dados);
                 }
 
-                if ($request->filled('destinos')) {
-                    $this->salvarDestinos($passageiro, $request->destinos);
-                }
             });
 
             return redirect()->route('responsavel.dashboard')
@@ -185,14 +180,6 @@ class PassageiroController extends Controller
             'vinculos.disponibilidades.dias',
         ]);
 
-        // Destinos vinculados aos endereços de desembarque
-        $destinos = Destino::whereIn(
-            'id_endereco',
-            $passageiro->enderecos
-                ->where('tipo', 'desembarque')
-                ->pluck('id_endereco')
-        )->with('endereco')->get();
-
         return Inertia::render('Responsavel/Passageiro/show', [
             'passageiro' => [
                 'id_passageiro'       => $passageiro->id_passageiro,
@@ -208,9 +195,9 @@ class PassageiroController extends Controller
                     'id_passageiro_endereco' => $pe->id_passageiro_endereco,
                     'tipo'                   => $pe->tipo,
                     'principal'              => $pe->principal,
+                    'nome'                   => $pe->nome,
                     'endereco'               => $pe->endereco,
                 ]),
-                'destinos'  => $destinos,
                 'vinculos'  => $passageiro->vinculos->map(fn($v) => [
                     'id_vinculo'  => $v->id_vinculo,
                     'status'      => $v->status,
@@ -296,11 +283,6 @@ class PassageiroController extends Controller
 
         $passageiro->load(['pessoa', 'enderecos.endereco']);
 
-        $destinos = Destino::whereIn(
-            'id_endereco',
-            $passageiro->enderecos->pluck('id_endereco')
-        )->with('endereco')->get();
-
         return Inertia::render('Responsavel/Passageiro/EditEnderecos', [
             'passageiro' => [
                 'id_passageiro' => $passageiro->id_passageiro,
@@ -309,9 +291,9 @@ class PassageiroController extends Controller
                     'id_passageiro_endereco' => $pe->id_passageiro_endereco,
                     'tipo'                   => $pe->tipo,
                     'principal'              => $pe->principal,
+                    'nome'                   => $pe->nome,
                     'endereco'               => $pe->endereco,
                 ]),
-                'destinos' => $destinos,
             ],
         ]);
     }
@@ -329,9 +311,6 @@ class PassageiroController extends Controller
             DB::transaction(function () use ($request, $passageiro): void {
                 $this->salvarEnderecosArray($passageiro, $request->validated(), substituir: true);
 
-                if ($request->filled('destinos')) {
-                    $this->salvarDestinos($passageiro, $request->destinos, substituir: true);
-                }
             });
 
             return redirect()->route('responsavel.passageiros.show', $id)
@@ -397,9 +376,9 @@ class PassageiroController extends Controller
                 'cep'         => $dados["{$prefixo}_cep"]         ?? '',
                 'latitude'    => $dados["{$prefixo}_latitude"]    ?? null,
                 'longitude'   => $dados["{$prefixo}_longitude"]   ?? null,
+                'nome'        => $prefixo === 'desembarque' ? ($dados['desembarque_nome'] ?? null) : null,
             ];
 
-            // residencia é singular; embarque/desembarque são listas
             if ($prefixo === 'residencia') {
                 $convertido['residencia'] = [$item];
             } else {
@@ -408,23 +387,6 @@ class PassageiroController extends Controller
         }
 
         $this->salvarEnderecosArray($passageiro, $convertido);
-
-        // Destino vinculado ao desembarque do onboarding
-        if (!empty($dados['destino_nome'])) {
-            $this->salvarDestinos($passageiro, [[
-                'logradouro'  => $dados['destino_logradouro']  ?? $dados['desembarque_logradouro'] ?? '',
-                'numero'      => $dados['destino_numero']      ?? null,
-                'complemento' => $dados['destino_complemento'] ?? null,
-                'bairro'      => $dados['destino_bairro']      ?? '',
-                'cidade'      => $dados['destino_cidade']      ?? '',
-                'estado'      => $dados['destino_estado']      ?? '',
-                'cep'         => $dados['destino_cep']         ?? '',
-                'latitude'    => $dados['destino_latitude']    ?? null,
-                'longitude'   => $dados['destino_longitude']   ?? null,
-                'nome'        => $dados['destino_nome'],
-                'tipo'        => $dados['destino_tipo'] ?? 'escola',
-            ]]);
-        }
     }
 
     /**
@@ -480,6 +442,7 @@ class PassageiroController extends Controller
                     'id_endereco'   => $endereco->id_endereco,
                     'tipo'          => $tipo,
                     'principal'     => $primeiroValido,
+                    'nome'          => $endDados['nome'] ?? null,
                 ]);
 
                 // Para residência só salva o primeiro; para os demais marca principal apenas no primeiro
@@ -490,57 +453,11 @@ class PassageiroController extends Controller
     }
 
     /**
-     * Salva destinos do passageiro
-     */
-    private function salvarDestinos(Passageiro $passageiro, array $destinos, bool $substituir = false): void
-    {
-        if ($substituir) {
-            // Busca ids de endereços de desembarque do passageiro
-            $idsEnderecos = PassageiroEndereco::where('id_passageiro', $passageiro->id_passageiro)
-                ->where('tipo', 'desembarque')
-                ->pluck('id_endereco');
-
-            Destino::whereIn('id_endereco', $idsEnderecos)->delete();
-        }
-
-        foreach ($destinos as $destDados) {
-            if (empty($destDados['logradouro'])) continue;
-
-            $endereco = Endereco::create([
-                'logradouro'  => $destDados['logradouro'],
-                'numero'      => $destDados['numero'] ?? null,
-                'complemento' => $destDados['complemento'] ?? null,
-                'bairro'      => $destDados['bairro'],
-                'cidade'      => $destDados['cidade'],
-                'estado'      => strtoupper($destDados['estado']),
-                'cep'         => preg_replace('/\D/', '', $destDados['cep']),
-                'latitude'    => $destDados['latitude'] ?? null,
-                'longitude'   => $destDados['longitude'] ?? null,
-            ]);
-
-            // Vincula o endereço ao passageiro como desembarque
-            PassageiroEndereco::create([
-                'id_passageiro' => $passageiro->id_passageiro,
-                'id_endereco'   => $endereco->id_endereco,
-                'tipo'          => 'desembarque',
-                'principal'     => false,
-            ]);
-
-            Destino::create([
-                'id_endereco' => $endereco->id_endereco,
-                'nome'        => $destDados['nome'],
-                'tipo'        => $destDados['tipo'] ?? 'escola',
-                'ativo'       => true,
-            ]);
-        }
-    }
-
-    /**
      * Geocodifica endereços no formato prefixado (onboarding).
      */
     private function enriquecerCoordenadasFaltantes(array $dados): array
     {
-        foreach (['residencia', 'embarque', 'desembarque', 'destino'] as $prefixo) {
+        foreach (['residencia', 'embarque', 'desembarque'] as $prefixo) {
             if (empty($dados["{$prefixo}_logradouro"])) continue;
 
             if (!empty($dados["{$prefixo}_latitude"]) && !empty($dados["{$prefixo}_longitude"])) continue;

@@ -14,6 +14,8 @@ use App\Http\Controllers\Motorista\VanController;
 use App\Http\Controllers\Motorista\DisponibilidadeController;
 use App\Http\Controllers\Motorista\VinculoController;
 use App\Http\Controllers\Motorista\PerfilController as MotoristaPerfilController;
+use App\Http\Controllers\Motorista\RotaController;
+use App\Http\Controllers\Responsavel\AcompanharController;
 use App\Http\Controllers\Responsavel\DashboardController as ResponsavelDashboard;
 use App\Http\Controllers\Auth\RegisterMotoristaController;
 use App\Http\Controllers\Auth\RegisterResponsavelController;
@@ -84,6 +86,9 @@ Route::middleware(['auth', 'role:responsavel'])->prefix('responsavel')->name('re
     Route::post('/presenca',      [PresencaController::class, 'store'])->name('presenca.store');
     Route::delete('/presenca/{id}', [PresencaController::class, 'destroy'])->name('presenca.destroy');
 
+    // Acompanhar trajeto em tempo real (polling JSON)
+    Route::get('/acompanhar', [AcompanharController::class, 'index'])->name('acompanhar');
+
     // Passageiro — cadastro inicial (onboarding)
     Route::get('/passageiros/criar', [PassageiroController::class, 'create'])->name('passageiros.create');
     Route::post('/passageiros/essencial', [PassageiroController::class, 'storeEssencial'])->name('passageiros.store.essencial');
@@ -116,6 +121,13 @@ Route::middleware(['auth', 'role:motorista'/*, 'verified' //isso aqui faria vali
     Route::post('/solicitacoes/{id}/recusar', [MotoristaSOlicitacaoController::class, 'recusar'])->name('solicitacoes.recusar');
 
     Route::post('/vinculos/{id}/encerrar', [VinculoController::class, 'encerrar'])->name('vinculos.encerrar');
+    Route::post('/disponibilidades/{id}/reordenar', [VinculoController::class, 'reordenar'])->name('disponibilidades.reordenar');
+
+    // Rotas GPS
+    Route::post('/rotas/{disponibilidadeId}/iniciar',              [RotaController::class, 'iniciar'])->name('rotas.iniciar');
+    Route::post('/rotas/{rotaId}/encerrar',                        [RotaController::class, 'encerrar'])->name('rotas.encerrar');
+    Route::post('/rotas/{rotaId}/posicao',                         [RotaController::class, 'posicao'])->name('rotas.posicao');
+    Route::post('/rotas/{rotaId}/paradas/{paradaId}/confirmar',    [RotaController::class, 'confirmar'])->name('rotas.confirmar');
 
     Route::get('/disponibilidades/criar',        [DisponibilidadeController::class, 'create'])->name('disponibilidades.create');
     Route::post('/disponibilidades',             [DisponibilidadeController::class, 'store'])->name('disponibilidades.store');

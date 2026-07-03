@@ -49,9 +49,15 @@ class SolicitacaoController extends Controller
             ]);
 
             foreach ($solicitacao->disponibilidades as $disp) {
+                // Próxima ordem = maior ordem atual + 1
+                $proximaOrdem = \Illuminate\Support\Facades\DB::table('vinculo_disponibilidade')
+                    ->where('id_disponibilidade', $disp->id_disponibilidade)
+                    ->max('ordem') + 1;
+
                 $vinculo->disponibilidades()->attach($disp->id_disponibilidade, [
                     'preco_mensal'     => $disp->pivot->preco_mensal,
-                    'dias_contratados' => $disp->pivot->dias_contratados, // JSON string do DB
+                    'dias_contratados' => $disp->pivot->dias_contratados,
+                    'ordem'            => $proximaOrdem,
                 ]);
             }
         });
