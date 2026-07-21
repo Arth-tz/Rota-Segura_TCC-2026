@@ -1,0 +1,69 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "overused-font",
+        "value": "plus jakarta sans",
+        "createdAt": "2026-07-21T03:52:39.962Z",
+        "reason": "PRODUCT.md anti-references explicitly confirm Sora/Plus Jakarta Sans as the existing brand identity to consolidate, not replace"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "*",
+        "files": [
+          "resources/js/Pages/Auth/ForgotPassword.vue",
+          "resources/js/Pages/Auth/Login.vue",
+          "resources/js/Pages/Welcome.vue"
+        ],
+        "createdAt": "2026-07-21T04:17:41.851Z",
+        "reason": "Funil publico (brand register) documentado no DESIGN.md como camada de tokens separada da UI de produto; confirmado pelo usuario"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "*",
+        "files": [
+          "resources/js/Pages/Auth/ForgotPassword.vue",
+          "resources/js/Pages/Auth/Login.vue",
+          "resources/js/Pages/Welcome.vue"
+        ],
+        "createdAt": "2026-07-21T04:17:48.117Z",
+        "reason": "Funil publico (brand register) documentado no DESIGN.md como camada de tokens separada da UI de produto; confirmado pelo usuario"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          "resources/js/Pages/Auth/ForgotPassword.vue",
+          "resources/js/Pages/Auth/Login.vue",
+          "resources/js/Pages/Welcome.vue"
+        ],
+        "createdAt": "2026-07-21T04:17:48.241Z",
+        "reason": "Funil publico (brand register) documentado no DESIGN.md como camada de tokens separada da UI de produto; confirmado pelo usuario"
+      },
+      {
+        "rule": "design-system-font-size",
+        "value": "*",
+        "files": [
+          "resources/js/Pages/Auth/ForgotPassword.vue",
+          "resources/js/Pages/Auth/Login.vue",
+          "resources/js/Pages/Welcome.vue"
+        ],
+        "createdAt": "2026-07-21T04:17:48.359Z",
+        "reason": "Funil publico (brand register) documentado no DESIGN.md como camada de tokens separada da UI de produto; confirmado pelo usuario"
+      },
+      {
+        "rule": "dark-glow",
+        "value": "*",
+        "files": [
+          "resources/js/Pages/Auth/ForgotPassword.vue",
+          "resources/js/Pages/Auth/Login.vue",
+          "resources/js/Pages/Welcome.vue"
+        ],
+        "createdAt": "2026-07-21T04:17:48.463Z",
+        "reason": "Funil publico (brand register) documentado no DESIGN.md como camada de tokens separada da UI de produto; confirmado pelo usuario"
+      }
+    ]
+  }
+}

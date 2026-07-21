@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-07-21T04:30:00Z",
+  "title": "Design System: Rota Segura — \"O Painel de Confiança\"",
+  "extensions": {
+    "colorMeta": {
+      "primary-blue": { "role": "primary", "displayName": "Azul Confiança", "canonical": "#2563eb", "tonalRamp": ["#0f172a", "#1e3a8a", "#1d4ed8", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd", "#dbeafe"] },
+      "primary-amber": { "role": "primary", "displayName": "Âmbar Operacional", "canonical": "#f59e0b", "tonalRamp": ["#451a03", "#78350f", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fcd34d", "#fef3c7"] },
+      "ink": { "role": "neutral", "displayName": "Tinta", "canonical": "#0f172a", "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#475569", "#64748b", "#94a3b8", "#cbd5e1"] },
+      "neutral-bg": { "role": "neutral", "displayName": "Fundo de Página", "canonical": "#f8fafc", "tonalRamp": ["#e2e8f0", "#eef2f7", "#f1f5f9", "#f8fafc", "#fafbfd", "#fcfdfe", "#ffffff", "#ffffff"] },
+      "success": { "role": "semantic", "displayName": "Sucesso", "canonical": "#16a34a", "tonalRamp": ["#052e16", "#14532d", "#166534", "#15803d", "#16a34a", "#22c55e", "#4ade80", "#bbf7d0"] },
+      "danger": { "role": "semantic", "displayName": "Perigo", "canonical": "#dc2626", "tonalRamp": ["#450a0a", "#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fecaca"] }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Sora Display", "purpose": "Títulos de seção dentro das telas autenticadas dos 3 portais." },
+      "brand-display": { "displayName": "Plus Jakarta Sans Display", "purpose": "Headline da Welcome.vue e telas de autenticação (funil público)." },
+      "body": { "displayName": "Sora Body", "purpose": "Texto corrido dentro do produto." },
+      "label": { "displayName": "Sora Label", "purpose": "Rótulos de campo e eyebrows — usar com moderação." },
+      "micro": { "displayName": "Sora Micro", "purpose": "Menor step da hierarquia: badges minúsculos, chips de dia, legendas de sidebar/bottom nav — só onde label (12px) não cabe fisicamente." }
+    },
+    "shadows": [
+      { "name": "ambient", "value": "0 1px 2px rgba(15,23,42,0.05)", "purpose": "Cards de lista e blocos internos em repouso." },
+      { "name": "destaque", "value": "0 10px 25px rgba(15,23,42,0.1)", "purpose": "Card hero no topo de cada dashboard." },
+      { "name": "flutuante", "value": "0 20px 60px rgba(15,23,42,0.25)", "purpose": "Modais e diálogos sobre backdrop." }
+    ],
+    "motion": [
+      { "name": "ease-out-standard", "value": "cubic-bezier(0.16, 1, 0.3, 1)", "purpose": "Curva padrão de saída (ease-out-expo) usada em toda transição de estado — substituiu a curva bounce/overshoot (cubic-bezier(0.34, 1.56, 0.64, 1)) removida de todo o código em 2026-07-21." }
+    ],
+    "breakpoints": []
+  },
+  "components": [
+    {
+      "name": "Hero Card (Responsável/Admin)",
+      "kind": "card",
+      "refersTo": "card-hero",
+      "description": "Card de topo do dashboard com gradiente azul sólido e estatísticas.",
+      "html": "<div class=\"ds-hero\"><p class=\"ds-hero__eyebrow\">Bem-vindo de volta</p><h2 class=\"ds-hero__title\">Olá, Maria</h2><div class=\"ds-hero__stats\"><div><span class=\"ds-hero__stat-value\">2</span><span class=\"ds-hero__stat-label\">passageiros</span></div></div></div>",
+      "css": ".ds-hero { position: relative; overflow: hidden; border-radius: 16px; background: linear-gradient(135deg, #2563eb, #1d4ed8); padding: 24px; color: #fff; box-shadow: 0 10px 25px rgba(15,23,42,0.1); font-family: 'Sora', sans-serif; } .ds-hero__eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: rgba(255,255,255,0.75); margin-bottom: 8px; } .ds-hero__title { font-size: 24px; font-weight: 800; margin-bottom: 16px; } .ds-hero__stats { display: flex; gap: 24px; } .ds-hero__stat-value { display: block; font-size: 28px; font-weight: 800; } .ds-hero__stat-label { font-size: 12px; color: rgba(255,255,255,0.75); }"
+    },
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Botão primário do portal Responsável/Admin.",
+      "html": "<button class=\"ds-btn-primary\">Confirmar</button>",
+      "css": ".ds-btn-primary { background: #2563eb; color: #fff; padding: 10px 20px; border-radius: 8px; border: none; font-family: 'Sora', sans-serif; font-weight: 600; font-size: 14px; box-shadow: 0 4px 14px rgba(37,99,235,0.35); transition: background 0.2s ease-out, box-shadow 0.2s ease-out; } .ds-btn-primary:hover { background: #1d4ed8; box-shadow: 0 8px 24px rgba(37,99,235,0.45); } .ds-btn-primary:focus-visible { outline: 2px solid #93c5fd; outline-offset: 2px; }"
+    },
+    {
+      "name": "Icon-Chip Section Header",
+      "kind": "custom",
+      "refersTo": "card-surface",
+      "description": "Cabeçalho de seção de formulário: chip de ícone quadrado + título.",
+      "html": "<div class=\"ds-section-header\"><div class=\"ds-section-header__icon\"><svg width=\"18\" height=\"18\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\"><path d=\"M12 4v16m8-8H4\"/></svg></div><h3 class=\"ds-section-header__title\">Dados pessoais</h3></div>",
+      "css": ".ds-section-header { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; } .ds-section-header__icon { width: 32px; height: 32px; border-radius: 12px; background: #fef3c7; color: #d97706; display: flex; align-items: center; justify-content: center; } .ds-section-header__title { font-family: 'Sora', sans-serif; font-weight: 700; font-size: 16px; color: #0f172a; }"
+    },
+    {
+      "name": "Empty State",
+      "kind": "custom",
+      "description": "Estado vazio padrão: borda tracejada, ícone, frase, CTA.",
+      "html": "<div class=\"ds-empty\"><div class=\"ds-empty__icon\"><svg width=\"32\" height=\"32\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\"><circle cx=\"12\" cy=\"12\" r=\"9\"/></svg></div><p class=\"ds-empty__title\">Nenhum passageiro ainda</p><p class=\"ds-empty__sub\">Adicione o primeiro passageiro para começar.</p><button class=\"ds-empty__cta\">Adicionar passageiro</button></div>",
+      "css": ".ds-empty { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 32px 24px; border: 2px dashed #fde68a; border-radius: 16px; background: #fff; } .ds-empty__icon { color: #fcd34d; } .ds-empty__title { font-family: 'Sora', sans-serif; font-weight: 700; color: #0f172a; } .ds-empty__sub { font-size: 13px; color: #475569; } .ds-empty__cta { margin-top: 4px; background: #f59e0b; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 600; font-size: 13px; }"
+    },
+    {
+      "name": "Status Badge",
+      "kind": "chip",
+      "refersTo": "badge-status",
+      "description": "Pílula de status semântico (pendente/ativo/rejeitado).",
+      "html": "<span class=\"ds-badge ds-badge--pending\">Aguardando aprovação</span>",
+      "css": ".ds-badge { display: inline-flex; align-items: center; padding: 4px 12px; border-radius: 9999px; font-size: 12px; font-weight: 600; font-family: 'Sora', sans-serif; } .ds-badge--pending { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; } .ds-badge--success { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "O Painel de Confiança",
+    "overview": "Rota Segura é onde um pai ou mãe decide se pode confiar o filho a um motorista que nunca viu pessoalmente. Todo o sistema existe pra tornar essa decisão mais tranquila: cartões sólidos com cantos generosamente arredondados, gradientes suaves de uma única cor de marca por portal, e uma paleta que nunca é neutra-fria nem lúdica-infantil. Este sistema rejeita explicitamente dois extremos: o visual frio e corporativo de um app bancário ou ERP genérico, e o visual infantilizado que trataria crianças como o público visual em vez do responsável adulto que toma a decisão.",
+    "keyCharacteristics": [
+      "Um gradiente de cor sólida por contexto (azul Responsável/Admin, âmbar Motorista) — nunca multi-hue.",
+      "Cantos generosamente arredondados (16px em cards principais, 12px em blocos internos).",
+      "Sombra reservada para o que realmente precisa se destacar (hero cards, modais).",
+      "Um padrão de estado vazio repetido fielmente em todo o produto."
+    ],
+    "rules": [
+      { "name": "A Regra da Cor Única por Portal", "body": "Cada portal usa exatamente uma cor de marca (azul ou âmbar) como protagonista.", "section": "colors" },
+      { "name": "A Regra do Texto Nunca Claro Demais", "body": "Texto de corpo #475569 ou mais escuro sobre qualquer fundo claro ou tintado; hover que tinge o fundo deve recolorir o texto junto.", "section": "colors" },
+      { "name": "A Regra da Fonte Única de Produto", "body": "Toda tela autenticada carrega Sora a partir de um único ponto central, nunca via link ou style inline por página.", "section": "typography" },
+      { "name": "A Regra da Fronteira Pública/Produto", "body": "Plus Jakarta Sans fica restrita ao funil público (Welcome, Login, ForgotPassword); o dashboard fala Sora.", "section": "typography" },
+      { "name": "A Regra da Sombra que Importa", "body": "Sombra forte reservada a no máximo 1-2 elementos por tela: o hero e o modal aberto.", "section": "elevation" }
+    ],
+    "dos": [
+      "Do manter uma cor de marca sólida por portal.",
+      "Do carregar Sora uma única vez, centralizado no layout raiz.",
+      "Do reservar sombra forte para hero card e modais.",
+      "Do usar o padrão de estado vazio para qualquer nova tela sem conteúdo.",
+      "Do recolorir o texto junto com o fundo em todo hover tintado.",
+      "Do usar o modal padrão para toda ação destrutiva."
+    ],
+    "donts": [
+      "Don't introduzir nova cor de marca ou gradiente multi-hue.",
+      "Don't usar border-left/border-right colorido como indicador de item ativo.",
+      "Don't usar confirm() nativo do navegador para ações destrutivas.",
+      "Don't deixar texto de corpo mais claro que #475569 sobre fundo claro.",
+      "Don't deixar uma página nova sem herdar o layout raiz e a fonte Sora.",
+      "Don't usar cores lúdicas fora da paleta azul/âmbar/slate.",
+      "Don't usar curvas de easing com bounce/overshoot."
+    ]
+  }
+}
