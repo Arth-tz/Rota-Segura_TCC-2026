@@ -15,6 +15,7 @@ class Van extends Model
     protected $fillable = [
         'id_motorista',
         'placa',
+        'nome_servico',
         'modelo',
         'marca',
         'ano_fabricacao',

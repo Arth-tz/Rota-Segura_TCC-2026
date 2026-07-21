@@ -35,7 +35,6 @@ const titulos = {
 
 <template>
     <Head title="Dashboard — Motorista" />
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600&display=swap" rel="stylesheet" />
 
     <FlashMessage />
     <div class="min-h-screen flex bg-slate-100">
@@ -49,7 +48,7 @@ const titulos = {
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs uppercase tracking-widest text-amber-200 font-medium">Motorista</p>
-                        <h2 class="text-xl font-bold mt-0.5" style="font-family:'Sora',sans-serif;">
+                        <h2 class="text-xl font-bold mt-0.5">
                             {{ titulos[secaoAtiva] }}
                         </h2>
                     </div>
@@ -69,6 +68,7 @@ const titulos = {
                     :passageiros="passageiros"
                     :disponibilidades="disponibilidades"
                     :solicitacoesPendentes="solicitacoesPendentes"
+                    :usuario="usuario"
                     @ir-passageiros="secaoAtiva = 'passageiros'"
                     @ir-solicitacoes="secaoAtiva = 'solicitacoes'"
                 />

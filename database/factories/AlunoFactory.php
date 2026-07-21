@@ -32,7 +32,7 @@ class AlunoFactory extends Factory
                                         'EMEF Santos Dumont',
                                     ]),
             'escola_endereco'     => fake()->streetAddress(),
-            'turno'               => fake()->randomElement(['manha', 'tarde', 'noite']),
+            'turno'               => fake()->randomElement(['manha', 'tarde', 'integral']),
             'serie_ano'           => fake()->randomElement([
                                         '1º Ano', '2º Ano', '3º Ano',
                                         '4º Ano', '5º Ano', '6º Ano',

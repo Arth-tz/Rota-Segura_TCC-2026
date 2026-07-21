@@ -14,6 +14,7 @@ import {
     StopIcon,
     SignalIcon,
     CheckIcon,
+    ExclamationTriangleIcon,
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
@@ -35,6 +36,8 @@ const listas = ref(props.trajetos.map(t => ({
     iniciando: false,
     encerrando: false,
     erro: null,
+    gpsFalhasConsecutivas: 0,
+    gpsAlerta: false,
 })))
 
 // ── Reordenar ─────────────────────────────────────────────────────────────────
@@ -71,15 +74,20 @@ async function salvar(trajetoIdx) {
 
 const watchIds = ref({}) // disponibilidadeId → watchId do navigator
 
+const GPS_FALHAS_PARA_ALERTA = 3
+
 function iniciarGPS(trajeto) {
-    if (!navigator.geolocation) return
+    if (!navigator.geolocation) {
+        trajeto.gpsAlerta = true
+        return
+    }
 
     const rotaId = trajeto.rota_ativa?.id_rota
     if (!rotaId) return
 
     const id = navigator.geolocation.watchPosition(
-        pos => enviarPosicao(rotaId, pos),
-        null,
+        pos => enviarPosicao(trajeto, rotaId, pos),
+        () => registrarFalhaGPS(trajeto),
         { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 },
     )
     watchIds.value[trajeto.id_disponibilidade] = id
@@ -93,14 +101,25 @@ function pararGPS(disponibilidadeId) {
     }
 }
 
-async function enviarPosicao(rotaId, pos) {
+function registrarFalhaGPS(trajeto) {
+    trajeto.gpsFalhasConsecutivas++
+    if (trajeto.gpsFalhasConsecutivas >= GPS_FALHAS_PARA_ALERTA) {
+        trajeto.gpsAlerta = true
+    }
+}
+
+async function enviarPosicao(trajeto, rotaId, pos) {
     try {
         await axios.post(route('motorista.rotas.posicao', rotaId), {
             latitude:  pos.coords.latitude,
             longitude: pos.coords.longitude,
             precisao:  pos.coords.accuracy,
         })
-    } catch { /* ignora falhas silenciosamente */ }
+        trajeto.gpsFalhasConsecutivas = 0
+        trajeto.gpsAlerta = false
+    } catch {
+        registrarFalhaGPS(trajeto)
+    }
 }
 
 onUnmounted(() => {
@@ -180,7 +199,7 @@ listas.value.forEach((t) => {
 
         <!-- Header -->
         <div class="rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 p-5 text-white shadow-lg">
-            <h3 class="text-lg font-bold" style="font-family:'Sora',sans-serif;">Meus trajetos</h3>
+            <h3 class="text-lg font-bold">Meus trajetos</h3>
             <p class="text-sm text-amber-100 mt-1">Gerencie a ordem de embarque e inicie os trajetos de hoje.</p>
         </div>
 
@@ -188,7 +207,7 @@ listas.value.forEach((t) => {
         <div v-if="!listas.length"
             class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-amber-200 bg-amber-50/40 py-14 px-6 text-center">
             <MapPinIcon class="w-10 h-10 text-amber-300 mb-3" />
-            <p class="font-semibold text-slate-700" style="font-family:'Sora',sans-serif;">Nenhum trajeto ativo</p>
+            <p class="font-semibold text-slate-700">Nenhum trajeto ativo</p>
             <p class="mt-1 text-sm text-slate-400">Crie disponibilidades e aceite passageiros para ver os trajetos aqui.</p>
         </div>
 
@@ -204,7 +223,12 @@ listas.value.forEach((t) => {
                     class="w-4 h-4 shrink-0"
                     :class="trajeto.turno === 'manha' ? 'text-amber-500' : trajeto.turno === 'tarde' ? 'text-indigo-500' : 'text-slate-400'" />
                 <p class="font-semibold text-slate-800 text-sm flex-1">{{ trajeto.nome }}</p>
-                <span v-if="trajeto.rota_ativa" class="flex items-center gap-1 text-xs text-amber-700 font-medium animate-pulse">
+                <span v-if="trajeto.rota_ativa && trajeto.gpsAlerta"
+                    class="flex items-center gap-1 text-xs text-red-700 font-semibold bg-red-50 border border-red-200 rounded-full px-2 py-0.5">
+                    <ExclamationTriangleIcon class="w-3.5 h-3.5" />
+                    Localização não está sendo enviada
+                </span>
+                <span v-else-if="trajeto.rota_ativa" class="flex items-center gap-1 text-xs text-amber-700 font-medium animate-pulse">
                     <SignalIcon class="w-3.5 h-3.5" />
                     Em andamento
                 </span>
@@ -268,8 +292,7 @@ listas.value.forEach((t) => {
                     <button @click="iniciarTrajeto(ti)"
                         :disabled="trajeto.iniciando || !trajeto.passageiros.length"
                         class="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition shadow-lg shadow-amber-200 disabled:opacity-50"
-                        :class="trajeto.passageiros.length ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-slate-100 text-slate-400 cursor-not-allowed'"
-                        style="font-family:'Sora',sans-serif;">
+                        :class="trajeto.passageiros.length ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-slate-100 text-slate-400 cursor-not-allowed'">
                         <PlayIcon class="w-4 h-4" />
                         {{ trajeto.iniciando ? 'Iniciando…' : 'Iniciar trajeto' }}
                     </button>
@@ -278,7 +301,19 @@ listas.value.forEach((t) => {
 
             <!-- Modo trajeto ativo — paradas com confirmação -->
             <template v-else>
-                <div class="divide-y divide-amber-100">
+
+                <!-- Sem paradas (passageiros sem endereço cadastrado) -->
+                <div v-if="!trajeto.rota_ativa.paradas.length"
+                    class="px-5 py-8 text-center space-y-2">
+                    <MapPinIcon class="w-8 h-8 text-amber-300 mx-auto" />
+                    <p class="text-sm font-semibold text-slate-600">Nenhuma parada gerada</p>
+                    <p class="text-xs text-slate-400 max-w-xs mx-auto">
+                        Os passageiros deste trajeto não têm endereço de embarque cadastrado.
+                        Peça aos responsáveis que adicionem os endereços antes de iniciar.
+                    </p>
+                </div>
+
+                <div v-else class="divide-y divide-amber-100">
                     <div v-for="parada in trajeto.rota_ativa.paradas" :key="parada.id_parada"
                         class="px-5 py-4">
 
@@ -337,8 +372,7 @@ listas.value.forEach((t) => {
                 <div class="px-5 py-4 border-t border-amber-100 bg-amber-50/40">
                     <button @click="encerrarTrajeto(ti)"
                         :disabled="trajeto.encerrando"
-                        class="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm bg-slate-700 hover:bg-slate-800 text-white transition disabled:opacity-50"
-                        style="font-family:'Sora',sans-serif;">
+                        class="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm bg-slate-700 hover:bg-slate-800 text-white transition disabled:opacity-50">
                         <StopIcon class="w-4 h-4" />
                         {{ trajeto.encerrando ? 'Encerrando…' : 'Encerrar trajeto' }}
                     </button>

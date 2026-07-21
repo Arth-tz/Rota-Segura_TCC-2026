@@ -13,7 +13,9 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Figtree', ...defaultTheme.fontFamily.sans],
+                sans: ['Sora', ...defaultTheme.fontFamily.sans],
+                brand: ['"Plus Jakarta Sans"', ...defaultTheme.fontFamily.sans],
+                accent: ['Nunito', ...defaultTheme.fontFamily.sans],
             },
         },
     },

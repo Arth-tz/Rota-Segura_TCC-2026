@@ -35,6 +35,18 @@ class SolicitacaoController extends Controller
                 'data_resposta' => now(),
             ]);
 
+            if ($solicitacao->tipo === 'alteracao') {
+                // Atualiza dias_contratados no vínculo existente
+                foreach ($solicitacao->disponibilidades as $disp) {
+                    \Illuminate\Support\Facades\DB::table('vinculo_disponibilidade')
+                        ->where('id_vinculo', $solicitacao->id_vinculo_alterado)
+                        ->where('id_disponibilidade', $disp->id_disponibilidade)
+                        ->update(['dias_contratados' => $disp->pivot->dias_contratados]);
+                }
+                return;
+            }
+
+            // tipo='nova': cria vínculo
             $preco_total = $solicitacao->disponibilidades->sum(
                 fn ($d) => (float) $d->pivot->preco_mensal
             );

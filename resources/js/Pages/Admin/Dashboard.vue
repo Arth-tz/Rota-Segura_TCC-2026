@@ -54,7 +54,6 @@ const statusConfig = {
 <template>
     <Head title="Dashboard — Admin" />
     <FlashMessage />
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@400;500;600&display=swap" rel="stylesheet" />
 
     <div class="min-h-screen bg-slate-100 flex flex-col">
 
@@ -67,7 +66,7 @@ const statusConfig = {
                     </div>
                     <div>
                         <p class="text-xs text-blue-300 uppercase tracking-widest font-medium">Administração</p>
-                        <p class="text-base font-bold leading-none mt-0.5" style="font-family:'Sora',sans-serif;">Rota Segura</p>
+                        <p class="text-base font-bold leading-none mt-0.5">Rota Segura</p>
                     </div>
                 </div>
                 <Link :href="route('logout')" method="post" as="button"
@@ -161,7 +160,7 @@ const statusConfig = {
                                 <UserIcon class="w-5 h-5 text-blue-500" />
                             </div>
                             <div class="min-w-0">
-                                <p class="font-semibold text-slate-900 truncate" style="font-family:'Sora',sans-serif;">{{ m.nome }}</p>
+                                <p class="font-semibold text-slate-900 truncate">{{ m.nome }}</p>
                                 <p class="text-xs text-slate-400 truncate">{{ m.email }}</p>
                             </div>
                         </div>
@@ -237,7 +236,7 @@ const statusConfig = {
                                 <TruckIcon class="w-5 h-5 text-blue-500" />
                             </div>
                             <div class="min-w-0">
-                                <p class="font-semibold text-slate-900" style="font-family:'Sora',sans-serif;">{{ v.placa }}</p>
+                                <p class="font-semibold text-slate-900">{{ v.placa }}</p>
                                 <p class="text-xs text-slate-400">{{ v.marca }} {{ v.modelo }} · {{ v.ano_fabricacao }}</p>
                             </div>
                         </div>
@@ -303,7 +302,7 @@ const statusConfig = {
                 @click.self="modalRejeitar = null">
                 <Transition name="pop">
                     <div v-if="modalRejeitar" class="bg-white rounded-2xl p-6 max-w-md w-full shadow-2xl border border-slate-100">
-                        <h3 class="text-base font-bold text-slate-900 mb-1" style="font-family:'Sora',sans-serif;">
+                        <h3 class="text-base font-bold text-slate-900 mb-1">
                             Rejeitar {{ modalRejeitar.tipo === 'motorista' ? 'motorista' : 'van' }}
                         </h3>
                         <p class="text-sm text-slate-500 mb-4">{{ modalRejeitar.nome }}</p>
@@ -335,7 +334,7 @@ const statusConfig = {
 <style scoped>
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
-.pop-enter-active { transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.pop-enter-active { transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1); }
 .pop-leave-active { transition: all 0.15s ease-in; }
 .pop-enter-from { opacity: 0; transform: scale(0.93) translateY(12px); }
 .pop-leave-to { opacity: 0; transform: scale(0.96); }

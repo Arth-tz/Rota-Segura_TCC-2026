@@ -37,7 +37,6 @@ const titulos = {
     <Head title="Dashboard — Responsável" />
 
     <FlashMessage />
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
     <div class="min-h-screen flex bg-gradient-to-r from-sky-700 via-blue-600 to-blue-700">
 
@@ -56,7 +55,7 @@ const titulos = {
                 <div class="flex items-center justify-between">
                     <div>
                         <p class="text-xs uppercase tracking-widest text-blue-300 font-medium">Responsável</p>
-                        <h2 class="text-xl font-bold mt-0.5" style="font-family:'Sora',sans-serif;">
+                        <h2 class="text-xl font-bold mt-0.5">
                             {{ titulos[secaoAtiva] }}
                         </h2>
                     </div>
@@ -68,6 +67,7 @@ const titulos = {
                 <SecaoInicio
                     v-if="secaoAtiva === 'inicio'"
                     :passageiros="passageiros"
+                    :usuario="usuario"
                     @buscar-van="secaoAtiva = 'buscar'"
                 />
                 <SecaoPassageiros
@@ -94,9 +94,3 @@ const titulos = {
         />
     </div>
 </template>
-
-<style>
-html, body {
-  background: linear-gradient(to right, #0ea5e9, #2563eb, #1e40af);
-}
-</style>

@@ -8,6 +8,7 @@ defineProps({
     passageiros:           { type: Array,  default: () => [] },
     disponibilidades:      { type: Array,  default: () => [] },
     solicitacoesPendentes: { type: Number, default: 0 },
+    usuario:               { type: Object, default: null },
 })
 
 const emit = defineEmits(['ir-passageiros', 'ir-solicitacoes'])
@@ -30,6 +31,10 @@ const diasLabel  = { seg: 'Seg', ter: 'Ter', qua: 'Qua', qui: 'Qui', sex: 'Sex',
             <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.12),_transparent_60%)] pointer-events-none"></div>
             <div class="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
                 <div>
+                    <!-- Saudação -->
+                    <p class="text-xs font-semibold text-amber-200 uppercase tracking-widest mb-2">
+                        Olá, {{ usuario?.nome?.split(' ')[0] ?? 'Motorista' }}
+                    </p>
                     <!-- Badge status motorista -->
                     <span class="inline-flex items-center text-xs px-2.5 py-1 rounded-full border font-semibold mb-3"
                         :class="statusConfig[motorista?.status_aprovacao]?.classes ?? 'bg-white/20 text-white border-white/20'">
@@ -38,11 +43,11 @@ const diasLabel  = { seg: 'Seg', ter: 'Ter', qua: 'Qua', qui: 'Qui', sex: 'Sex',
 
                     <!-- Mensagem contextual -->
                     <div v-if="motorista?.status_aprovacao === 'pendente'">
-                        <p class="font-bold text-lg" style="font-family:'Sora',sans-serif;">Cadastro em análise</p>
+                        <p class="font-bold text-lg">Cadastro em análise</p>
                         <p class="text-sm text-amber-100 mt-1 max-w-sm">Seus dados estão sendo verificados pelo administrador.</p>
                     </div>
                     <div v-else-if="motorista?.status_aprovacao === 'rejeitado'">
-                        <p class="font-bold text-lg" style="font-family:'Sora',sans-serif;">Cadastro não aprovado</p>
+                        <p class="font-bold text-lg">Cadastro não aprovado</p>
                         <p v-if="motorista?.motivo_rejeicao" class="text-sm text-amber-100 mt-1">{{ motorista.motivo_rejeicao }}</p>
                     </div>
                     <div v-else class="flex items-center gap-6">
@@ -92,8 +97,7 @@ const diasLabel  = { seg: 'Seg', ter: 'Ter', qua: 'Qua', qui: 'Qui', sex: 'Sex',
                     <p class="text-xs text-slate-400 mt-0.5">Cadastre para começar a receber passageiros</p>
                 </div>
                 <Link :href="route('motorista.van.create')"
-                    class="inline-flex items-center rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-4 py-2 transition shadow-sm"
-                    style="font-family:'Sora',sans-serif;">
+                    class="inline-flex items-center rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-4 py-2 transition shadow-sm">
                     Cadastrar van
                 </Link>
             </div>
@@ -105,14 +109,20 @@ const diasLabel  = { seg: 'Seg', ter: 'Ter', qua: 'Qua', qui: 'Qui', sex: 'Sex',
                             <TruckIcon class="w-5 h-5 text-amber-600" />
                         </div>
                         <div>
-                            <p class="font-bold text-slate-900">{{ van.placa }}</p>
-                            <p class="text-xs text-slate-400">{{ [van.marca, van.modelo, van.ano_fabricacao].filter(Boolean).join(' · ') }}</p>
+                            <p class="font-bold text-slate-900">{{ van.nome_servico || van.placa }}</p>
+                            <p class="text-xs text-slate-400">{{ [van.nome_servico ? van.placa : null, van.marca, van.modelo, van.ano_fabricacao].filter(Boolean).join(' · ') }}</p>
                         </div>
                     </div>
-                    <span class="text-xs px-2.5 py-1 rounded-full border font-semibold shrink-0"
-                        :class="statusConfig[van.status_aprovacao]?.classes">
-                        {{ statusConfig[van.status_aprovacao]?.label ?? van.status_aprovacao }}
-                    </span>
+                    <div class="flex flex-col items-end gap-1.5 shrink-0">
+                        <span class="text-xs px-2.5 py-1 rounded-full border font-semibold"
+                            :class="statusConfig[van.status_aprovacao]?.classes">
+                            {{ statusConfig[van.status_aprovacao]?.label ?? van.status_aprovacao }}
+                        </span>
+                        <Link :href="route('motorista.van.edit')"
+                            class="flex items-center gap-1 text-xs text-amber-600 hover:text-amber-700 transition">
+                            <PencilSquareIcon class="w-3.5 h-3.5" /> Editar van
+                        </Link>
+                    </div>
                 </div>
                 <div class="grid grid-cols-2 gap-2 text-xs">
                     <div class="rounded-xl bg-slate-50 px-3 py-2">
@@ -162,8 +172,7 @@ const diasLabel  = { seg: 'Seg', ter: 'Ter', qua: 'Qua', qui: 'Qui', sex: 'Sex',
                 <p class="text-xs text-slate-400 mt-0.5">Crie um trajeto para que responsáveis possam encontrar você</p>
             </div>
             <Link :href="route('motorista.disponibilidades.create')"
-                class="inline-flex items-center gap-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-4 py-2 transition shadow-sm"
-                style="font-family:'Sora',sans-serif;">
+                class="inline-flex items-center gap-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-semibold px-4 py-2 transition shadow-sm">
                 <PlusIcon class="w-3.5 h-3.5" /> Criar trajeto
             </Link>
         </div>
@@ -173,7 +182,7 @@ const diasLabel  = { seg: 'Seg', ter: 'Ter', qua: 'Qua', qui: 'Qui', sex: 'Sex',
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
                     <MapIcon class="w-4 h-4 text-amber-500" />
-                    <p class="text-sm font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Meus trajetos</p>
+                    <p class="text-sm font-semibold text-slate-800">Meus trajetos</p>
                 </div>
                 <Link v-if="van" :href="route('motorista.disponibilidades.create')"
                     class="flex items-center gap-1 text-xs font-semibold text-amber-600 hover:text-amber-700 transition">
@@ -206,9 +215,9 @@ const diasLabel  = { seg: 'Seg', ter: 'Ter', qua: 'Qua', qui: 'Qui', sex: 'Sex',
                     </div>
                     <div v-if="d.bairros_atendidos?.length || d.escolas_atendidas?.length" class="flex flex-wrap gap-1 mb-2">
                         <span v-for="b in (d.bairros_atendidos ?? []).slice(0,3)" :key="'b'+b"
-                            class="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] text-slate-500">{{ b }}</span>
+                            class="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-500">{{ b }}</span>
                         <span v-for="e in (d.escolas_atendidas ?? []).slice(0,2)" :key="'e'+e"
-                            class="rounded-full bg-blue-50 px-2 py-0.5 text-[11px] text-blue-600">{{ e }}</span>
+                            class="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] text-blue-600">{{ e }}</span>
                     </div>
                     <p class="text-sm font-bold text-amber-600">
                         R$ {{ Number(d.preco_mensal).toFixed(2).replace('.', ',') }}
@@ -223,7 +232,7 @@ const diasLabel  = { seg: 'Seg', ter: 'Ter', qua: 'Qua', qui: 'Qui', sex: 'Sex',
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-2">
                     <UserGroupIcon class="w-4 h-4 text-amber-500" />
-                    <p class="text-sm font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Passageiros</p>
+                    <p class="text-sm font-semibold text-slate-800">Passageiros</p>
                 </div>
                 <button @click="emit('ir-passageiros')"
                     class="text-xs font-semibold text-amber-600 hover:text-amber-700 transition">

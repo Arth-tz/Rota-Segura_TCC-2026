@@ -1,6 +1,7 @@
 <script setup>
+import { ref, computed } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
-import { ArrowLeftIcon, UserIcon, IdentificationIcon, EnvelopeIcon, PhoneIcon, LockClosedIcon, ShieldCheckIcon } from '@heroicons/vue/24/outline'
+import { ArrowLeftIcon, UserIcon, IdentificationIcon, EnvelopeIcon, PhoneIcon, LockClosedIcon, CameraIcon } from '@heroicons/vue/24/outline'
 import FlashMessage from '@/Components/UI/FlashMessage.vue'
 
 const props = defineProps({
@@ -23,6 +24,22 @@ const form = useForm({
     senha:                '',
     senha_confirmation:   '',
 })
+
+const formFoto    = useForm({ foto: null })
+const fotoPreview = ref(null)
+const fileInput   = ref(null)
+const fotoAtual   = computed(() => fotoPreview.value ?? props.dados.foto_url ?? null)
+
+function handleFotoChange(event) {
+    const file = event.target.files[0]
+    if (!file) return
+    fotoPreview.value = URL.createObjectURL(file)
+    formFoto.foto = file
+    formFoto.post(route('responsavel.perfil.foto'), {
+        forceFormData: true,
+        onSuccess: () => { fotoPreview.value = null },
+    })
+}
 
 function submit() { form.put(route('responsavel.perfil.update')) }
 
@@ -52,12 +69,43 @@ function formatDate(d) {
                 </Link>
                 <div>
                     <p class="text-xs font-semibold text-blue-200 uppercase tracking-widest">Responsável</p>
-                    <h1 class="text-lg font-bold text-white" style="font-family:'Sora',sans-serif;">Meu perfil</h1>
+                    <h1 class="text-lg font-bold text-white">Meu perfil</h1>
                 </div>
             </div>
         </header>
 
         <main class="max-w-2xl mx-auto px-4 py-6 space-y-4">
+
+            <!-- ── Foto de perfil ── -->
+            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+                <div class="px-5 py-5">
+                    <div class="flex items-center gap-5">
+                        <button type="button" @click="fileInput.click()" :disabled="formFoto.processing"
+                            class="relative group shrink-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-400">
+                            <div class="w-20 h-20 rounded-2xl overflow-hidden bg-blue-100 flex items-center justify-center">
+                                <img v-if="fotoAtual" :src="fotoAtual" class="w-full h-full object-cover" alt="Foto de perfil" />
+                                <span v-else class="text-2xl font-bold text-blue-400">
+                                    {{ dados.nome?.[0]?.toUpperCase() }}
+                                </span>
+                            </div>
+                            <div class="absolute inset-0 rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                                <CameraIcon class="w-6 h-6 text-white" />
+                            </div>
+                        </button>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-slate-700 truncate">{{ dados.nome }}</p>
+                            <button type="button" @click="fileInput.click()" :disabled="formFoto.processing"
+                                class="text-xs text-blue-600 hover:text-blue-700 transition mt-0.5">
+                                {{ formFoto.processing ? 'Enviando foto…' : 'Alterar foto de perfil' }}
+                            </button>
+                            <p v-if="formFoto.errors.foto" class="text-xs text-red-500 mt-1">{{ formFoto.errors.foto }}</p>
+                            <p class="text-xs text-slate-400 mt-1">JPG, PNG ou WebP · máx. 2 MB</p>
+                        </div>
+                        <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp"
+                            class="hidden" @change="handleFotoChange" />
+                    </div>
+                </div>
+            </div>
 
             <!-- ── SEÇÃO 1: Dados pessoais (editáveis) ── -->
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
@@ -66,7 +114,7 @@ function formatDate(d) {
                         <UserIcon class="w-4 h-4 text-white" />
                     </div>
                     <div>
-                        <h2 class="text-sm font-bold text-slate-800" style="font-family:'Sora',sans-serif;">Dados pessoais</h2>
+                        <h2 class="text-sm font-bold text-slate-800">Dados pessoais</h2>
                         <p class="text-xs text-slate-400 mt-0.5">Informações que você pode alterar</p>
                     </div>
                 </div>
@@ -111,7 +159,7 @@ function formatDate(d) {
                         <IdentificationIcon class="w-4 h-4 text-white" />
                     </div>
                     <div>
-                        <h2 class="text-sm font-bold text-slate-800" style="font-family:'Sora',sans-serif;">Dados de cadastro</h2>
+                        <h2 class="text-sm font-bold text-slate-800">Dados de cadastro</h2>
                         <p class="text-xs text-slate-400 mt-0.5">Não podem ser alterados — entre em contato com o administrador se houver erro</p>
                     </div>
                 </div>
@@ -138,7 +186,7 @@ function formatDate(d) {
                         <LockClosedIcon class="w-4 h-4 text-white" />
                     </div>
                     <div>
-                        <h2 class="text-sm font-bold text-slate-800" style="font-family:'Sora',sans-serif;">Acesso</h2>
+                        <h2 class="text-sm font-bold text-slate-800">Acesso</h2>
                         <p class="text-xs text-slate-400 mt-0.5">E-mail de login e senha</p>
                     </div>
                 </div>
@@ -179,8 +227,7 @@ function formatDate(d) {
                     Cancelar
                 </Link>
                 <button @click="submit" :disabled="form.processing"
-                    class="flex-1 flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 py-3 text-sm font-bold text-white transition shadow-sm"
-                    style="font-family:'Sora',sans-serif;">
+                    class="flex-1 flex items-center justify-center rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 py-3 text-sm font-bold text-white transition shadow-sm">
                     {{ form.processing ? 'Salvando…' : 'Salvar alterações' }}
                 </button>
             </div>

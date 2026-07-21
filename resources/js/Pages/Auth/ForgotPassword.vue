@@ -22,7 +22,6 @@ const submit = () => {
 
 <template>
     <Head title="Esqueci minha senha" />
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
     <div class="lg-root">
 
@@ -203,7 +202,7 @@ const submit = () => {
     width: 32px; height: 32px; border-radius: 9px; flex-shrink: 0;
     background: rgba(255,255,255,0.14); border: 1px solid rgba(255,255,255,0.18);
     display: flex; align-items: center; justify-content: center; color: #fff;
-    transition: background 0.25s, transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+    transition: background 0.25s, transform 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 @media (hover: hover) {
     .lg-aside__perk:hover .lg-aside__perk-icon { background: rgba(255,255,255,0.24); transform: scale(1.1); }
@@ -331,7 +330,7 @@ const submit = () => {
 .lg-checkbox__check {
     width: 10px; height: 10px; color: #fff;
     opacity: 0; transform: scale(0.6);
-    transition: opacity 0.15s, transform 0.15s cubic-bezier(0.34,1.56,0.64,1);
+    transition: opacity 0.15s, transform 0.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .lg-checkbox:checked ~ .lg-checkbox__custom .lg-checkbox__check {
     opacity: 1; transform: scale(1);
@@ -356,7 +355,7 @@ const submit = () => {
     display: flex; align-items: center; justify-content: center;
     box-shadow: 0 4px 16px rgba(37,99,235,0.35);
     min-height: 50px;
-    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease, background 0.2s ease;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, background 0.2s ease;
 }
 @media (hover: hover) {
     .lg-submit:hover:not(:disabled) { background: #1d4ed8; transform: translateY(-2px); box-shadow: 0 8px 24px rgba(37,99,235,0.45); }

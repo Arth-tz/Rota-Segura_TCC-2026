@@ -66,17 +66,38 @@ function iconEmbarque(cor = '#10b981') {
 
 // ── Polling ───────────────────────────────────────────────────────────────────
 
+const POSICAO_DESATUALIZADA_MS = 30_000
+
+function formatarHora(iso) {
+    return new Date(iso).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+}
+
+// Uma van "atualizada agora" só significa que o GPS realmente reportou uma nova
+// posição — não que o polling teve sucesso (a rota pode ter parado de enviar
+// localização e o backend segue devolvendo a última posição conhecida).
+function posicaoDesatualizada(p) {
+    if (!p.posicao_van?.capturada_em) return false
+    return Date.now() - new Date(p.posicao_van.capturada_em).getTime() > POSICAO_DESATUALIZADA_MS
+}
+
 async function buscarDados() {
     try {
         const { data } = await axios.get(route('responsavel.acompanhar'))
         passageiros.value = data.passageiros
-        atualizado.value  = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-        atualizarMapa()
+
+        const capturas = passageiros.value.map(p => p.posicao_van?.capturada_em).filter(Boolean)
+        if (capturas.length) {
+            atualizado.value = formatarHora(capturas.reduce((a, b) => (new Date(a) > new Date(b) ? a : b)))
+        }
+
         erro.value = null
     } catch {
         erro.value = 'Erro ao atualizar posições.'
     } finally {
         carregando.value = false
+        await nextTick()
+        iniciarMapa()
+        atualizarMapa()
     }
 }
 
@@ -160,9 +181,7 @@ function atualizarMapa() {
 
 // ── Lifecycle ─────────────────────────────────────────────────────────────────
 
-onMounted(async () => {
-    await nextTick()
-    iniciarMapa()
+onMounted(() => {
     iniciarPolling()
 })
 
@@ -194,7 +213,7 @@ const STATUS_COR = {
         <div class="rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 p-5 text-white shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-lg font-bold" style="font-family:'Sora',sans-serif;">Acompanhar trajeto</h3>
+                    <h3 class="text-lg font-bold">Acompanhar trajeto</h3>
                     <p class="text-sm text-blue-200 mt-1">Posição da van em tempo real.</p>
                 </div>
                 <div v-if="atualizado" class="flex items-center gap-1 text-xs text-blue-200">
@@ -225,7 +244,11 @@ const STATUS_COR = {
                     </div>
                     <div class="flex-1 min-w-0">
                         <p class="text-sm font-semibold text-slate-800 truncate">{{ p.nome }}</p>
-                        <div v-if="p.posicao_van" class="flex items-center gap-1 mt-0.5">
+                        <div v-if="p.posicao_van && posicaoDesatualizada(p)" class="flex items-center gap-1 mt-0.5">
+                            <SignalIcon class="w-3 h-3 text-red-500" />
+                            <p class="text-xs text-red-600 font-medium">Posição desatualizada</p>
+                        </div>
+                        <div v-else-if="p.posicao_van" class="flex items-center gap-1 mt-0.5">
                             <SignalIcon class="w-3 h-3 text-amber-500" />
                             <p class="text-xs text-slate-400">Van a caminho</p>
                         </div>
@@ -241,14 +264,15 @@ const STATUS_COR = {
             <div v-else
                 class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-blue-200 bg-blue-50/40 py-14 px-6 text-center">
                 <TruckIcon class="w-10 h-10 text-blue-300 mb-3" />
-                <p class="font-semibold text-slate-700" style="font-family:'Sora',sans-serif;">Nenhum passageiro cadastrado</p>
+                <p class="font-semibold text-slate-700">Nenhum passageiro cadastrado</p>
                 <p class="mt-1 text-sm text-slate-400">Adicione passageiros para acompanhar os trajetos aqui.</p>
             </div>
 
-            <!-- Mapa Leaflet -->
-            <div v-if="passageiros.some(p => p.posicao_van || p.embarque || p.desembarque)"
-                class="rounded-2xl overflow-hidden border border-slate-200 shadow-sm">
-                <div ref="mapDiv" style="height: 400px;"></div>
+            <!-- Mapa Leaflet — só aparece quando há van em rota -->
+            <div v-if="passageiros.some(p => p.posicao_van)"
+                class="rounded-2xl overflow-hidden border border-slate-200 shadow-sm"
+                style="position: relative; z-index: 0;">
+                <div ref="mapDiv" style="height: 380px;"></div>
                 <div class="px-4 py-2 bg-white border-t border-slate-100 flex gap-4 text-xs text-slate-500">
                     <span class="flex items-center gap-1">
                         <span class="w-3 h-3 rounded-full bg-amber-400 inline-block"></span> Van
@@ -263,7 +287,7 @@ const STATUS_COR = {
             </div>
 
             <!-- Aviso: sem rota ativa -->
-            <div v-else-if="passageiros.length"
+            <div v-else-if="passageiros.length && passageiros.some(p => p.id_rota)"
                 class="rounded-2xl border border-slate-200 bg-slate-50 px-5 py-6 text-center">
                 <MapPinIcon class="w-8 h-8 text-slate-300 mx-auto mb-2" />
                 <p class="text-sm font-medium text-slate-500">Nenhuma van em rota no momento.</p>

@@ -12,13 +12,12 @@ import { MagnifyingGlassIcon, ArrowRightIcon, FunnelIcon, ShieldCheckIcon, MapPi
                 <MagnifyingGlassIcon class="w-5 h-5 text-blue-300" />
                 <p class="text-xs uppercase tracking-widest text-blue-300 font-medium">Marketplace</p>
             </div>
-            <h3 class="text-2xl font-bold mt-1" style="font-family:'Sora',sans-serif;">Encontre a van ideal</h3>
+            <h3 class="text-2xl font-bold mt-1">Encontre a van ideal</h3>
             <p class="mt-2 text-sm text-blue-200 max-w-md">
                 Busque por nome do motorista, bairro, escola, turno ou dias da semana. Resultados carregados por página — sem travamentos.
             </p>
             <Link :href="route('responsavel.marketplace')"
-                class="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-50 transition shadow-sm"
-                style="font-family:'Sora',sans-serif;">
+                class="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-50 transition shadow-sm">
                 Abrir marketplace
                 <ArrowRightIcon class="w-4 h-4" />
             </Link>

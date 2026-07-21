@@ -18,6 +18,8 @@ class Solicitacao extends Model
         'id_responsavel',
         'id_usuario_solicitante',
         'tipo_solicitante',
+        'tipo',
+        'id_vinculo_alterado',
         'status',
         'mensagem',
         'motivo_recusa',
@@ -56,6 +58,11 @@ class Solicitacao extends Model
     public function vinculo()
     {
         return $this->hasOne(Vinculo::class, 'id_solicitacao', 'id_solicitacao');
+    }
+
+    public function vinculoAlterado()
+    {
+        return $this->belongsTo(Vinculo::class, 'id_vinculo_alterado', 'id_vinculo');
     }
 
     public function disponibilidades()

@@ -45,6 +45,6 @@ return new class extends Migration
             $table->unique(['id_passageiro', 'data'], 'disponibilidade_passageiro_id_passageiro_data_unique');
         });
 
-        DB::statement("ALTER TABLE disponibilidade MODIFY COLUMN turno ENUM('manha','tarde','noite') NOT NULL");
+        DB::statement("ALTER TABLE disponibilidade MODIFY COLUMN turno ENUM('manha','tarde','integral') NOT NULL");
     }
 };

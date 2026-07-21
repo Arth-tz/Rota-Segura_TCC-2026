@@ -17,11 +17,12 @@ function logout() { form.post(route('logout')) }
         <!-- Card dados -->
         <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
             <div class="flex items-center gap-4 px-5 py-4 border-b border-amber-100 bg-amber-50/60">
-                <div class="h-12 w-12 rounded-full bg-amber-500 flex items-center justify-center shrink-0">
-                    <span class="text-white font-bold text-lg">{{ usuario?.nome?.charAt(0)?.toUpperCase() ?? 'M' }}</span>
+                <div class="h-12 w-12 rounded-full overflow-hidden bg-amber-500 flex items-center justify-center shrink-0">
+                    <img v-if="usuario?.foto_url" :src="usuario.foto_url" class="w-full h-full object-cover" alt="" />
+                    <span v-else class="text-white font-bold text-lg">{{ usuario?.nome?.charAt(0)?.toUpperCase() ?? 'M' }}</span>
                 </div>
                 <div>
-                    <p class="font-bold text-slate-900" style="font-family:'Sora',sans-serif;">{{ usuario?.nome ?? '—' }}</p>
+                    <p class="font-bold text-slate-900">{{ usuario?.nome ?? '—' }}</p>
                     <p class="text-xs text-slate-500 mt-0.5">{{ usuario?.email ?? '—' }}</p>
                 </div>
                 <span class="ml-auto text-xs px-2.5 py-1 rounded-full bg-amber-100 text-amber-700 border border-amber-200 font-semibold shrink-0">
@@ -58,8 +59,7 @@ function logout() { form.post(route('logout')) }
         <!-- Ações -->
         <div class="grid grid-cols-2 gap-3">
             <Link :href="route('motorista.perfil.edit')"
-                class="flex items-center justify-center rounded-xl bg-amber-500 hover:bg-amber-600 px-4 py-3 text-sm font-semibold text-white transition shadow-sm"
-                style="font-family:'Sora',sans-serif;">
+                class="flex items-center justify-center rounded-xl bg-amber-500 hover:bg-amber-600 px-4 py-3 text-sm font-semibold text-white transition shadow-sm">
                 Editar perfil
             </Link>
             <button @click="logout" :disabled="form.processing"

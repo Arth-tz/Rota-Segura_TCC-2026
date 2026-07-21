@@ -1,7 +1,6 @@
 <?php
 
 //-- use com alias para facilitar e nao precisar escrever url completa
-use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Responsavel\PassageiroController as PassageiroController;
 use App\Http\Controllers\Responsavel\PerfilController as ResponsavelPerfilController;
 use App\Http\Controllers\Responsavel\SolicitacaoController;
@@ -69,8 +68,9 @@ Route::middleware(['auth', 'role:responsavel'])->prefix('responsavel')->name('re
     Route::get('/dashboard', [ResponsavelDashboard::class, 'index'])->name('dashboard');
 
     // Perfil
-    Route::get('/perfil',  [ResponsavelPerfilController::class, 'edit'])->name('perfil.edit');
-    Route::put('/perfil',  [ResponsavelPerfilController::class, 'update'])->name('perfil.update');
+    Route::get('/perfil',       [ResponsavelPerfilController::class, 'edit'])->name('perfil.edit');
+    Route::put('/perfil',       [ResponsavelPerfilController::class, 'update'])->name('perfil.update');
+    Route::post('/perfil/foto', [ResponsavelPerfilController::class, 'uploadFoto'])->name('perfil.foto');
 
     // Marketplace
     Route::get('/marketplace', [MarketplaceController::class, 'index'])->name('marketplace');
@@ -81,6 +81,11 @@ Route::middleware(['auth', 'role:responsavel'])->prefix('responsavel')->name('re
         ->name('solicitacoes.store');
     Route::delete('/solicitacoes/{id}', [SolicitacaoController::class, 'cancelar'])
         ->name('solicitacoes.cancelar');
+
+    // Alteração de dias de vínculo ativo
+    Route::post('/vinculos/{idVinculo}/alterar', [SolicitacaoController::class, 'storeAlteracao'])
+        ->middleware('throttle:10,1')
+        ->name('vinculos.alterar');
 
     // Presença diária
     Route::post('/presenca',      [PresencaController::class, 'store'])->name('presenca.store');
@@ -99,23 +104,26 @@ Route::middleware(['auth', 'role:responsavel'])->prefix('responsavel')->name('re
     Route::get('/passageiros/adicionar', [PassageiroController::class, 'adicionar'])->name('passageiros.adicionar');
     Route::post('/passageiros/adicionar', [PassageiroController::class, 'storeCompleto'])->name('passageiros.adicionar.store');
 
-    // Passageiro — gestão (detalhes, edição, exclusão)
+    // Passageiro — gestão (detalhes, edição, foto)
     Route::get('/passageiros/{id}', [PassageiroController::class, 'show'])->name('passageiros.show');
-    Route::get('/passageiros/{id}/editar', [PassageiroController::class, 'edit'])->name('passageiros.edit');
     Route::put('/passageiros/{id}', [PassageiroController::class, 'update'])->name('passageiros.update');
-    Route::get('/passageiros/{id}/enderecos', [PassageiroController::class, 'editEnderecos'])->name('passageiros.enderecos');
     Route::put('/passageiros/{id}/enderecos', [PassageiroController::class, 'updateEnderecos'])->name('passageiros.enderecos.update');
     Route::put('/passageiros/{id}/desativar', [PassageiroController::class, 'desativar'])->name('passageiros.desativar');
+    Route::post('/passageiros/{id}/foto', [PassageiroController::class, 'uploadFoto'])->name('passageiros.foto');
 });
 
 //-- Rota com autenticação para dashboard de Motorista (controller MotoristaDashboard)
 Route::middleware(['auth', 'role:motorista'/*, 'verified' //isso aqui faria validacao de email (mandaria cod para confirmacao no email*/ ])->prefix('motorista')->name('motorista.')->group(function(){
     Route::get('/dashboard', [MotoristaDashboard::class, 'index'])->name('dashboard');
-    Route::get('/van/criar', [VanController::class, 'create'])->name('van.create');
-    Route::post('/van', [VanController::class, 'store'])->name('van.store');
+    Route::get('/van/criar',  [VanController::class, 'create'])->name('van.create');
+    Route::post('/van',       [VanController::class, 'store'])->name('van.store');
+    Route::get('/van/editar', [VanController::class, 'edit'])->name('van.edit');
+    Route::put('/van',        [VanController::class, 'update'])->name('van.update');
+    Route::post('/van/foto',  [VanController::class, 'uploadFoto'])->name('van.foto');
 
     Route::get('/perfil',         [MotoristaPerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil',         [MotoristaPerfilController::class, 'update'])->name('perfil.update');
+    Route::post('/perfil/foto',   [MotoristaPerfilController::class, 'uploadFoto'])->name('perfil.foto');
 
     Route::post('/solicitacoes/{id}/aceitar', [MotoristaSOlicitacaoController::class, 'aceitar'])->name('solicitacoes.aceitar');
     Route::post('/solicitacoes/{id}/recusar', [MotoristaSOlicitacaoController::class, 'recusar'])->name('solicitacoes.recusar');
@@ -150,10 +158,5 @@ Route::middleware('guest')->group(function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');*/
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
 
 require __DIR__.'/auth.php';

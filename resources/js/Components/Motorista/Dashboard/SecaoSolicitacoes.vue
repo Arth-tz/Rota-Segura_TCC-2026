@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
+import ConfirmModal from '@/Components/UI/ConfirmModal.vue'
 import {
     CheckCircleIcon,
     XCircleIcon,
@@ -11,6 +12,7 @@ import {
     MapPinIcon,
     ExclamationCircleIcon,
     PhoneIcon,
+    ArrowsRightLeftIcon,
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
@@ -26,10 +28,19 @@ function formatarPreco(v) {
 }
 
 // ── Aceite ────────────────────────────────────────────────────────────────
+const modalAceiteAberto    = ref(false)
+const solicitacaoAceitando = ref(null)
+const formAceite           = useForm({})
+
 function aceitar(id) {
-    if (!confirm('Aceitar esta solicitação e criar o vínculo?')) return
-    useForm({}).post(route('motorista.solicitacoes.aceitar', id), {
+    solicitacaoAceitando.value = id
+    modalAceiteAberto.value    = true
+}
+
+function confirmarAceite() {
+    formAceite.post(route('motorista.solicitacoes.aceitar', solicitacaoAceitando.value), {
         preserveScroll: true,
+        onSuccess: () => { modalAceiteAberto.value = false },
     })
 }
 
@@ -57,7 +68,7 @@ function confirmarRecusa() {
 
         <!-- Header -->
         <div class="rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 p-5 text-white shadow-lg">
-            <h3 class="text-lg font-bold" style="font-family:'Sora',sans-serif;">Solicitações pendentes</h3>
+            <h3 class="text-lg font-bold">Solicitações pendentes</h3>
             <p class="text-sm text-amber-100 mt-1">
                 {{ solicitacoes.length === 0
                     ? 'Nenhuma solicitação no momento.'
@@ -69,7 +80,7 @@ function confirmarRecusa() {
         <div v-if="solicitacoes.length === 0"
             class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-amber-200 bg-amber-50/40 py-14 px-6 text-center">
             <CalendarDaysIcon class="w-10 h-10 text-amber-300 mb-3" />
-            <p class="font-semibold text-slate-700" style="font-family:'Sora',sans-serif;">Tudo em dia!</p>
+            <p class="font-semibold text-slate-700">Tudo em dia!</p>
             <p class="mt-1 text-sm text-slate-400">Quando responsáveis solicitarem vagas, elas aparecerão aqui.</p>
         </div>
 
@@ -79,16 +90,24 @@ function confirmarRecusa() {
 
             <!-- Cabeçalho: passageiro -->
             <div class="flex items-center gap-3 px-5 py-4 bg-slate-50 border-b border-slate-100">
-                <div class="w-10 h-10 rounded-full bg-amber-500 flex items-center justify-center shrink-0">
-                    <span class="text-white font-bold text-sm">{{ s.passageiro.nome?.charAt(0)?.toUpperCase() ?? '?' }}</span>
+                <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
+                    :class="s.tipo === 'alteracao' ? 'bg-blue-500' : 'bg-amber-500'">
+                    <ArrowsRightLeftIcon v-if="s.tipo === 'alteracao'" class="w-5 h-5 text-white" />
+                    <span v-else class="text-white font-bold text-sm">{{ s.passageiro.nome?.charAt(0)?.toUpperCase() ?? '?' }}</span>
                 </div>
                 <div class="flex-1 min-w-0">
-                    <p class="font-bold text-slate-900 text-sm" style="font-family:'Sora',sans-serif;">
-                        {{ s.passageiro.nome ?? 'Passageiro' }}
-                    </p>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <p class="font-bold text-slate-900 text-sm">
+                            {{ s.passageiro.nome ?? 'Passageiro' }}
+                        </p>
+                        <span v-if="s.tipo === 'alteracao'"
+                            class="text-xs px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200 font-semibold">
+                            Alteração de dias
+                        </span>
+                    </div>
                     <p class="text-xs text-slate-400">Solicitação enviada em {{ s.data_solicitacao }}</p>
                 </div>
-                <div class="text-right shrink-0">
+                <div v-if="s.tipo !== 'alteracao'" class="text-right shrink-0">
                     <p class="text-lg font-bold text-emerald-700">{{ formatarPreco(s.preco_total) }}</p>
                     <p class="text-xs text-slate-400">/mês total</p>
                 </div>
@@ -152,13 +171,26 @@ function confirmarRecusa() {
                         </span>
                     </div>
 
-                    <!-- Dias contratados -->
-                    <div class="flex flex-wrap gap-1 mb-2">
-                        <span v-for="dia in d.dias_contratados" :key="dia"
-                            class="text-xs px-2 py-0.5 rounded-md bg-amber-500 text-white font-medium">
-                            {{ DIAS_MAP[dia] ?? dia }}
-                        </span>
-                        <span v-if="!d.dias_contratados?.length" class="text-xs text-slate-400 italic">Dias não especificados</span>
+                    <!-- Dias: para alteração mostra "atuais → novos"; para nova, mostra direto -->
+                    <div class="flex flex-wrap gap-1 mb-2 items-center">
+                        <template v-if="s.tipo === 'alteracao' && d.dias_atuais?.length">
+                            <span v-for="dia in d.dias_atuais" :key="'a-' + dia"
+                                class="text-xs px-2 py-0.5 rounded-md bg-slate-200 text-slate-600 font-medium line-through">
+                                {{ DIAS_MAP[dia] ?? dia }}
+                            </span>
+                            <ArrowsRightLeftIcon class="w-3.5 h-3.5 text-blue-400 mx-0.5 shrink-0" />
+                            <span v-for="dia in d.dias_contratados" :key="'n-' + dia"
+                                class="text-xs px-2 py-0.5 rounded-md bg-blue-500 text-white font-medium">
+                                {{ DIAS_MAP[dia] ?? dia }}
+                            </span>
+                        </template>
+                        <template v-else>
+                            <span v-for="dia in d.dias_contratados" :key="dia"
+                                class="text-xs px-2 py-0.5 rounded-md bg-amber-500 text-white font-medium">
+                                {{ DIAS_MAP[dia] ?? dia }}
+                            </span>
+                            <span v-if="!d.dias_contratados?.length" class="text-xs text-slate-400 italic">Dias não especificados</span>
+                        </template>
                     </div>
 
                     <p class="text-sm font-bold text-emerald-700">
@@ -182,8 +214,7 @@ function confirmarRecusa() {
                     Recusar
                 </button>
                 <button @click="aceitar(s.id_solicitacao)"
-                    class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition shadow-sm"
-                    style="font-family:'Sora',sans-serif;">
+                    class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-bold transition shadow-sm">
                     <CheckCircleIcon class="w-4 h-4" />
                     Aceitar
                 </button>
@@ -202,7 +233,7 @@ function confirmarRecusa() {
                     <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                         <div>
                             <p class="text-xs text-slate-400 uppercase tracking-widest">Recusar solicitação</p>
-                            <h3 class="font-bold text-slate-900 mt-0.5" style="font-family:'Sora',sans-serif;">
+                            <h3 class="font-bold text-slate-900 mt-0.5">
                                 {{ solicitacaoRecusando?.passageiro?.nome }}
                             </h3>
                         </div>
@@ -231,8 +262,7 @@ function confirmarRecusa() {
                         </button>
                         <button @click="confirmarRecusa"
                             :disabled="formRecusa.processing"
-                            class="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-bold transition shadow-sm"
-                            style="font-family:'Sora',sans-serif;">
+                            class="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-bold transition shadow-sm">
                             {{ formRecusa.processing ? 'Recusando…' : 'Confirmar recusa' }}
                         </button>
                     </div>
@@ -240,6 +270,18 @@ function confirmarRecusa() {
             </div>
         </Transition>
     </Teleport>
+
+    <ConfirmModal
+        :show="modalAceiteAberto"
+        eyebrow="Aceitar solicitação"
+        title="Criar vínculo com este passageiro?"
+        message="O responsável será notificado e o vínculo passa a valer imediatamente."
+        confirm-label="Sim, aceitar"
+        cancel-label="Voltar"
+        variant="success"
+        :processing="formAceite.processing"
+        @confirm="confirmarAceite"
+        @close="modalAceiteAberto = false" />
 </template>
 
 <style scoped>

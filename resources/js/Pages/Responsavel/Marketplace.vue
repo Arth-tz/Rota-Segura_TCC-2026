@@ -17,6 +17,7 @@ import {
     ChatBubbleLeftRightIcon,
     ChevronLeftIcon,
     ChevronRightIcon,
+    TruckIcon,
 } from '@heroicons/vue/24/outline'
 import FlashMessage from '@/Components/UI/FlashMessage.vue'
 
@@ -24,6 +25,8 @@ const props = defineProps({
     disponibilidades: { type: Object, required: true },
     passageiros:      { type: Array, default: () => [] },
     filtros:          { type: Object, default: () => ({}) },
+    ids_vinculados:   { type: Array, default: () => [] },
+    ids_solicitados:  { type: Array, default: () => [] },
 })
 
 // ── Filtros locais (refletem URL) ─────────────────────────────────────────
@@ -142,8 +145,6 @@ function paginaLinks() {
     <Head title="Buscar Vans — Marketplace" />
     <FlashMessage />
 
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet" />
-
     <div class="min-h-screen bg-slate-50">
 
         <!-- Topbar -->
@@ -155,7 +156,7 @@ function paginaLinks() {
                 </Link>
                 <div class="flex-1">
                     <p class="text-xs font-semibold text-blue-200 uppercase tracking-widest">Responsável</p>
-                    <h1 class="text-lg font-bold text-white" style="font-family:'Sora',sans-serif;">Buscar Vans</h1>
+                    <h1 class="text-lg font-bold text-white">Buscar Vans</h1>
                 </div>
                 <div class="text-right">
                     <p class="text-2xl font-bold text-white">{{ disponibilidades.total }}</p>
@@ -247,8 +248,7 @@ function paginaLinks() {
                 <!-- Botão buscar -->
                 <div class="mt-4 flex justify-end">
                     <button @click="buscar"
-                        class="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition shadow-sm"
-                        style="font-family:'Sora',sans-serif;">
+                        class="flex items-center gap-2 px-6 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition shadow-sm">
                         <MagnifyingGlassIcon class="w-4 h-4" />
                         Buscar
                     </button>
@@ -272,7 +272,7 @@ function paginaLinks() {
                 <div class="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center mb-4">
                     <MagnifyingGlassIcon class="w-7 h-7 text-blue-400" />
                 </div>
-                <p class="font-bold text-slate-800 text-lg" style="font-family:'Sora',sans-serif;">Nenhuma van encontrada</p>
+                <p class="font-bold text-slate-800 text-lg">Nenhuma van encontrada</p>
                 <p class="mt-2 text-sm text-slate-500 max-w-sm">
                     {{ filtrosAtivos() ? 'Tente ajustar os filtros para ver mais resultados.' : 'Ainda não há vans aprovadas disponíveis.' }}
                 </p>
@@ -285,22 +285,50 @@ function paginaLinks() {
             <!-- ── Cards ──────────────────────────────────────────────────── -->
             <div v-else class="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
                 <div v-for="disp in disponibilidades.data" :key="disp.id_disponibilidade"
-                    class="rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md hover:border-blue-200 transition-all flex flex-col overflow-hidden">
+                    class="rounded-2xl border bg-white shadow-sm hover:shadow-md transition-all flex flex-col overflow-hidden"
+                    :class="ids_vinculados.includes(disp.id_disponibilidade)
+                        ? 'border-emerald-300 hover:border-emerald-400'
+                        : ids_solicitados.includes(disp.id_disponibilidade)
+                        ? 'border-amber-300 hover:border-amber-400'
+                        : 'border-slate-200 hover:border-blue-200'">
 
-                    <!-- Motorista + badge -->
+                    <!-- Banner foto da van -->
+                    <div class="relative h-32 w-full overflow-hidden bg-amber-100 shrink-0">
+                        <img v-if="disp.van.foto_url"
+                            :src="disp.van.foto_url"
+                            class="w-full h-full object-cover"
+                            :alt="disp.van.nome_servico || disp.van.placa" />
+                        <div v-else class="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-amber-400 to-amber-600">
+                            <TruckIcon class="w-14 h-14 text-white/60" />
+                        </div>
+                    </div>
+
+                    <!-- Motorista + badges -->
                     <div class="flex items-center gap-3 px-4 pt-4 pb-3 border-b border-slate-100">
                         <div class="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center shrink-0">
                             <span class="text-white font-bold text-sm">{{ disp.motorista.nome?.charAt(0)?.toUpperCase() ?? '?' }}</span>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="font-bold text-slate-900 text-sm truncate" style="font-family:'Sora',sans-serif;">
-                                {{ disp.motorista.nome ?? '—' }}
+                            <p class="font-bold text-slate-900 text-sm truncate">
+                                {{ disp.van.nome_servico || disp.motorista.nome || '—' }}
                             </p>
-                            <p class="text-xs text-slate-400">{{ disp.van.marca }} {{ disp.van.modelo }} · {{ disp.van.ano }}</p>
+                            <p class="text-xs text-slate-400 truncate">
+                                <template v-if="disp.van.nome_servico">{{ disp.motorista.nome }} · </template>{{ disp.van.marca }} {{ disp.van.modelo }} · {{ disp.van.ano }}
+                            </p>
                         </div>
-                        <span class="flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold shrink-0">
-                            <ShieldCheckIcon class="w-3.5 h-3.5" />Verificado
-                        </span>
+                        <div class="flex flex-col items-end gap-1 shrink-0">
+                            <span class="flex items-center gap-1 text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 font-semibold">
+                                <ShieldCheckIcon class="w-3.5 h-3.5" />Verificado
+                            </span>
+                            <span v-if="ids_vinculados.includes(disp.id_disponibilidade)"
+                                class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 font-bold">
+                                Vinculado
+                            </span>
+                            <span v-else-if="ids_solicitados.includes(disp.id_disponibilidade)"
+                                class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 font-bold">
+                                Solicitado
+                            </span>
+                        </div>
                     </div>
 
                     <!-- Corpo -->
@@ -384,7 +412,18 @@ function paginaLinks() {
                             <ChatBubbleLeftRightIcon class="w-4 h-4" />
                             WhatsApp
                         </a>
-                        <button
+                        <!-- Já vinculado -->
+                        <div v-if="ids_vinculados.includes(disp.id_disponibilidade)"
+                            class="flex-1 py-2.5 rounded-xl text-xs font-bold text-center bg-emerald-100 text-emerald-700 border border-emerald-200">
+                            Já vinculado
+                        </div>
+                        <!-- Solicitação pendente -->
+                        <div v-else-if="ids_solicitados.includes(disp.id_disponibilidade)"
+                            class="flex-1 py-2.5 rounded-xl text-xs font-bold text-center bg-amber-100 text-amber-700 border border-amber-200">
+                            Aguardando resposta
+                        </div>
+                        <!-- Solicitar normalmente -->
+                        <button v-else
                             :disabled="disp.vagas_disponiveis === 0 || passageiros.length === 0"
                             @click="abrirModal(disp)"
                             class="flex-1 py-2.5 rounded-xl text-xs font-bold transition"
@@ -451,7 +490,7 @@ function paginaLinks() {
                         <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                             <div>
                                 <p class="text-xs text-slate-400 uppercase tracking-widest">Solicitar vaga</p>
-                                <h3 class="font-bold text-slate-900 mt-0.5" style="font-family:'Sora',sans-serif;">
+                                <h3 class="font-bold text-slate-900 mt-0.5">
                                     {{ disponSelecionada?.nome }}
                                 </h3>
                                 <p class="text-xs text-slate-500 mt-0.5">
@@ -540,8 +579,7 @@ function paginaLinks() {
                                 class="flex-1 py-3 rounded-xl text-sm font-bold transition"
                                 :class="form.id_passageiro && form.dias_contratados.length > 0 && !semEnderecos && !form.processing
                                     ? 'bg-blue-600 text-white hover:bg-blue-700 shadow-sm'
-                                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'"
-                                style="font-family:'Sora',sans-serif;">
+                                    : 'bg-slate-100 text-slate-400 cursor-not-allowed'">
                                 {{ form.processing ? 'Enviando…'
                                     : form.dias_contratados.length === 0 ? 'Selecione um dia'
                                     : semEnderecos ? 'Cadastre os endereços'
@@ -559,7 +597,7 @@ function paginaLinks() {
 <style scoped>
 .fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
-.pop-enter-active { transition: all 0.25s cubic-bezier(0.34, 1.56, 0.64, 1); }
+.pop-enter-active { transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1); }
 .pop-leave-active { transition: all 0.15s ease-in; }
 .pop-enter-from { opacity: 0; transform: scale(0.94) translateY(20px); }
 .pop-leave-to { opacity: 0; transform: scale(0.96); }

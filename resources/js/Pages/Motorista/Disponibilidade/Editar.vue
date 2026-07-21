@@ -3,6 +3,7 @@ import { useForm, Head, Link, router } from '@inertiajs/vue3'
 import { ArrowLeftIcon, MapIcon, ClockIcon, CalendarDaysIcon, CurrencyDollarIcon, UsersIcon, TrashIcon, HomeModernIcon, AcademicCapIcon } from '@heroicons/vue/24/outline'
 import { ref } from 'vue'
 import TagInput from '@/Components/UI/TagInput.vue'
+import FlashMessage from '@/Components/UI/FlashMessage.vue'
 
 const props = defineProps({
     disponibilidade: { type: Object, required: true },
@@ -22,7 +23,7 @@ const DIAS = [
 const TURNOS = [
     { value: 'manha', label: 'Manhã'  },
     { value: 'tarde', label: 'Tarde'  },
-    { value: 'noite', label: 'Noite'  },
+    { value: 'integral', label: 'Integral' },
 ]
 
 const form = useForm({
@@ -49,6 +50,7 @@ function excluir() {
 
 <template>
     <Head title="Editar trajeto" />
+    <FlashMessage />
 
     <div class="min-h-screen bg-slate-50">
 
@@ -61,7 +63,7 @@ function excluir() {
                 </Link>
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-semibold text-amber-200 uppercase tracking-widest">Motorista</p>
-                    <h1 class="text-lg font-bold text-white truncate" style="font-family:'Sora',sans-serif;">
+                    <h1 class="text-lg font-bold text-white truncate">
                         {{ disponibilidade.nome }}
                     </h1>
                 </div>
@@ -84,7 +86,7 @@ function excluir() {
             <!-- Ativo toggle -->
             <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white shadow-sm px-5 py-4">
                 <div>
-                    <p class="text-sm font-bold text-slate-800" style="font-family:'Sora',sans-serif;">Trajeto ativo</p>
+                    <p class="text-sm font-bold text-slate-800">Trajeto ativo</p>
                     <p class="text-xs text-slate-500 mt-0.5">Aparecer nas buscas dos responsáveis</p>
                 </div>
                 <button type="button" @click="form.ativa = !form.ativa"
@@ -101,7 +103,7 @@ function excluir() {
                     <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
                         <MapIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800" style="font-family:'Sora',sans-serif;">Identificação</h2>
+                    <h2 class="text-sm font-bold text-slate-800">Identificação</h2>
                 </div>
                 <div class="px-5 py-4">
                     <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Nome do trajeto</label>
@@ -118,7 +120,7 @@ function excluir() {
                     <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
                         <ClockIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800" style="font-family:'Sora',sans-serif;">Turno</h2>
+                    <h2 class="text-sm font-bold text-slate-800">Turno</h2>
                 </div>
                 <div class="px-5 py-4">
                     <div class="grid grid-cols-3 gap-3">
@@ -127,7 +129,7 @@ function excluir() {
                             class="rounded-xl border py-3 text-sm font-semibold transition"
                             :class="form.turno === t.value
                                 ? 'border-amber-400 bg-amber-50 text-amber-700 shadow-sm'
-                                : 'border-slate-200 text-slate-600 hover:border-amber-200 hover:bg-amber-50/50'">
+                                : 'border-slate-200 text-slate-600 hover:border-amber-200 hover:bg-amber-50/50 hover:text-amber-700'">
                             {{ t.label }}
                         </button>
                     </div>
@@ -141,7 +143,7 @@ function excluir() {
                     <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
                         <CalendarDaysIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800" style="font-family:'Sora',sans-serif;">Dias da semana</h2>
+                    <h2 class="text-sm font-bold text-slate-800">Dias da semana</h2>
                 </div>
                 <div class="px-5 py-4">
                     <div class="grid grid-cols-4 sm:grid-cols-7 gap-2">
@@ -150,7 +152,7 @@ function excluir() {
                             class="rounded-xl border py-2.5 text-xs font-semibold transition"
                             :class="form.dias.includes(d.value)
                                 ? 'border-amber-400 bg-amber-500 text-white shadow-sm'
-                                : 'border-slate-200 text-slate-600 hover:border-amber-200 hover:bg-amber-50/50'">
+                                : 'border-slate-200 text-slate-600 hover:border-amber-200 hover:bg-amber-50/50 hover:text-amber-700'">
                             {{ d.label.slice(0, 3) }}
                         </button>
                     </div>
@@ -164,7 +166,7 @@ function excluir() {
                     <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
                         <CurrencyDollarIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800" style="font-family:'Sora',sans-serif;">Preço e vagas</h2>
+                    <h2 class="text-sm font-bold text-slate-800">Preço e vagas</h2>
                 </div>
                 <div class="px-5 py-4 grid gap-4 sm:grid-cols-2">
                     <div>
@@ -200,7 +202,7 @@ function excluir() {
                         <HomeModernIcon class="w-4 h-4 text-white" />
                     </div>
                     <div>
-                        <h2 class="text-sm font-bold text-slate-800" style="font-family:'Sora',sans-serif;">Área de atuação</h2>
+                        <h2 class="text-sm font-bold text-slate-800">Área de atuação</h2>
                         <p class="text-xs text-slate-400 mt-0.5">Ajuda responsáveis a te encontrarem no marketplace</p>
                     </div>
                 </div>
@@ -229,8 +231,7 @@ function excluir() {
                     Cancelar
                 </Link>
                 <button @click="submit" :disabled="form.processing"
-                    class="flex-1 flex items-center justify-center rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-60 py-3 text-sm font-bold text-white transition shadow-sm"
-                    style="font-family:'Sora',sans-serif;">
+                    class="flex-1 flex items-center justify-center rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-60 py-3 text-sm font-bold text-white transition shadow-sm">
                     {{ form.processing ? 'Salvando…' : 'Salvar alterações' }}
                 </button>
             </div>
@@ -244,7 +245,7 @@ function excluir() {
             class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
             @click.self="confirmDelete = false">
             <div class="w-full max-w-sm rounded-2xl bg-white shadow-xl p-6">
-                <h3 class="font-bold text-slate-900 text-lg mb-2" style="font-family:'Sora',sans-serif;">Excluir trajeto?</h3>
+                <h3 class="font-bold text-slate-900 text-lg mb-2">Excluir trajeto?</h3>
                 <p class="text-sm text-slate-500 mb-6">Esta ação não pode ser desfeita. O trajeto será removido permanentemente.</p>
                 <div class="flex gap-3">
                     <button @click="confirmDelete = false"

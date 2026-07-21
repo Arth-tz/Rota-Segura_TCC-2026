@@ -2,6 +2,7 @@
 import { useForm, Head, Link } from '@inertiajs/vue3'
 import { ArrowLeftIcon, MapIcon, ClockIcon, CalendarDaysIcon, CurrencyDollarIcon, UsersIcon, HomeModernIcon, AcademicCapIcon } from '@heroicons/vue/24/outline'
 import TagInput from '@/Components/UI/TagInput.vue'
+import FlashMessage from '@/Components/UI/FlashMessage.vue'
 
 const props = defineProps({
     id_van:       { type: Number, required: true },
@@ -21,7 +22,7 @@ const DIAS = [
 const TURNOS = [
     { value: 'manha', label: 'Manhã'  },
     { value: 'tarde', label: 'Tarde'  },
-    { value: 'noite', label: 'Noite'  },
+    { value: 'integral', label: 'Integral' },
 ]
 
 const form = useForm({
@@ -41,6 +42,7 @@ function submit() {
 
 <template>
     <Head title="Novo trajeto" />
+    <FlashMessage />
 
     <div class="min-h-screen bg-slate-50">
 
@@ -53,7 +55,7 @@ function submit() {
                 </Link>
                 <div>
                     <p class="text-xs font-semibold text-amber-200 uppercase tracking-widest">Motorista</p>
-                    <h1 class="text-lg font-bold text-white" style="font-family:'Sora',sans-serif;">Novo trajeto</h1>
+                    <h1 class="text-lg font-bold text-white">Novo trajeto</h1>
                 </div>
             </div>
         </header>
@@ -72,7 +74,7 @@ function submit() {
                     <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
                         <MapIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800" style="font-family:'Sora',sans-serif;">Identificação</h2>
+                    <h2 class="text-sm font-bold text-slate-800">Identificação</h2>
                 </div>
                 <div class="px-5 py-4">
                     <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Nome do trajeto</label>
@@ -90,7 +92,7 @@ function submit() {
                     <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
                         <ClockIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800" style="font-family:'Sora',sans-serif;">Turno</h2>
+                    <h2 class="text-sm font-bold text-slate-800">Turno</h2>
                 </div>
                 <div class="px-5 py-4">
                     <div class="grid grid-cols-3 gap-3">
@@ -100,7 +102,7 @@ function submit() {
                             class="rounded-xl border py-3 text-sm font-semibold transition"
                             :class="form.turno === t.value
                                 ? 'border-amber-400 bg-amber-50 text-amber-700 shadow-sm'
-                                : 'border-slate-200 text-slate-600 hover:border-amber-200 hover:bg-amber-50/50'">
+                                : 'border-slate-200 text-slate-600 hover:border-amber-200 hover:bg-amber-50/50 hover:text-amber-700'">
                             {{ t.label }}
                         </button>
                     </div>
@@ -114,7 +116,7 @@ function submit() {
                     <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
                         <CalendarDaysIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800" style="font-family:'Sora',sans-serif;">Dias da semana</h2>
+                    <h2 class="text-sm font-bold text-slate-800">Dias da semana</h2>
                 </div>
                 <div class="px-5 py-4">
                     <div class="grid grid-cols-4 sm:grid-cols-7 gap-2">
@@ -124,7 +126,7 @@ function submit() {
                             class="rounded-xl border py-2.5 text-xs font-semibold transition"
                             :class="form.dias.includes(d.value)
                                 ? 'border-amber-400 bg-amber-500 text-white shadow-sm'
-                                : 'border-slate-200 text-slate-600 hover:border-amber-200 hover:bg-amber-50/50'">
+                                : 'border-slate-200 text-slate-600 hover:border-amber-200 hover:bg-amber-50/50 hover:text-amber-700'">
                             {{ d.label.slice(0, 3) }}
                         </button>
                     </div>
@@ -138,7 +140,7 @@ function submit() {
                     <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
                         <CurrencyDollarIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800" style="font-family:'Sora',sans-serif;">Preço e vagas</h2>
+                    <h2 class="text-sm font-bold text-slate-800">Preço e vagas</h2>
                 </div>
                 <div class="px-5 py-4 grid gap-4 sm:grid-cols-2">
                     <div>
@@ -178,7 +180,7 @@ function submit() {
                         <HomeModernIcon class="w-4 h-4 text-white" />
                     </div>
                     <div>
-                        <h2 class="text-sm font-bold text-slate-800" style="font-family:'Sora',sans-serif;">Área de atuação</h2>
+                        <h2 class="text-sm font-bold text-slate-800">Área de atuação</h2>
                         <p class="text-xs text-slate-400 mt-0.5">Ajuda responsáveis a te encontrarem no marketplace</p>
                     </div>
                 </div>
@@ -207,8 +209,7 @@ function submit() {
                     Cancelar
                 </Link>
                 <button @click="submit" :disabled="form.processing"
-                    class="flex-1 flex items-center justify-center rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-60 py-3 text-sm font-bold text-white transition shadow-sm"
-                    style="font-family:'Sora',sans-serif;">
+                    class="flex-1 flex items-center justify-center rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-60 py-3 text-sm font-bold text-white transition shadow-sm">
                     {{ form.processing ? 'Salvando…' : 'Criar trajeto' }}
                 </button>
             </div>

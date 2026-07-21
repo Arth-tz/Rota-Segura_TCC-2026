@@ -9,7 +9,7 @@ return new class extends Migration {
             $table->bigIncrements('id_disponibilidade');
             $table->unsignedBigInteger('id_van');
             $table->string('nome', 100)->comment('Ex: Manhã ida, Tarde volta, Treino ter/qui');
-            $table->enum('turno', ['manha', 'tarde', 'noite']);
+            $table->enum('turno', ['manha', 'tarde', 'integral']);
             $table->decimal('preco_mensal', 8, 2);
             $table->unsignedInteger('capacidade_total');
             $table->boolean('ativa')->default(true);

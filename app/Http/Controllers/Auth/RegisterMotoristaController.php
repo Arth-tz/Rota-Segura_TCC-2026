@@ -49,7 +49,7 @@ class RegisterMotoristaController extends Controller
                 Auth::login($usuario);
             });
 
-            return redirect()->route('motorista.dashboard');
+            return redirect()->route('motorista.van.create');
 
         } catch (\Throwable $e) {
             report($e);

@@ -24,8 +24,6 @@ function submit() {
 <template>
     <Head title="Cadastrar passageiro" />
 
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet" />
-
     <div class="min-h-screen bg-slate-50 flex">
 
         <!-- Lado esquerdo -->
@@ -33,7 +31,7 @@ function submit() {
 
             <Link :href="route('home')" class="flex items-center gap-2 hover:opacity-80 transition-all duration-300">
                 <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-12 w-12">
-                <span class="text-white font-bold text-lg tracking-tight" style="font-family:'Sora',sans-serif;">Rota Segura</span>
+                <span class="text-white font-bold text-lg tracking-tight">Rota Segura</span>
             </Link>
 
             <div class="relative z-10">
@@ -54,7 +52,7 @@ function submit() {
                     </div>
                 </div>
 
-                <h2 class="text-4xl font-extrabold text-white leading-tight mb-4" style="font-family:'Sora',sans-serif;">
+                <h2 class="text-4xl font-extrabold text-white leading-tight mb-4">
                     Cadastre o passageiro
                 </h2>
                 <p class="text-blue-100 text-sm leading-relaxed">
@@ -76,10 +74,10 @@ function submit() {
 
                 <div class="lg:hidden flex items-center gap-2 mb-8">
                     <img src="/rota-segura/public/images/Logo_rota_segura-azul.png" alt="Rota Segura" class="h-10 w-10">
-                    <span class="text-slate-900 font-bold" style="font-family:'Sora',sans-serif;">Rota Segura</span>
+                    <span class="text-slate-900 font-bold">Rota Segura</span>
                 </div>
 
-                <h1 class="text-3xl font-bold text-slate-900 mb-1" style="font-family:'Sora',sans-serif;">
+                <h1 class="text-3xl font-bold text-slate-900 mb-1">
                     Cadastrar passageiro
                 </h1>
                 <p class="text-slate-400 text-sm mb-8">
@@ -159,14 +157,13 @@ function submit() {
                             type="submit"
                             :disabled="form.processing"
                             class="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold px-6 py-3 rounded-xl transition shadow-lg shadow-blue-200 text-sm"
-                            style="font-family:'Sora',sans-serif;"
                         >
                             {{ form.processing ? 'Salvando...' : 'Continuar' }}
                         </button>
                     </div>
                 </form>
 
-                <p class="text-center text-xs text-slate-400 mt-6" style="font-family:'Nunito',sans-serif;">
+                <p class="text-center text-xs text-slate-400 mt-6">
                     Você pode cadastrar passageiros a qualquer momento pelo seu dashboard.
                 </p>
 

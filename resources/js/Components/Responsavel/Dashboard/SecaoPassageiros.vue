@@ -21,11 +21,10 @@ const pendente = computed(() => props.passageiros.filter(p => p.status === 'soli
         <!-- Header com stats reais -->
         <div class="rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 p-5 text-white shadow-lg">
             <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                <h3 class="text-lg font-bold" style="font-family:'Sora',sans-serif;">Meus passageiros</h3>
+                <h3 class="text-lg font-bold">Meus passageiros</h3>
                 <Link
                     :href="route('responsavel.passageiros.adicionar')"
                     class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50 transition self-start sm:self-auto"
-                    style="font-family:'Sora',sans-serif;"
                 >
                     <UserPlusIcon class="w-4 h-4" />
                     Adicionar
@@ -70,12 +69,11 @@ const pendente = computed(() => props.passageiros.filter(p => p.status === 'soli
             <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center mb-4">
                 <UserPlusIcon class="w-6 h-6 text-blue-500" />
             </div>
-            <p class="font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Nenhum passageiro cadastrado</p>
+            <p class="font-semibold text-slate-800">Nenhum passageiro cadastrado</p>
             <p class="mt-1 text-sm text-slate-500">Adicione passageiros para gerenciá-los aqui.</p>
             <Link
                 :href="route('responsavel.passageiros.adicionar')"
                 class="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition shadow-sm"
-                style="font-family:'Sora',sans-serif;"
             >
                 <UserPlusIcon class="w-4 h-4" />
                 Adicionar passageiro

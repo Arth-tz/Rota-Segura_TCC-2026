@@ -1,6 +1,13 @@
 <script setup>
 import { Link } from '@inertiajs/vue3'
-
+import {
+    HomeIcon,
+    ClipboardDocumentListIcon,
+    UsersIcon,
+    MapIcon,
+    UserCircleIcon,
+    ArrowRightOnRectangleIcon,
+} from '@heroicons/vue/24/outline'
 
 const emit = defineEmits(['mudar'])
 
@@ -11,40 +18,41 @@ const props = defineProps({
 })
 
 const navItems = [
-    { key: 'inicio',        label: 'Início' },
-    { key: 'solicitacoes',  label: 'Solicitações' },
-    { key: 'passageiros',   label: 'Meus Passageiros' },
-    { key: 'trajetos',      label: 'Meus Trajetos' },
-    { key: 'perfil',        label: 'Meu Perfil' },
+    { key: 'inicio',        label: 'Início',            icon: HomeIcon },
+    { key: 'solicitacoes',  label: 'Solicitações',      icon: ClipboardDocumentListIcon },
+    { key: 'passageiros',   label: 'Meus Passageiros',  icon: UsersIcon },
+    { key: 'trajetos',      label: 'Meus Trajetos',     icon: MapIcon },
+    { key: 'perfil',        label: 'Meu Perfil',        icon: UserCircleIcon },
 ]
 </script>
 
 <template>
-    <aside class="hidden md:flex md:w-72 flex-col sticky top-0 h-screen bg-gradient-to-b from-amber-500 to-yellow-500 text-white border-r border-amber-600/30">
+    <aside class="hidden md:flex md:w-64 flex-col sticky top-0 h-screen bg-gradient-to-b from-amber-500 to-amber-700 text-white border-r border-amber-600/30">
 
         <!-- Logo -->
-        <div class="p-6 border-b border-amber-600/30">
-            <Link :href="route('home')" class="flex items-center gap-2">
-                <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-10 w-auto" />
+        <div class="px-5 py-5 border-b border-amber-600/30">
+            <Link :href="route('home')" class="flex items-center gap-2.5">
+                <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-9 w-auto" />
                 <div>
-                    <p class="text-xs text-amber-100 font-semibold uppercase tracking-widest">Motorista</p>
-                    <p class="text-base font-bold text-white" style="font-family:'Sora',sans-serif;">Rota Segura</p>
+                    <p class="text-[10px] text-amber-200 font-semibold uppercase tracking-widest leading-none mb-0.5">Motorista</p>
+                    <p class="text-sm font-bold text-white leading-none">Rota Segura</p>
                 </div>
             </Link>
         </div>
 
         <!-- Nav -->
-        <nav class="flex-1 p-4 space-y-1">
+        <nav class="flex-1 p-3 space-y-0.5 overflow-y-auto">
             <button
                 v-for="item in navItems"
                 :key="item.key"
                 @click="emit('mudar', item.key)"
-                class="w-full flex items-center justify-between gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all"
+                class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all"
                 :class="secaoAtiva === item.key
-                    ? 'bg-amber-600 text-white shadow-lg shadow-amber-800/20'
-                    : 'text-amber-100 hover:bg-amber-600/40 hover:text-white'"
+                    ? 'bg-amber-600/80 text-white shadow-md shadow-amber-900/30'
+                    : 'text-amber-100/80 hover:bg-amber-600/40 hover:text-white'"
             >
-                {{ item.label }}
+                <component :is="item.icon" class="shrink-0" style="width:18px;height:18px;" />
+                <span class="flex-1 text-left">{{ item.label }}</span>
                 <span v-if="item.key === 'solicitacoes' && solicitacoesPendentes > 0"
                     class="flex items-center justify-center w-5 h-5 rounded-full bg-white text-amber-700 text-xs font-bold shrink-0">
                     {{ solicitacoesPendentes }}
@@ -52,19 +60,29 @@ const navItems = [
             </button>
         </nav>
 
-        <!-- Usuário logado -->
-        <div class="p-4 border-t border-amber-600/30">
-            <div class="flex items-center gap-3 px-2 py-2">
-                <div class="w-9 h-9 rounded-full bg-white flex items-center justify-center shrink-0">
-                    <span class="text-amber-600 text-sm font-bold">
+        <!-- Rodapé: usuário + logout -->
+        <div class="p-3 border-t border-amber-600/30 space-y-1">
+            <div class="flex items-center gap-3 px-3 py-2">
+                <div class="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center shrink-0">
+                    <img v-if="usuario?.foto_url" :src="usuario.foto_url" class="w-full h-full object-cover" alt="" />
+                    <span v-else class="text-amber-600 text-xs font-bold">
                         {{ usuario?.nome?.charAt(0)?.toUpperCase() ?? 'M' }}
                     </span>
                 </div>
-                <div class="min-w-0">
-                    <p class="text-sm font-semibold text-white truncate">{{ usuario?.nome ?? 'Motorista' }}</p>
-                    <p class="text-xs text-amber-100 truncate">{{ usuario?.email ?? '' }}</p>
+                <div class="min-w-0 flex-1">
+                    <p class="text-sm font-semibold text-white truncate leading-tight">{{ usuario?.nome ?? 'Motorista' }}</p>
+                    <p class="text-xs text-amber-200 truncate leading-tight">{{ usuario?.email ?? '' }}</p>
                 </div>
             </div>
+            <Link
+                :href="route('logout')"
+                method="post"
+                as="button"
+                class="w-full flex items-center gap-3 px-3.5 py-2 rounded-xl text-sm font-medium text-amber-200/70 hover:bg-red-900/30 hover:text-red-300 transition-all"
+            >
+                <ArrowRightOnRectangleIcon style="width:18px;height:18px;" class="shrink-0" />
+                Sair
+            </Link>
         </div>
     </aside>
 </template>

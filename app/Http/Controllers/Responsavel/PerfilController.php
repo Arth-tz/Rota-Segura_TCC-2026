@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rules\Password;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -24,6 +25,7 @@ class PerfilController extends Controller
                 'data_nascimento'    => $usuario->pessoa?->data_nascimento?->format('Y-m-d'),
                 'email'              => $usuario->email,
                 'telefone'           => $usuario->pessoa?->telefone,
+                'foto_url'           => $usuario->pessoa?->foto_url,
                 'tipo_responsavel'   => $responsavel?->tipo_responsavel,
                 'telefone_emergencia'=> $responsavel?->telefone_emergencia,
             ],
@@ -68,5 +70,29 @@ class PerfilController extends Controller
 
         return redirect()->route('responsavel.perfil.edit')
             ->with('sucesso', 'Perfil atualizado com sucesso!');
+    }
+
+    public function uploadFoto(Request $request): RedirectResponse
+    {
+        $usuario     = auth()->user()->load('pessoa', 'responsavel');
+        $responsavel = $usuario->responsavel;
+
+        $request->validate([
+            'foto' => ['required', 'image', 'max:2048', 'mimes:jpg,jpeg,png,webp'],
+        ], [
+            'foto.required' => 'Selecione uma imagem.',
+            'foto.image'    => 'O arquivo deve ser uma imagem.',
+            'foto.max'      => 'A imagem deve ter no máximo 2 MB.',
+        ]);
+
+        foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
+            Storage::disk('public')->delete("responsaveis/{$responsavel->id_responsavel}/foto.{$ext}");
+        }
+
+        $ext  = $request->file('foto')->getClientOriginalExtension();
+        $path = $request->file('foto')->storeAs("responsaveis/{$responsavel->id_responsavel}", "foto.{$ext}", 'public');
+        $usuario->pessoa->update(['foto_url' => Storage::disk('public')->url($path)]);
+
+        return back()->with('sucesso', 'Foto atualizada com sucesso!');
     }
 }

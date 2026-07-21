@@ -47,7 +47,7 @@ class DashboardController extends Controller
         // ── Vínculos ativos com disponibilidades (uma query, sem N+1) ───────
         $vinculosAtivos = Vinculo::whereIn('id_passageiro', $idsPassageiros)
             ->where('status', 'ativo')
-            ->with('disponibilidades')
+            ->with(['disponibilidades.dias', 'van.motorista.usuario.pessoa'])
             ->get()
             ->groupBy('id_passageiro'); // suporta múltiplos vínculos por passageiro
 
@@ -68,11 +68,15 @@ class DashboardController extends Controller
             $vinculosAtivos,
             $presencasBulk
         ) {
-            $vinculosDeste = $vinculosAtivos->get($passageiro->id_passageiro) ?? collect();
+            $vinculosDeste          = $vinculosAtivos->get($passageiro->id_passageiro) ?? collect();
+            $solicitacoesPassageiro = $pendentesPorPassageiro[$passageiro->id_passageiro] ?? collect();
             $status        = 'sem_van';
             $statusLabel   = 'Sem van';
             $statusColor   = 'slate';
             $proximosDias  = [];
+
+            // BUG #3: status de 'solicitacao_pendente' só conta tipo='nova'
+            $novasDestePassageiro = $solicitacoesPassageiro->filter(fn ($s) => $s->tipo === 'nova');
 
             if ($vinculosDeste->isNotEmpty()) {
                 $status      = 'vinculo_ativo';
@@ -81,25 +85,65 @@ class DashboardController extends Controller
                 foreach ($vinculosDeste as $vinculo) {
                     $proximosDias = array_merge($proximosDias, $this->proximosDias($vinculo, $presencasBulk));
                 }
-                // Ordena por data e remove duplicatas de data+vinculo
                 usort($proximosDias, fn ($a, $b) => strcmp($a['data'], $b['data']));
-            } elseif (($pendentesPorPassageiro[$passageiro->id_passageiro] ?? collect())->isNotEmpty()) {
+            } elseif ($novasDestePassageiro->isNotEmpty()) {
                 $status      = 'solicitacao_pendente';
                 $statusLabel = 'Solicitação pendente';
                 $statusColor = 'amber';
             }
 
-            $solicitacoesDeste = ($pendentesPorPassageiro[$passageiro->id_passageiro] ?? collect())
+            // Solicitações nova para o accordion
+            $solicitacoesDeste = $novasDestePassageiro
                 ->map(fn ($s) => [
-                    'id_solicitacao'   => $s->id_solicitacao,
-                    'data_solicitacao' => $s->data_solicitacao?->format('d/m/Y'),
-                    'disponibilidades' => $s->disponibilidades->map(fn ($d) => [
+                    'id_solicitacao'      => $s->id_solicitacao,
+                    'tipo'                => $s->tipo,
+                    'id_vinculo_alterado' => $s->id_vinculo_alterado,
+                    'data_solicitacao'    => $s->data_solicitacao?->format('d/m/Y'),
+                    'disponibilidades'    => $s->disponibilidades->map(fn ($d) => [
                         'nome'             => $d->nome,
                         'turno'            => $d->turno,
                         'dias_contratados' => json_decode($d->pivot->dias_contratados ?? '[]', true),
                         'preco_mensal'     => $d->pivot->preco_mensal,
                     ])->all(),
                 ])->values()->all();
+
+            // BUG #2: alteracoesPendentes indexadas por id_disponibilidade (não por id_vinculo)
+            $alteracoesPendentes = [];
+            foreach ($solicitacoesPassageiro as $sol) {
+                if ($sol->tipo === 'alteracao') {
+                    foreach ($sol->disponibilidades as $disp) {
+                        $alteracoesPendentes[$disp->id_disponibilidade] = [
+                            'id_solicitacao'      => $sol->id_solicitacao,
+                            'tipo'                => 'alteracao',
+                            'id_vinculo_alterado' => $sol->id_vinculo_alterado,
+                            'data_solicitacao'    => $sol->data_solicitacao?->format('d/m/Y'),
+                        ];
+                    }
+                }
+            }
+
+            // BUG #1: motoristaDados como array de objetos por vínculo (não um único objeto do ->first())
+            $motoristaDados = null;
+            if ($vinculosDeste->isNotEmpty()) {
+                $motoristaDados = $vinculosDeste->map(fn ($vl) => [
+                    'id_vinculo'       => $vl->id_vinculo,
+                    'nome'             => $vl->van?->motorista?->usuario?->pessoa?->nome,
+                    'telefone'         => $vl->van?->motorista?->usuario?->pessoa?->telefone,
+                    'van_modelo'       => trim(($vl->van?->marca ?? '') . ' ' . ($vl->van?->modelo ?? '')),
+                    'van_placa'        => $vl->van?->placa,
+                    'van_cor'          => $vl->van?->cor,
+                    'nome_servico'     => $vl->van?->nome_servico,
+                    'disponibilidades' => $vl->disponibilidades->map(fn ($d) => [
+                        'id_vinculo'         => $vl->id_vinculo,
+                        'id_disponibilidade' => $d->id_disponibilidade,
+                        'nome'               => $d->nome,
+                        'turno'              => $d->turno,
+                        'dias_contratados'   => json_decode($d->pivot->dias_contratados ?? '[]', true),
+                        'dias_disponiveis'   => $d->dias->pluck('dia_semana')->all(),
+                        'alteracao_pendente' => $alteracoesPendentes[$d->id_disponibilidade] ?? null,
+                    ])->values()->all(),
+                ])->values()->all();
+            }
 
             return [
                 'id_passageiro'          => $passageiro->id_passageiro,
@@ -111,6 +155,7 @@ class DashboardController extends Controller
                 'data_inscricao'         => optional($passageiro->data_inscricao)?->format('Y-m-d'),
                 'solicitacoes_pendentes' => $solicitacoesDeste,
                 'proximos_dias'          => $proximosDias,
+                'motorista'              => $motoristaDados,
             ];
         })->values();
 

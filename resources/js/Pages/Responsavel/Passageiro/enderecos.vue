@@ -91,8 +91,6 @@ function submit() {
 <template>
     <Head title="Onde fica o passageiro?" />
 
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet" />
-
     <div class="min-h-screen bg-slate-50 flex">
 
         <!-- Lado esquerdo -->
@@ -100,7 +98,7 @@ function submit() {
 
             <Link :href="route('home')" class="flex items-center gap-2 hover:opacity-80 transition-all duration-300">
                  <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Logo Rota Segura" class="h-12 w-12" />
-                <span class="text-white font-bold text-lg tracking-tight" style="font-family:'Sora',sans-serif;">Rota Segura</span>
+                <span class="text-white font-bold text-lg tracking-tight">Rota Segura</span>
             </Link>
 
             <div class="relative z-10">
@@ -123,7 +121,7 @@ function submit() {
                     </div>
                 </div>
 
-                <h2 class="text-4xl font-extrabold text-white leading-tight mb-4" style="font-family:'Sora',sans-serif;">
+                <h2 class="text-4xl font-extrabold text-white leading-tight mb-4">
                     Onde fica o passageiro?
                 </h2>
                 <p class="text-blue-100 text-sm leading-relaxed mb-8">
@@ -164,10 +162,10 @@ function submit() {
 
                 <div class="lg:hidden flex items-center gap-2 mb-8">
                     <img src="/rota-segura/public/images/Logo_rota_segura-azul.png" alt="Rota Segura" class="h-10 w-10">
-                    <span class="text-slate-900 font-bold" style="font-family:'Sora',sans-serif;">Rota Segura</span>
+                    <span class="text-slate-900 font-bold">Rota Segura</span>
                 </div>
 
-                <h1 class="text-3xl font-bold text-slate-900 mb-1" style="font-family:'Sora',sans-serif;">
+                <h1 class="text-3xl font-bold text-slate-900 mb-1">
                     Endereços
                 </h1>
                 <p class="text-slate-400 text-sm mb-8">
@@ -187,7 +185,7 @@ function submit() {
                                 <span class="text-white text-xs font-bold">A</span>
                             </div>
                             <div>
-                                <h2 class="text-sm font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">De onde sai</h2>
+                                <h2 class="text-sm font-semibold text-slate-800">De onde sai</h2>
                                 <p class="text-xs text-slate-400">Onde o motorista vai buscar o passageiro</p>
                             </div>
                         </div>
@@ -209,7 +207,7 @@ function submit() {
                                     <li
                                         v-for="s in sugestoes['embarque']" :key="s.place_id"
                                         @mousedown="selecionarSugestao('embarque', s)"
-                                        class="px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer border-b border-slate-100 last:border-0 transition flex items-center gap-2"
+                                        class="px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-800 cursor-pointer border-b border-slate-100 last:border-0 transition flex items-center gap-2"
                                     >
                                         <MapPinIcon class="w-3.5 h-3.5 text-slate-400 shrink-0" />
                                         <span class="truncate">{{ s.display_name }}</span>
@@ -259,7 +257,7 @@ function submit() {
                                 <span class="text-white text-xs font-bold">B</span>
                             </div>
                             <div>
-                                <h2 class="text-sm font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Para onde vai</h2>
+                                <h2 class="text-sm font-semibold text-slate-800">Para onde vai</h2>
                                 <p class="text-xs text-slate-400">Escola, academia ou outra atividade</p>
                             </div>
                         </div>
@@ -285,7 +283,7 @@ function submit() {
                                     <li
                                         v-for="s in sugestoes['desembarque']" :key="s.place_id"
                                         @mousedown="selecionarSugestao('desembarque', s)"
-                                        class="px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 cursor-pointer border-b border-slate-100 last:border-0 transition flex items-center gap-2"
+                                        class="px-4 py-3 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-800 cursor-pointer border-b border-slate-100 last:border-0 transition flex items-center gap-2"
                                     >
                                         <MapPinIcon class="w-3.5 h-3.5 text-slate-400 shrink-0" />
                                         <span class="truncate">{{ s.display_name }}</span>
@@ -346,7 +344,6 @@ function submit() {
                             type="submit"
                             :disabled="form.processing"
                             class="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold px-8 py-3 rounded-xl transition shadow-lg shadow-blue-200 text-sm"
-                            style="font-family:'Sora',sans-serif;"
                         >
                             {{ form.processing ? 'Salvando...' : 'Concluir cadastro →' }}
                         </button>

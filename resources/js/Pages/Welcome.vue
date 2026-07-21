@@ -43,8 +43,6 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 
 <template>
     <div class="rs-root">
-        <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-
         <!-- NAV -->
         <nav class="rs-nav" :class="{ 'rs-nav--scrolled': scrollY > 30 }">
             <div class="rs-nav__inner">
@@ -311,7 +309,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
     display: inline-flex; align-items: center; justify-content: center; gap: 8px;
     font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600;
     border-radius: 12px; cursor: pointer; text-decoration: none; border: none;
-    transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.25s ease, background 0.2s ease;
+    transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, background 0.2s ease;
     white-space: nowrap; line-height: 1;
 }
 .rs-btn:hover { transform: translateY(-2px); }
@@ -550,7 +548,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 
 .rs-feature-card {
     background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 18px; padding: 22px;
-    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.35s ease, border-color 0.25s ease, background 0.25s ease;
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.35s ease, border-color 0.25s ease, background 0.25s ease;
 }
 @media (min-width: 640px) { .rs-feature-card { padding: 26px; border-radius: 20px; } }
 @media (hover: hover) {
@@ -561,7 +559,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 .rs-feature-card__icon {
     width: 44px; height: 44px; border-radius: 12px;
     display: flex; align-items: center; justify-content: center; margin-bottom: 14px;
-    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 @media (min-width: 640px) { .rs-feature-card__icon { width: 48px; height: 48px; border-radius: 14px; margin-bottom: 18px; } }
 .rs-feature-card__icon svg { width: 20px; height: 20px; }
@@ -594,7 +592,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
     display: flex; align-items: center; justify-content: center;
     font-family: 'Nunito', sans-serif; font-weight: 900; font-size: 1rem; flex-shrink: 0;
     box-shadow: 0 4px 14px rgba(37,99,235,0.35); position: relative; z-index: 1;
-    transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1), box-shadow 0.3s ease;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.3s ease;
 }
 @media (min-width: 640px) { .rs-step__num { width: 44px; height: 44px; font-size: 1.1rem; } }
 @media (hover: hover) {
@@ -736,7 +734,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 .rs-modal__option {
     display: block; background: #f8fafc; border: 2px solid #e2e8f0;
     border-radius: 14px; padding: 16px 10px; text-align: center; text-decoration: none;
-    transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
 }
 @media (min-width: 400px) { .rs-modal__option { padding: 20px 14px; border-radius: 16px; } }
 @media (min-width: 480px) { .rs-modal__option { padding: 22px 16px; border-radius: 18px; } }

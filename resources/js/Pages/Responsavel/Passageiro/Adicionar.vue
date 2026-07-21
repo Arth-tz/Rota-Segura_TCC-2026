@@ -70,7 +70,6 @@ const ic = 'w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm
 
 <template>
     <Head title="Adicionar Passageiro" />
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet" />
 
     <div class="min-h-screen bg-slate-50">
 
@@ -84,7 +83,7 @@ const ic = 'w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm
                     </svg>
                 </Link>
                 <div>
-                    <h1 class="text-base font-bold text-slate-900" style="font-family:'Sora',sans-serif;">
+                    <h1 class="text-base font-bold text-slate-900">
                         Novo passageiro
                     </h1>
                     <p class="text-xs text-slate-400">Preencha os dados e endereços</p>
@@ -101,7 +100,7 @@ const ic = 'w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm
                         <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
                             <UserIcon class="w-4 h-4 text-white" />
                         </div>
-                        <h2 class="text-sm font-semibold text-blue-900" style="font-family:'Sora',sans-serif;">
+                        <h2 class="text-sm font-semibold text-blue-900">
                             Dados pessoais
                         </h2>
                     </div>
@@ -176,7 +175,7 @@ const ic = 'w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm
                             <MapPinIcon class="w-4 h-4 text-white" />
                         </div>
                         <div>
-                            <h2 class="text-sm font-semibold text-blue-900" style="font-family:'Sora',sans-serif;">
+                            <h2 class="text-sm font-semibold text-blue-900">
                                 Local de embarque
                             </h2>
                             <p class="text-xs text-blue-400 mt-0.5">Onde o motorista busca o passageiro</p>
@@ -217,7 +216,7 @@ const ic = 'w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm
                             <AcademicCapIcon class="w-4 h-4 text-white" />
                         </div>
                         <div>
-                            <h2 class="text-sm font-semibold text-blue-900" style="font-family:'Sora',sans-serif;">
+                            <h2 class="text-sm font-semibold text-blue-900">
                                 Escola / Destino
                             </h2>
                             <p class="text-xs text-blue-400 mt-0.5">Para onde o motorista leva o passageiro</p>
@@ -250,8 +249,7 @@ const ic = 'w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm
                         Cancelar
                     </Link>
                     <button type="submit" :disabled="form.processing"
-                        class="flex-1 py-3 min-h-[44px] rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-bold transition shadow-lg shadow-blue-200"
-                        style="font-family:'Sora',sans-serif;">
+                        class="flex-1 py-3 min-h-[44px] rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-bold transition shadow-lg shadow-blue-200">
                         {{ form.processing ? 'Salvando...' : 'Cadastrar passageiro' }}
                     </button>
                 </div>

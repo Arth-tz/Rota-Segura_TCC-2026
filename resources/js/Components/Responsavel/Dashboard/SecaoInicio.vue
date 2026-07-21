@@ -6,6 +6,7 @@ import { UserPlusIcon, MagnifyingGlassIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
     passageiros: { type: Array, default: () => [] },
+    usuario:     { type: Object, default: null },
 })
 
 const emit = defineEmits(['buscar-van'])
@@ -23,7 +24,10 @@ const pendente = computed(() => props.passageiros.filter(p => p.status === 'soli
             <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.12),_transparent_60%)] pointer-events-none"></div>
             <div class="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
                 <div>
-                    <p class="text-4xl font-bold" style="font-family:'Sora',sans-serif;">{{ passageiros.length }}</p>
+                    <p class="text-xs font-semibold text-blue-200 uppercase tracking-widest mb-1">
+                        Olá, {{ usuario?.nome?.split(' ')[0] ?? 'Responsável' }}
+                    </p>
+                    <p class="text-4xl font-bold">{{ passageiros.length }}</p>
                     <p class="mt-1 text-sm text-blue-200">{{ passageiros.length === 1 ? 'passageiro cadastrado' : 'passageiros cadastrados' }}</p>
                 </div>
 
@@ -52,7 +56,6 @@ const pendente = computed(() => props.passageiros.filter(p => p.status === 'soli
                     <Link
                         :href="route('responsavel.passageiros.adicionar')"
                         class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-50 transition shadow-sm"
-                        style="font-family:'Sora',sans-serif;"
                     >
                         <UserPlusIcon class="w-4 h-4" />
                         Novo passageiro
@@ -60,7 +63,6 @@ const pendente = computed(() => props.passageiros.filter(p => p.status === 'soli
                     <Link
                         :href="route('responsavel.marketplace')"
                         class="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/20 transition"
-                        style="font-family:'Sora',sans-serif;"
                     >
                         <MagnifyingGlassIcon class="w-4 h-4" />
                         Buscar van
@@ -93,12 +95,11 @@ const pendente = computed(() => props.passageiros.filter(p => p.status === 'soli
             <div class="w-12 h-12 rounded-2xl bg-blue-100 flex items-center justify-center mb-4">
                 <UserPlusIcon class="w-6 h-6 text-blue-500" />
             </div>
-            <p class="font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Nenhum passageiro ainda</p>
+            <p class="font-semibold text-slate-800">Nenhum passageiro ainda</p>
             <p class="mt-1 text-sm text-slate-500 max-w-xs">Cadastre o primeiro passageiro para começar a organizar o transporte.</p>
             <Link
                 :href="route('responsavel.passageiros.adicionar')"
                 class="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-blue-700 transition shadow-sm"
-                style="font-family:'Sora',sans-serif;"
             >
                 <UserPlusIcon class="w-4 h-4" />
                 Cadastrar passageiro

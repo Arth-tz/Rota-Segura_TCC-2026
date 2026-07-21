@@ -15,6 +15,7 @@ use App\Services\Geocoding\NominatimGeocodingService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -214,31 +215,6 @@ class PassageiroController extends Controller
         ]);
     }
 
-    // ─── EDITAR DADOS PESSOAIS ───────────────────────────────────────────────
-
-    public function edit(int $id): Response|RedirectResponse
-    {
-        $passageiro = $this->buscarPassageiroDoResponsavel($id);
-
-        if (!$passageiro) {
-            return redirect()->route('responsavel.dashboard')
-                ->withErrors(['geral' => 'Passageiro não encontrado.']);
-        }
-
-        $passageiro->load('pessoa');
-
-        return Inertia::render('Responsavel/Passageiro/Edit', [
-            'passageiro' => [
-                'id_passageiro'       => $passageiro->id_passageiro,
-                'nome'                => $passageiro->pessoa->nome,
-                'cpf'                 => $passageiro->pessoa->cpf,
-                'data_nascimento'     => $passageiro->pessoa->data_nascimento?->format('Y-m-d'),
-                'telefone'            => $passageiro->pessoa->telefone,
-                'observacoes_medicas' => $passageiro->observacoes_medicas,
-            ],
-        ]);
-    }
-
     public function update(UpdatePassageiroRequest $request, int $id): RedirectResponse
     {
         $passageiro = $this->buscarPassageiroDoResponsavel($id);
@@ -270,34 +246,6 @@ class PassageiroController extends Controller
         }
     }
 
-    // ─── EDITAR ENDEREÇOS ────────────────────────────────────────────────────
-
-    public function editEnderecos(int $id): Response|RedirectResponse
-    {
-        $passageiro = $this->buscarPassageiroDoResponsavel($id);
-
-        if (!$passageiro) {
-            return redirect()->route('responsavel.dashboard')
-                ->withErrors(['geral' => 'Passageiro não encontrado.']);
-        }
-
-        $passageiro->load(['pessoa', 'enderecos.endereco']);
-
-        return Inertia::render('Responsavel/Passageiro/EditEnderecos', [
-            'passageiro' => [
-                'id_passageiro' => $passageiro->id_passageiro,
-                'nome'          => $passageiro->pessoa->nome,
-                'enderecos'     => $passageiro->enderecos->map(fn($pe) => [
-                    'id_passageiro_endereco' => $pe->id_passageiro_endereco,
-                    'tipo'                   => $pe->tipo,
-                    'principal'              => $pe->principal,
-                    'nome'                   => $pe->nome,
-                    'endereco'               => $pe->endereco,
-                ]),
-            ],
-        ]);
-    }
-
     public function updateEnderecos(UpdatePassageiroEnderecosRequest $request, int $id): RedirectResponse
     {
         $passageiro = $this->buscarPassageiroDoResponsavel($id);
@@ -320,6 +268,38 @@ class PassageiroController extends Controller
             report($e);
             return back()->withErrors(['geral' => 'Erro ao atualizar endereços. Tente novamente.']);
         }
+    }
+
+    // ─── FOTO ────────────────────────────────────────────────────────────────
+
+    public function uploadFoto(Request $request, int $id): RedirectResponse
+    {
+        $passageiro = $this->buscarPassageiroDoResponsavel($id);
+
+        if (!$passageiro) {
+            return redirect()->route('responsavel.dashboard')
+                ->withErrors(['geral' => 'Passageiro não encontrado.']);
+        }
+
+        $request->validate([
+            'foto' => ['required', 'image', 'max:2048', 'mimes:jpg,jpeg,png,webp'],
+        ]);
+
+        $passageiro->load('pessoa');
+
+        // Remove qualquer foto anterior do passageiro
+        foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
+            Storage::disk('public')->delete("passageiros/{$id}/foto.{$ext}");
+        }
+
+        $ext  = $request->file('foto')->getClientOriginalExtension();
+        $path = $request->file('foto')->storeAs("passageiros/{$id}", "foto.{$ext}", 'public');
+
+        $passageiro->pessoa->update([
+            'foto_url' => Storage::disk('public')->url($path),
+        ]);
+
+        return back()->with('sucesso', 'Foto atualizada com sucesso!');
     }
 
     // ─── DESATIVAR ───────────────────────────────────────────────────────────
@@ -511,21 +491,4 @@ class PassageiroController extends Controller
         return $dados;
     }
 
-    /**
-     * Cria endereço a partir de dados com prefixo
-     */
-    private function criarEnderecoPorPrefixo(array $dados, string $prefixo): Endereco
-    {
-        return Endereco::create([
-            'logradouro'  => $dados["{$prefixo}_logradouro"],
-            'numero'      => $dados["{$prefixo}_numero"]      ?? null,
-            'complemento' => $dados["{$prefixo}_complemento"] ?? null,
-            'bairro'      => $dados["{$prefixo}_bairro"],
-            'cidade'      => $dados["{$prefixo}_cidade"],
-            'estado'      => $dados["{$prefixo}_estado"],
-            'cep'         => $dados["{$prefixo}_cep"],
-            'latitude'    => $dados["{$prefixo}_latitude"]    ?? null,
-            'longitude'   => $dados["{$prefixo}_longitude"]   ?? null,
-        ]);
-    }
 }

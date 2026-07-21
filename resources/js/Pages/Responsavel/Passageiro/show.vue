@@ -1,8 +1,9 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, useForm, router } from '@inertiajs/vue3'
-import { FlagIcon, HomeIcon, MapPinIcon } from '@heroicons/vue/24/outline'
+import { FlagIcon, HomeIcon, MapPinIcon, CameraIcon } from '@heroicons/vue/24/outline'
 import EnderecoSection from '@/Components/Responsavel/EnderecoSection.vue'
+import FlashMessage from '@/Components/UI/FlashMessage.vue'
 
 const props = defineProps({
     passageiro: { type: Object, required: true },
@@ -64,6 +65,24 @@ function salvarEnderecos() {
     })).put(route('responsavel.passageiros.enderecos.update', props.passageiro.id_passageiro))
 }
 
+// ─── FOTO ─────────────────────────────────────────────────────────────────────
+const fotoPreview = ref(null)
+const fileInput    = ref(null)
+const formFoto     = useForm({ foto: null })
+
+const fotoAtual = computed(() => fotoPreview.value ?? props.passageiro.foto_url ?? null)
+
+function handleFotoChange(event) {
+    const file = event.target.files[0]
+    if (!file) return
+    fotoPreview.value = URL.createObjectURL(file)
+    formFoto.foto = file
+    formFoto.post(route('responsavel.passageiros.foto', props.passageiro.id_passageiro), {
+        forceFormData: true,
+        onSuccess: () => { fotoPreview.value = null },
+    })
+}
+
 // ─── DESATIVAR PASSAGEIRO ────────────────────────────────────────────────────
 const confirmandoDesativar = ref(false)
 
@@ -77,8 +96,7 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
 
 <template>
     <Head :title="`${passageiro.nome} — Passageiro`" />
-
-    <link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=Nunito:wght@300;400;500;600&display=swap" rel="stylesheet" />
+    <FlashMessage />
 
     <div class="min-h-screen bg-slate-50">
         <div class="max-w-3xl mx-auto px-4 py-8">
@@ -90,7 +108,7 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                     class="text-sm text-slate-400 hover:text-slate-600 transition"
                 >← Voltar</Link>
                 <span class="text-slate-300">/</span>
-                <h1 class="text-xl font-bold text-slate-900" style="font-family:'Sora',sans-serif;">
+                <h1 class="text-xl font-bold text-slate-900">
                     {{ passageiro.nome }}
                 </h1>
                 <span
@@ -122,7 +140,53 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
 
             <!-- ── SEÇÃO: DADOS PESSOAIS ──────────────────────────────────── -->
             <div v-if="secaoAberta === 'dados'" class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
-                <h2 class="text-base font-semibold text-slate-800 mb-5" style="font-family:'Sora',sans-serif;">Dados pessoais</h2>
+                <h2 class="text-base font-semibold text-slate-800 mb-5">Dados pessoais</h2>
+
+                <!-- Foto do passageiro -->
+                <div class="flex items-center gap-5 mb-6 pb-6 border-b border-slate-100">
+                    <button
+                        type="button"
+                        @click="fileInput.click()"
+                        :disabled="formFoto.processing"
+                        class="relative group shrink-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    >
+                        <div class="w-20 h-20 rounded-2xl overflow-hidden bg-blue-100 flex items-center justify-center">
+                            <img
+                                v-if="fotoAtual"
+                                :src="fotoAtual"
+                                class="w-full h-full object-cover"
+                                :alt="passageiro.nome"
+                            />
+                            <span v-else class="text-2xl font-bold text-blue-400 select-none">
+                                {{ passageiro.nome?.[0]?.toUpperCase() }}
+                            </span>
+                        </div>
+                        <div class="absolute inset-0 rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition flex items-center justify-center">
+                            <CameraIcon class="w-6 h-6 text-white" />
+                        </div>
+                    </button>
+
+                    <div class="min-w-0">
+                        <p class="text-sm font-semibold text-slate-700 truncate">{{ passageiro.nome }}</p>
+                        <button
+                            type="button"
+                            @click="fileInput.click()"
+                            :disabled="formFoto.processing"
+                            class="text-xs text-blue-600 hover:text-blue-700 transition mt-0.5 disabled:opacity-50"
+                        >
+                            {{ formFoto.processing ? 'Enviando foto...' : 'Alterar foto' }}
+                        </button>
+                        <p v-if="formFoto.errors.foto" class="text-xs text-red-500 mt-1">{{ formFoto.errors.foto }}</p>
+                    </div>
+
+                    <input
+                        ref="fileInput"
+                        type="file"
+                        accept="image/jpeg,image/png,image/webp"
+                        class="hidden"
+                        @change="handleFotoChange"
+                    />
+                </div>
 
                 <form @submit.prevent="salvarDados" class="space-y-4">
                     <div>
@@ -211,7 +275,6 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                             type="submit"
                             :disabled="formDados.processing"
                             class="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition shadow-sm shadow-blue-200"
-                            style="font-family:'Sora',sans-serif;"
                         >
                             {{ formDados.processing ? 'Salvando...' : 'Salvar dados' }}
                         </button>
@@ -227,7 +290,7 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
                         <MapPinIcon class="w-4 h-4 text-slate-400 shrink-0" />
-                        <h2 class="text-base font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Embarques</h2>
+                        <h2 class="text-base font-semibold text-slate-800">Embarques</h2>
                     </div>
                         <button @click="adicionarEmbarque" class="text-xs font-semibold text-blue-600 hover:text-blue-700 transition">+ Adicionar</button>
                     </div>
@@ -252,7 +315,7 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                     <div class="flex items-center justify-between mb-4">
                         <div class="flex items-center gap-2">
                         <FlagIcon class="w-4 h-4 text-slate-400 shrink-0" />
-                        <h2 class="text-base font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Desembarques</h2>
+                        <h2 class="text-base font-semibold text-slate-800">Desembarques</h2>
                     </div>
                         <button @click="adicionarDesembarque" class="text-xs font-semibold text-blue-600 hover:text-blue-700 transition">+ Adicionar</button>
                     </div>
@@ -281,7 +344,7 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                 <div class="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm">
                     <div class="flex items-center gap-2 mb-4">
                         <HomeIcon class="w-4 h-4 text-slate-400 shrink-0" />
-                        <h2 class="text-base font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Residência</h2>
+                        <h2 class="text-base font-semibold text-slate-800">Residência</h2>
                     </div>
 
                     <EnderecoSection v-model="residencia" />
@@ -293,7 +356,6 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                         @click="salvarEnderecos"
                         :disabled="formEnderecos.processing"
                         class="bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white text-sm font-semibold px-6 py-2.5 rounded-xl transition shadow-sm shadow-blue-200"
-                        style="font-family:'Sora',sans-serif;"
                     >
                         {{ formEnderecos.processing ? 'Salvando...' : 'Salvar endereços' }}
                     </button>
@@ -307,7 +369,7 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                 <div v-if="vinculoAtivo" class="bg-white border border-emerald-200 rounded-2xl p-6 shadow-sm">
                     <div class="flex items-center gap-2 mb-4">
                         <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                        <h2 class="text-base font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Vínculo ativo</h2>
+                        <h2 class="text-base font-semibold text-slate-800">Vínculo ativo</h2>
                     </div>
 
                     <div class="space-y-2 text-sm">
@@ -333,12 +395,11 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                 <!-- Sem vínculo -->
                 <div v-else class="bg-white border border-slate-200 border-dashed rounded-2xl p-10 text-center shadow-sm">
                     <div class="mx-auto mb-4 h-12 w-12 rounded-2xl bg-blue-50 ring-1 ring-blue-100"></div>
-                    <p class="font-semibold text-slate-700" style="font-family:'Sora',sans-serif;">Sem van vinculada</p>
+                    <p class="font-semibold text-slate-700">Sem van vinculada</p>
                     <p class="text-sm text-slate-400 mt-1 mb-4">Busque uma van disponível para vincular este passageiro.</p>
                     <Link
                         :href="route('responsavel.dashboard')"
                         class="inline-flex bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-sm shadow-blue-200"
-                        style="font-family:'Sora',sans-serif;"
                     >
                         Buscar van no dashboard
                     </Link>

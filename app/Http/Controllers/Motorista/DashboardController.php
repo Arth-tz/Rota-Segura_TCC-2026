@@ -115,10 +115,11 @@ class DashboardController extends Controller
         $solicitacoes = $van
             ? $van->solicitacoes()
                 ->where('status', 'pendente')
-                ->with(['passageiro.pessoa', 'passageiro.enderecos.endereco', 'responsavel.usuario.pessoa', 'disponibilidades'])
+                ->with(['passageiro.pessoa', 'passageiro.enderecos.endereco', 'responsavel.usuario.pessoa', 'disponibilidades', 'vinculoAlterado.disponibilidades'])
                 ->get()
                 ->map(fn ($s) => [
                     'id_solicitacao'   => $s->id_solicitacao,
+                    'tipo'             => $s->tipo,
                     'mensagem'         => $s->mensagem,
                     'data_solicitacao' => $s->data_solicitacao?->format('d/m/Y'),
                     'passageiro' => [
@@ -144,6 +145,15 @@ class DashboardController extends Controller
                         'turno'            => $d->turno,
                         'preco_mensal'     => $d->pivot->preco_mensal,
                         'dias_contratados' => json_decode($d->pivot->dias_contratados ?? '[]', true),
+                        // dias atuais do vínculo (para alterações)
+                        'dias_atuais'      => $s->tipo === 'alteracao'
+                            ? json_decode(
+                                $s->vinculoAlterado?->disponibilidades
+                                    ->firstWhere('id_disponibilidade', $d->id_disponibilidade)
+                                    ?->pivot->dias_contratados ?? '[]',
+                                true
+                            )
+                            : null,
                     ])->all(),
                     'preco_total' => $s->disponibilidades->sum(fn ($d) => (float) $d->pivot->preco_mensal),
                 ])->values()
@@ -163,6 +173,7 @@ class DashboardController extends Controller
             'van' => $van ? [
                 'id_van'                 => $van->id_van,
                 'placa'                  => $van->placa,
+                'nome_servico'           => $van->nome_servico,
                 'modelo'                 => $van->modelo,
                 'marca'                  => $van->marca,
                 'ano_fabricacao'         => $van->ano_fabricacao,
@@ -180,8 +191,9 @@ class DashboardController extends Controller
             'solicitacoes'          => $solicitacoes,
             'solicitacoesPendentes' => $solicitacoesPendentes,
             'usuario' => [
-                'nome'  => $usuario->pessoa?->nome,
-                'email' => $usuario->email,
+                'nome'     => $usuario->pessoa?->nome,
+                'email'    => $usuario->email,
+                'foto_url' => $usuario->pessoa?->foto_url,
             ],
         ]);
     }

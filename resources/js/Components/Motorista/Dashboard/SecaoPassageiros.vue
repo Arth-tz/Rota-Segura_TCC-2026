@@ -46,7 +46,7 @@ function confirmarEncerrar() {
         <div class="rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 p-5 text-white shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
-                    <h3 class="text-lg font-bold" style="font-family:'Sora',sans-serif;">Meus passageiros</h3>
+                    <h3 class="text-lg font-bold">Meus passageiros</h3>
                     <p class="text-xs text-amber-200 mt-0.5 capitalize">{{ hojeLabel }}</p>
                 </div>
                 <div class="text-right">
@@ -80,7 +80,7 @@ function confirmarEncerrar() {
             <div class="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center mb-4">
                 <UsersIcon class="w-6 h-6 text-amber-500" />
             </div>
-            <p class="font-semibold text-slate-800" style="font-family:'Sora',sans-serif;">Nenhum passageiro vinculado</p>
+            <p class="font-semibold text-slate-800">Nenhum passageiro vinculado</p>
             <p class="mt-1 text-sm text-slate-500 max-w-xs">Quando responsáveis solicitarem vagas e você aceitar, os passageiros aparecerão aqui.</p>
         </div>
 
@@ -151,7 +151,7 @@ function confirmarEncerrar() {
                     <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
                         <div>
                             <p class="text-xs text-slate-400 uppercase tracking-widest">Encerrar vínculo</p>
-                            <h3 class="font-bold text-slate-900 mt-0.5" style="font-family:'Sora',sans-serif;">
+                            <h3 class="font-bold text-slate-900 mt-0.5">
                                 {{ passageiroAlvo?.nome }}
                             </h3>
                         </div>
@@ -182,8 +182,7 @@ function confirmarEncerrar() {
                             Cancelar
                         </button>
                         <button @click="confirmarEncerrar" :disabled="formEncerrar.processing"
-                            class="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-bold transition shadow-sm"
-                            style="font-family:'Sora',sans-serif;">
+                            class="flex-1 py-3 rounded-xl bg-red-600 hover:bg-red-700 text-white text-sm font-bold transition shadow-sm">
                             {{ formEncerrar.processing ? 'Encerrando…' : 'Confirmar encerramento' }}
                         </button>
                     </div>

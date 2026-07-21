@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Responsavel;
 
 use App\Http\Controllers\Controller;
 use App\Models\Disponibilidade;
+use App\Models\Solicitacao;
+use App\Models\Vinculo;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -48,10 +50,15 @@ class MarketplaceController extends Controller
         }
 
         if ($motorista) {
-            $query->whereHas(
-                'van.motorista.usuario.pessoa',
-                fn ($q) => $q->where('nome', 'LIKE', '%' . $motorista . '%')
-            );
+            $query->where(function ($q) use ($motorista) {
+                $q->whereHas(
+                    'van.motorista.usuario.pessoa',
+                    fn ($q2) => $q2->where('nome', 'LIKE', '%' . $motorista . '%')
+                )->orWhereHas(
+                    'van',
+                    fn ($q2) => $q2->where('nome_servico', 'LIKE', '%' . $motorista . '%')
+                );
+            });
         }
 
         foreach ($dias as $dia) {
@@ -74,8 +81,9 @@ class MarketplaceController extends Controller
                 'escolas_atendidas'  => $disp->escolas_atendidas ?? [],
                 'dias'               => $disp->dias->pluck('dia_semana')->all(),
                 'van' => [
-                    'id_van'   => $disp->van?->id_van,
-                    'placa'    => $disp->van?->placa,
+                    'id_van'       => $disp->van?->id_van,
+                    'placa'        => $disp->van?->placa,
+                    'nome_servico' => $disp->van?->nome_servico,
                     'modelo'   => $disp->van?->modelo,
                     'marca'    => $disp->van?->marca,
                     'ano'      => $disp->van?->ano_fabricacao,
@@ -89,7 +97,9 @@ class MarketplaceController extends Controller
             ];
         });
 
-        $responsavel = auth()->user()->responsavel;
+        $responsavel    = auth()->user()->responsavel;
+        $idsPassageiros = $responsavel->passageiros()->pluck('passageiro.id_passageiro')->all();
+
         $passageiros = $responsavel->passageiros()
             ->with(['pessoa', 'enderecos'])
             ->get()
@@ -102,9 +112,32 @@ class MarketplaceController extends Controller
             ])
             ->values();
 
+        // IDs de disponibilidades já vinculadas (vínculo ativo)
+        $idsVinculados = $idsPassageiros
+            ? Vinculo::whereIn('id_passageiro', $idsPassageiros)
+                ->where('status', 'ativo')
+                ->with('disponibilidades')
+                ->get()
+                ->flatMap(fn ($v) => $v->disponibilidades->pluck('id_disponibilidade'))
+                ->unique()->values()->all()
+            : [];
+
+        // IDs de disponibilidades com solicitação pendente
+        $idsSolicitados = $idsPassageiros
+            ? Solicitacao::where('id_responsavel', $responsavel->id_responsavel)
+                ->whereIn('id_passageiro', $idsPassageiros)
+                ->where('status', 'pendente')
+                ->with('disponibilidades')
+                ->get()
+                ->flatMap(fn ($s) => $s->disponibilidades->pluck('id_disponibilidade'))
+                ->unique()->values()->all()
+            : [];
+
         return Inertia::render('Responsavel/Marketplace', [
             'disponibilidades' => $disponibilidades,
             'passageiros'      => $passageiros,
+            'ids_vinculados'   => $idsVinculados,
+            'ids_solicitados'  => $idsSolicitados,
             'filtros'          => [
                 'turno'     => $turno,
                 'bairro'    => $bairro,
