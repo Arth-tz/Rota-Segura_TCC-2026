@@ -2,11 +2,12 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Notifications\Notifiable;
 
-class Usuario extends Authenticatable
+class Usuario extends Authenticatable implements MustVerifyEmail
 {
     use HasFactory, Notifiable;
 
@@ -32,10 +33,11 @@ class Usuario extends Authenticatable
     ];
 
     protected $casts = [
-        'ativo'         => 'boolean',
-        'ultimo_login'  => 'datetime',
-        'bloqueado_ate' => 'datetime',
-        'role'          => \App\Enums\UserRole::class,
+        'ativo'              => 'boolean',
+        'ultimo_login'       => 'datetime',
+        'bloqueado_ate'      => 'datetime',
+        'email_verified_at'  => 'datetime',
+        'role'               => \App\Enums\UserRole::class,
     ];
 
     public function getAuthPassword()

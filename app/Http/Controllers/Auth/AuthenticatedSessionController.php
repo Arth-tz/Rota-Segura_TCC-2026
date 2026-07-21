@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
-use App\Enums\UserRole;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -27,14 +26,9 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
         $request->session()->regenerate();
 
-        $role = $request->user()->role;
+        $routeName = $request->user()->role->dashboardRouteName();
 
-        return match ($role) {
-            UserRole::Admin      => redirect()->route('admin.dashboard'),
-            UserRole::Motorista  => redirect()->route('motorista.dashboard'),
-            UserRole::Responsavel => redirect()->route('responsavel.dashboard'),
-            default              => redirect('/'),
-        };
+        return $routeName ? redirect()->route($routeName) : redirect('/');
     }
 
     public function destroy(Request $request): RedirectResponse
