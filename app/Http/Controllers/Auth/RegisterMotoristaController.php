@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -24,7 +25,7 @@ class RegisterMotoristaController extends Controller
     public function store(RegisterMotoristaRequest $request): RedirectResponse
     {
         try {
-            DB::transaction(function () use ($request) {
+            ['pessoa' => $pessoa, 'motorista' => $motorista] = DB::transaction(function () use ($request) {
 
                 $pessoa = Pessoa::create([
                     'nome'            => $request->nome,
@@ -40,14 +41,22 @@ class RegisterMotoristaController extends Controller
                     'role'       => UserRole::Motorista,
                 ]);
 
-                $usuario->motorista()->create([
+                $motorista = $usuario->motorista()->create([
                     'cnh_numero'    => $request->cnh_numero,
                     'cnh_categoria' => $request->cnh_categoria,
                     'cnh_validade'  => $request->cnh_validade,
                 ]);
 
                 Auth::login($usuario);
+
+                return ['pessoa' => $pessoa, 'motorista' => $motorista];
             });
+
+            if ($request->hasFile('foto')) {
+                $ext  = $request->file('foto')->getClientOriginalExtension();
+                $path = $request->file('foto')->storeAs("motoristas/{$motorista->id_motorista}", "foto.{$ext}", 'public');
+                $pessoa->update(['foto_url' => Storage::disk('public')->url($path)]);
+            }
 
             return redirect()->route('motorista.van.create');
 

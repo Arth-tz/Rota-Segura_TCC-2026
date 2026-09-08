@@ -22,6 +22,8 @@ class Parada extends Model
         'observacoes',
     ];
 
+    protected $casts = [];
+
     public function rota()
     {
         return $this->belongsTo(Rota::class, 'id_rota', 'id_rota');

@@ -228,7 +228,7 @@ class RotaController extends Controller
                 'id_parada'    => $p->id_parada,
                 'ordem'        => $p->ordem,
                 'tipo'         => $p->tipo,
-                'horario_real' => $p->horario_real?->format('H:i'),
+                'horario_real' => $p->horario_real ? substr((string) $p->horario_real, 0, 5) : null,
                 'endereco' => $p->endereco ? [
                     'logradouro' => $p->endereco->logradouro,
                     'numero'     => $p->endereco->numero,
@@ -239,6 +239,7 @@ class RotaController extends Controller
                 'passageiros' => $p->passageiros->map(fn ($pas) => [
                     'id_passageiro'  => $pas->id_passageiro,
                     'nome'           => $pas->pessoa?->nome,
+                    'foto_url'       => $pas->pessoa?->foto_url,
                     'embarque_em'    => $pas->pivot->embarque_em,
                     'desembarque_em' => $pas->pivot->desembarque_em,
                 ])->values()->all(),

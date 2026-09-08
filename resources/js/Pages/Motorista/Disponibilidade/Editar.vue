@@ -3,6 +3,7 @@ import { useForm, Head, Link, router } from '@inertiajs/vue3'
 import { ArrowLeftIcon, MapIcon, ClockIcon, CalendarDaysIcon, CurrencyDollarIcon, UsersIcon, TrashIcon, HomeModernIcon, AcademicCapIcon } from '@heroicons/vue/24/outline'
 import { ref } from 'vue'
 import TagInput from '@/Components/UI/TagInput.vue'
+import RegiaoInput from '@/Components/UI/RegiaoInput.vue'
 import FlashMessage from '@/Components/UI/FlashMessage.vue'
 
 const props = defineProps({
@@ -33,14 +34,17 @@ const form = useForm({
     preco_mensal:      props.disponibilidade.preco_mensal,
     capacidade_total:  props.disponibilidade.capacidade_total,
     ativa:             props.disponibilidade.ativa,
-    bairros_atendidos: [...(props.disponibilidade.bairros_atendidos ?? [])],
+    regioes_atendidas: (props.disponibilidade.regioes_atendidas ?? []).map(r => ({ cidade: r.cidade, bairros: [...(r.bairros ?? [])] })),
     escolas_atendidas: [...(props.disponibilidade.escolas_atendidas ?? [])],
 })
 
 const confirmDelete = ref(false)
 
 function submit() {
-    form.put(route('motorista.disponibilidades.update', props.disponibilidade.id_disponibilidade))
+    form.transform((data) => ({
+        ...data,
+        regioes_atendidas: data.regioes_atendidas.filter((r) => r.cidade.trim()),
+    })).put(route('motorista.disponibilidades.update', props.disponibilidade.id_disponibilidade))
 }
 
 function excluir() {
@@ -55,7 +59,7 @@ function excluir() {
     <div class="min-h-screen bg-slate-50">
 
         <!-- Topbar -->
-        <header class="bg-gradient-to-b from-amber-500 to-amber-600 shadow-sm">
+        <header class="bg-gradient-to-b from-amber-700 to-amber-800 shadow-sm">
             <div class="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
                 <Link :href="route('motorista.dashboard')"
                     class="w-9 h-9 rounded-xl bg-white/20 hover:bg-white/30 flex items-center justify-center transition shrink-0">
@@ -63,7 +67,7 @@ function excluir() {
                 </Link>
                 <div class="flex-1 min-w-0">
                     <p class="text-xs font-semibold text-amber-200 uppercase tracking-widest">Motorista</p>
-                    <h1 class="text-lg font-bold text-white truncate">
+                    <h1 class="text-2xl font-bold text-white truncate">
                         {{ disponibilidade.nome }}
                     </h1>
                 </div>
@@ -86,12 +90,12 @@ function excluir() {
             <!-- Ativo toggle -->
             <div class="flex items-center justify-between rounded-2xl border border-slate-200 bg-white shadow-sm px-5 py-4">
                 <div>
-                    <p class="text-sm font-bold text-slate-800">Trajeto ativo</p>
+                    <p class="text-base font-semibold text-slate-800">Trajeto ativo</p>
                     <p class="text-xs text-slate-500 mt-0.5">Aparecer nas buscas dos responsáveis</p>
                 </div>
                 <button type="button" @click="form.ativa = !form.ativa"
                     class="relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200"
-                    :class="form.ativa ? 'bg-amber-500' : 'bg-slate-200'">
+                    :class="form.ativa ? 'bg-amber-700' : 'bg-slate-200'">
                     <span class="pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-md transition-transform duration-200"
                         :class="form.ativa ? 'translate-x-5' : 'translate-x-0'" />
                 </button>
@@ -100,16 +104,16 @@ function excluir() {
             <!-- Nome -->
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div class="flex items-center gap-3 px-5 py-4 border-b border-amber-100 bg-amber-50/60">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-amber-700 flex items-center justify-center shrink-0">
                         <MapIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800">Identificação</h2>
+                    <h2 class="text-base font-semibold text-slate-800">Identificação</h2>
                 </div>
                 <div class="px-5 py-4">
                     <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Nome do trajeto</label>
                     <input v-model="form.nome" type="text" maxlength="100"
                         class="w-full rounded-xl border px-4 py-2.5 text-sm text-slate-900 outline-none transition"
-                        :class="form.errors.nome ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100'" />
+                        :class="form.errors.nome ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-600 focus:ring-2 focus:ring-amber-100'" />
                     <p v-if="form.errors.nome" class="mt-1 text-xs text-red-600">{{ form.errors.nome }}</p>
                 </div>
             </div>
@@ -117,10 +121,10 @@ function excluir() {
             <!-- Turno -->
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div class="flex items-center gap-3 px-5 py-4 border-b border-amber-100 bg-amber-50/60">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-amber-700 flex items-center justify-center shrink-0">
                         <ClockIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800">Turno</h2>
+                    <h2 class="text-base font-semibold text-slate-800">Turno</h2>
                 </div>
                 <div class="px-5 py-4">
                     <div class="grid grid-cols-3 gap-3">
@@ -128,8 +132,8 @@ function excluir() {
                             @click="form.turno = t.value"
                             class="rounded-xl border py-3 text-sm font-semibold transition"
                             :class="form.turno === t.value
-                                ? 'border-amber-400 bg-amber-50 text-amber-700 shadow-sm'
-                                : 'border-slate-200 text-slate-600 hover:border-amber-200 hover:bg-amber-50/50 hover:text-amber-700'">
+                                ? 'border-amber-600 bg-amber-50 text-amber-700 shadow-sm'
+                                : 'border-slate-200 text-slate-600 hover:border-amber-300 hover:bg-slate-50 hover:text-amber-800'">
                             {{ t.label }}
                         </button>
                     </div>
@@ -140,10 +144,10 @@ function excluir() {
             <!-- Dias -->
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div class="flex items-center gap-3 px-5 py-4 border-b border-amber-100 bg-amber-50/60">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-amber-700 flex items-center justify-center shrink-0">
                         <CalendarDaysIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800">Dias da semana</h2>
+                    <h2 class="text-base font-semibold text-slate-800">Dias da semana</h2>
                 </div>
                 <div class="px-5 py-4">
                     <div class="grid grid-cols-4 sm:grid-cols-7 gap-2">
@@ -151,8 +155,8 @@ function excluir() {
                             @click="form.dias.includes(d.value) ? form.dias = form.dias.filter(x => x !== d.value) : form.dias.push(d.value)"
                             class="rounded-xl border py-2.5 text-xs font-semibold transition"
                             :class="form.dias.includes(d.value)
-                                ? 'border-amber-400 bg-amber-500 text-white shadow-sm'
-                                : 'border-slate-200 text-slate-600 hover:border-amber-200 hover:bg-amber-50/50 hover:text-amber-700'">
+                                ? 'border-amber-600 bg-amber-700 text-white shadow-sm'
+                                : 'border-slate-200 text-slate-600 hover:border-amber-300 hover:bg-slate-50 hover:text-amber-800'">
                             {{ d.label.slice(0, 3) }}
                         </button>
                     </div>
@@ -163,10 +167,10 @@ function excluir() {
             <!-- Preço e capacidade -->
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div class="flex items-center gap-3 px-5 py-4 border-b border-amber-100 bg-amber-50/60">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-amber-700 flex items-center justify-center shrink-0">
                         <CurrencyDollarIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800">Preço e vagas</h2>
+                    <h2 class="text-base font-semibold text-slate-800">Preço e vagas</h2>
                 </div>
                 <div class="px-5 py-4 grid gap-4 sm:grid-cols-2">
                     <div>
@@ -175,7 +179,7 @@ function excluir() {
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none">R$</span>
                             <input v-model="form.preco_mensal" type="number" min="0" max="9999.99" step="0.01"
                                 class="w-full rounded-xl border pl-9 pr-4 py-2.5 text-sm text-slate-900 outline-none transition"
-                                :class="form.errors.preco_mensal ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100'" />
+                                :class="form.errors.preco_mensal ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-600 focus:ring-2 focus:ring-amber-100'" />
                         </div>
                         <p v-if="form.errors.preco_mensal" class="mt-1 text-xs text-red-600">{{ form.errors.preco_mensal }}</p>
                     </div>
@@ -188,7 +192,7 @@ function excluir() {
                             <UsersIcon class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                             <input v-model="form.capacidade_total" type="number" min="1" :max="capacidade_van ?? 99"
                                 class="w-full rounded-xl border pl-9 pr-4 py-2.5 text-sm text-slate-900 outline-none transition"
-                                :class="form.errors.capacidade_total ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100'" />
+                                :class="form.errors.capacidade_total ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-600 focus:ring-2 focus:ring-amber-100'" />
                         </div>
                         <p v-if="form.errors.capacidade_total" class="mt-1 text-xs text-red-600">{{ form.errors.capacidade_total }}</p>
                     </div>
@@ -198,21 +202,21 @@ function excluir() {
             <!-- Bairros e escolas -->
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div class="flex items-center gap-3 px-5 py-4 border-b border-amber-100 bg-amber-50/60">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-amber-700 flex items-center justify-center shrink-0">
                         <HomeModernIcon class="w-4 h-4 text-white" />
                     </div>
                     <div>
-                        <h2 class="text-sm font-bold text-slate-800">Área de atuação</h2>
+                        <h2 class="text-base font-semibold text-slate-800">Área de atuação</h2>
                         <p class="text-xs text-slate-400 mt-0.5">Ajuda responsáveis a te encontrarem no marketplace</p>
                     </div>
                 </div>
                 <div class="px-5 py-4 space-y-4">
                     <div>
                         <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
-                            <HomeModernIcon class="w-3.5 h-3.5" /> Bairros atendidos
+                            <HomeModernIcon class="w-3.5 h-3.5" /> Cidades e bairros atendidos
                         </label>
-                        <TagInput v-model="form.bairros_atendidos" placeholder="Ex: Igara · pressione Enter para adicionar" />
-                        <p v-if="form.errors.bairros_atendidos" class="mt-1 text-xs text-red-600">{{ form.errors.bairros_atendidos }}</p>
+                        <RegiaoInput v-model="form.regioes_atendidas" />
+                        <p v-if="form.errors.regioes_atendidas" class="mt-1 text-xs text-red-600">{{ form.errors.regioes_atendidas }}</p>
                     </div>
                     <div>
                         <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
@@ -231,7 +235,7 @@ function excluir() {
                     Cancelar
                 </Link>
                 <button @click="submit" :disabled="form.processing"
-                    class="flex-1 flex items-center justify-center rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-60 py-3 text-sm font-bold text-white transition shadow-sm">
+                    class="flex-1 flex items-center justify-center rounded-xl bg-amber-700 hover:bg-amber-800 disabled:opacity-60 py-3 text-sm font-bold text-white transition shadow-sm shadow-amber-900/20">
                     {{ form.processing ? 'Salvando…' : 'Salvar alterações' }}
                 </button>
             </div>

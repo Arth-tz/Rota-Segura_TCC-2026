@@ -1,7 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, useForm, router } from '@inertiajs/vue3'
-import { FlagIcon, HomeIcon, MapPinIcon, CameraIcon } from '@heroicons/vue/24/outline'
+import { FlagIcon, HomeIcon, MapPinIcon, CameraIcon, ArrowLeftIcon, LinkIcon } from '@heroicons/vue/24/outline'
 import EnderecoSection from '@/Components/Responsavel/EnderecoSection.vue'
 import FlashMessage from '@/Components/UI/FlashMessage.vue'
 
@@ -105,8 +105,11 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
             <div class="flex items-center gap-3 mb-6">
                 <Link
                     :href="route('responsavel.dashboard')"
-                    class="text-sm text-slate-400 hover:text-slate-600 transition"
-                >← Voltar</Link>
+                    class="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition"
+                >
+                    <ArrowLeftIcon class="w-3.5 h-3.5" />
+                    Voltar
+                </Link>
                 <span class="text-slate-300">/</span>
                 <h1 class="text-xl font-bold text-slate-900">
                     {{ passageiro.nome }}
@@ -190,7 +193,7 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
 
                 <form @submit.prevent="salvarDados" class="space-y-4">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Nome completo</label>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">Nome completo</label>
                         <input
                             v-model="formDados.nome"
                             type="text"
@@ -203,7 +206,7 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Data de nascimento</label>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Data de nascimento</label>
                             <input
                                 v-model="formDados.data_nascimento"
                                 type="date"
@@ -214,7 +217,7 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                             <p v-if="formDados.errors.data_nascimento" class="text-red-500 text-xs mt-1">{{ formDados.errors.data_nascimento }}</p>
                         </div>
                         <div>
-                            <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">Telefone</label>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Telefone</label>
                             <input
                                 v-model="formDados.telefone"
                                 type="text"
@@ -226,7 +229,7 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
 
                     <!-- CPF somente leitura -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">CPF</label>
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">CPF</label>
                         <input
                             :value="passageiro.cpf"
                             type="text"
@@ -237,9 +240,9 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                     </div>
 
                     <div>
-                        <label class="block text-xs font-semibold text-slate-500 mb-1.5 uppercase tracking-wide">
+                        <label class="block text-sm font-medium text-slate-700 mb-1.5">
                             Observações médicas
-                            <span class="text-slate-400 normal-case font-normal">(opcional)</span>
+                            <span class="text-slate-400 font-normal">(opcional)</span>
                         </label>
                         <textarea
                             v-model="formDados.obs_medica"
@@ -301,8 +304,8 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
 
                     <div v-for="(emb, index) in embarques" :key="index" class="mb-6 pb-6 border-b border-slate-100 last:border-0 last:mb-0 last:pb-0">
                         <div class="flex items-center justify-between mb-3">
-                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                                Embarque {{ index + 1 }} {{ index === 0 ? '— Principal' : '' }}
+                            <span class="text-sm font-medium text-slate-600">
+                                Embarque {{ index + 1 }}{{ index === 0 ? ' — principal' : '' }}
                             </span>
                             <button v-if="embarques.length > 1" @click="removerEmbarque(index)" class="text-xs text-red-400 hover:text-red-600 transition">Remover</button>
                         </div>
@@ -326,13 +329,13 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
 
                     <div v-for="(des, index) in desembarques" :key="index" class="mb-6 pb-6 border-b border-slate-100 last:border-0 last:mb-0 last:pb-0">
                         <div class="flex items-center justify-between mb-3">
-                            <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                                Desembarque {{ index + 1 }} {{ index === 0 ? '— Principal' : '' }}
+                            <span class="text-sm font-medium text-slate-600">
+                                Desembarque {{ index + 1 }}{{ index === 0 ? ' — principal' : '' }}
                             </span>
                             <button v-if="desembarques.length > 1" @click="removerDesembarque(index)" class="text-xs text-red-400 hover:text-red-600 transition">Remover</button>
                         </div>
                         <div class="mb-3">
-                            <label class="block text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1.5">Nome do local</label>
+                            <label class="block text-sm font-medium text-slate-700 mb-1.5">Nome do local</label>
                             <input v-model="des.nome" placeholder="Ex: Escola Municipal João XXIII"
                                 class="w-full px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition" />
                         </div>
@@ -394,14 +397,16 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
 
                 <!-- Sem vínculo -->
                 <div v-else class="bg-white border border-slate-200 border-dashed rounded-2xl p-10 text-center shadow-sm">
-                    <div class="mx-auto mb-4 h-12 w-12 rounded-2xl bg-blue-50 ring-1 ring-blue-100"></div>
+                    <div class="mx-auto mb-4 h-12 w-12 rounded-2xl bg-blue-50 ring-1 ring-blue-100 flex items-center justify-center">
+                        <LinkIcon class="w-5 h-5 text-blue-300" />
+                    </div>
                     <p class="font-semibold text-slate-700">Sem van vinculada</p>
                     <p class="text-sm text-slate-400 mt-1 mb-4">Busque uma van disponível para vincular este passageiro.</p>
                     <Link
                         :href="route('responsavel.dashboard')"
                         class="inline-flex bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold px-5 py-2.5 rounded-xl transition shadow-sm shadow-blue-200"
                     >
-                        Buscar van no dashboard
+                        Buscar van no painel
                     </Link>
                 </div>
 

@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { Head } from '@inertiajs/vue3'
 
 import Sidebar            from '@/Components/Motorista/Layout/Sidebar.vue'
@@ -22,6 +22,9 @@ const props = defineProps({
     usuario:               { type: Object, default: null },
 })
 
+onMounted(() => { document.body.style.backgroundColor = '#92400e' })
+onUnmounted(() => { document.body.style.backgroundColor = '' })
+
 const secaoAtiva = ref('inicio')
 
 const titulos = {
@@ -34,7 +37,7 @@ const titulos = {
 </script>
 
 <template>
-    <Head title="Dashboard — Motorista" />
+    <Head title="Painel — Motorista" />
 
     <FlashMessage />
     <div class="min-h-screen flex bg-slate-100">
@@ -44,10 +47,10 @@ const titulos = {
         <div class="flex-1 flex flex-col min-w-0 bg-slate-50">
 
             <!-- Header -->
-            <header class="bg-gradient-to-b from-amber-500 to-amber-600 text-white px-6 py-4 sticky top-0 z-10 shadow-md border-b border-amber-700/40">
+            <header class="bg-gradient-to-b from-amber-700 to-amber-800 text-white px-6 py-4 sticky top-0 z-10 shadow-md border-b border-amber-900/40">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-xs uppercase tracking-widest text-amber-200 font-medium">Motorista</p>
+                        <p class="text-xs text-amber-200 font-medium">Portal Motorista</p>
                         <h2 class="text-xl font-bold mt-0.5">
                             {{ titulos[secaoAtiva] }}
                         </h2>
@@ -60,7 +63,7 @@ const titulos = {
                 </div>
             </header>
 
-            <main class="flex-1 px-4 md:px-8 py-6 pb-24 md:pb-8">
+            <main class="flex-1 min-w-0 overflow-x-hidden px-4 md:px-8 py-6 pb-24 md:pb-8">
                 <SecaoInicio
                     v-if="secaoAtiva === 'inicio'"
                     :motorista="motorista"
@@ -88,6 +91,7 @@ const titulos = {
                     v-else-if="secaoAtiva === 'perfil'"
                     :usuario="usuario"
                     :motorista="motorista"
+                    :van="van"
                 />
             </main>
         </div>

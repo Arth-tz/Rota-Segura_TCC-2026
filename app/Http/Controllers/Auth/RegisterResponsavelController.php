@@ -11,6 +11,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -24,7 +25,7 @@ class RegisterResponsavelController extends Controller
     public function store(RegisterResponsavelRequest $request): RedirectResponse
     {
         try {
-            DB::transaction(function () use ($request) {
+            ['pessoa' => $pessoa, 'responsavel' => $responsavel] = DB::transaction(function () use ($request) {
 
                 $pessoa = Pessoa::create([
                     'nome'            => $request->nome,
@@ -40,12 +41,20 @@ class RegisterResponsavelController extends Controller
                     'role'       => UserRole::Responsavel,
                 ]);
 
-                $usuario->responsavel()->create([
+                $responsavel = $usuario->responsavel()->create([
                     'tipo_responsavel' => 'representante_legal',
                 ]);
 
                 Auth::login($usuario);
+
+                return ['pessoa' => $pessoa, 'responsavel' => $responsavel];
             });
+
+            if ($request->hasFile('foto')) {
+                $ext  = $request->file('foto')->getClientOriginalExtension();
+                $path = $request->file('foto')->storeAs("responsaveis/{$responsavel->id_responsavel}", "foto.{$ext}", 'public');
+                $pessoa->update(['foto_url' => Storage::disk('public')->url($path)]);
+            }
 
             return redirect()->route('responsavel.passageiros.create');
 

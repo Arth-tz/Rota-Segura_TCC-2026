@@ -1,6 +1,6 @@
 ﻿<script setup>
 import { Link } from '@inertiajs/vue3'
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { Head, usePage } from '@inertiajs/vue3'
 
 import FlashMessage     from '@/Components/UI/FlashMessage.vue'
@@ -22,6 +22,9 @@ const props = defineProps({
 const page    = usePage()
 const usuario = computed(() => page.props.auth?.user ?? null)
 
+onMounted(() => { document.body.style.backgroundColor = '#1e40af' })
+onUnmounted(() => { document.body.style.backgroundColor = '' })
+
 const secaoAtiva = ref('inicio')
 
 const titulos = {
@@ -34,11 +37,11 @@ const titulos = {
 </script>
 
 <template>
-    <Head title="Dashboard — Responsável" />
+    <Head title="Painel — Responsável" />
 
     <FlashMessage />
 
-    <div class="min-h-screen flex bg-gradient-to-r from-sky-700 via-blue-600 to-blue-700">
+    <div class="min-h-screen flex bg-slate-100">
 
         <!-- Sidebar — só desktop -->
         <Sidebar
@@ -48,22 +51,20 @@ const titulos = {
         />
 
         <!-- Conteúdo principal -->
-        <div class="flex-1 flex flex-col min-w-0 bg-white">
+        <div class="flex-1 flex flex-col min-w-0 bg-slate-50">
 
             <!-- Header -->
-            <header class="bg-blue-600 text-white px-6 py-4 sticky top-0 z-10 shadow-md border-b border-blue-700/50">
+            <header class="bg-gradient-to-b from-blue-700 to-blue-800 text-white px-6 py-4 sticky top-0 z-10 shadow-md border-b border-blue-900/40">
                 <div class="flex items-center justify-between">
                     <div>
-                        <p class="text-xs uppercase tracking-widest text-blue-300 font-medium">Responsável</p>
-                        <h2 class="text-xl font-bold mt-0.5">
-                            {{ titulos[secaoAtiva] }}
-                        </h2>
+                        <p class="text-xs text-blue-300 font-medium">Portal Responsável</p>
+                        <h2 class="text-xl font-bold leading-tight">{{ titulos[secaoAtiva] }}</h2>
                     </div>
                 </div>
             </header>
 
             <!-- Seções -->
-            <main class="flex-1 px-4 md:px-8 py-6 pb-24 md:pb-8">
+            <main class="flex-1 min-w-0 overflow-x-hidden px-4 md:px-8 py-6 pb-24 md:pb-8">
                 <SecaoInicio
                     v-if="secaoAtiva === 'inicio'"
                     :passageiros="passageiros"

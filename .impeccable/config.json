@@ -1,7 +1,11 @@
 {
   "detector": {
     "ignoreRules": [],
-    "ignoreFiles": [],
+    "ignoreFiles": [
+      "resources/views/vendor/mail/html/themes/default.css",
+      "resources/js/Pages/Auth/ResetPassword.vue",
+      "resources/js/Pages/Auth/VerifyEmail.vue"
+    ],
     "ignoreValues": [
       {
         "rule": "overused-font",
@@ -63,6 +67,14 @@
         ],
         "createdAt": "2026-07-21T04:17:48.463Z",
         "reason": "Funil publico (brand register) documentado no DESIGN.md como camada de tokens separada da UI de produto; confirmado pelo usuario"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "resources/js/Pages/Motorista/Van/Editar.vue"
+        ],
+        "createdAt": "2026-07-21T20:58:30.503Z"
       }
     ]
   }

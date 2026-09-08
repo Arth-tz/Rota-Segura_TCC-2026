@@ -19,14 +19,14 @@ class Disponibilidade extends Model
         'preco_mensal',
         'capacidade_total',
         'ativa',
-        'bairros_atendidos',
+        'regioes_atendidas',
         'escolas_atendidas',
     ];
 
     protected $casts = [
         'ativa'              => 'boolean',
         'preco_mensal'       => 'decimal:2',
-        'bairros_atendidos'  => 'array',
+        'regioes_atendidas'  => 'array',
         'escolas_atendidas'  => 'array',
     ];
 

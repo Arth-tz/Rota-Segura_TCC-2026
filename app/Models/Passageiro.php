@@ -16,13 +16,15 @@ class Passageiro extends Model
         'id_pessoa',
         'id_usuario',
         'observacoes_medicas',
+        'foto_consentimento_lgpd',
         'ativo',
         'data_inscricao',
     ];
 
     protected $casts = [
-        'ativo'          => 'boolean',
-        'data_inscricao' => 'date',
+        'ativo'                   => 'boolean',
+        'foto_consentimento_lgpd' => 'boolean',
+        'data_inscricao'          => 'date',
     ];
 
     public function pessoa()

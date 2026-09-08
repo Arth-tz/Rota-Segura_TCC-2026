@@ -55,7 +55,7 @@ class DashboardController extends Controller
                 'capacidade_total'   => $d->capacidade_total,
                 'ativa'              => $d->ativa,
                 'dias'               => $d->dias->pluck('dia_semana')->values(),
-                'bairros_atendidos'  => $d->bairros_atendidos ?? [],
+                'regioes_atendidas'  => $d->regioes_atendidas ?? [],
                 'escolas_atendidas'  => $d->escolas_atendidas ?? [],
             ])->values()
             : collect();
@@ -169,6 +169,8 @@ class DashboardController extends Controller
                 'cnh_validade'     => $motorista->cnh_validade?->format('Y-m-d'),
                 'status_aprovacao' => $motorista->status_aprovacao,
                 'motivo_rejeicao'  => $motorista->motivo_rejeicao,
+                'has_cnh_foto'     => !empty($motorista->cnh_foto_url),
+                'has_certidao'     => !empty($motorista->certidao_antecedentes_url),
             ] : null,
             'van' => $van ? [
                 'id_van'                 => $van->id_van,
@@ -184,6 +186,9 @@ class DashboardController extends Controller
                 'documentacao_completa'  => $van->documentacao_completa,
                 'motivo_rejeicao'        => $van->motivo_rejeicao,
                 'foto_url'               => $van->foto_url,
+                'has_crlv'               => !empty($van->crlv_url),
+                'has_seguro'             => !empty($van->seguro_url),
+                'has_autorizacao'        => !empty($van->autorizacao_municipal_url),
             ] : null,
             'passageiros'           => $passageiros,
             'disponibilidades'      => $disponibilidades,

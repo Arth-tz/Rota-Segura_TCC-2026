@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import axios from 'axios'
 import {
     MapPinIcon,
@@ -25,6 +25,15 @@ const TURNOS = { manha: 'Manhã', tarde: 'Tarde', integral: 'Integral' }
 
 function turnoIcon(t) {
     return t === 'manha' ? SunIcon : t === 'tarde' ? MoonIcon : ClockIcon
+}
+
+// Mesma janela heurística usada no lado do responsável (AcompanharController::estaAtrasado)
+function trajetoAtrasado(trajeto) {
+    if (trajeto.rota_ativa || !trajeto.passageiros.length) return false
+    const agora = new Date().toTimeString().slice(0, 5)
+    if (trajeto.turno === 'manha') return agora > '09:30'
+    if (trajeto.turno === 'tarde') return agora > '15:00'
+    return false
 }
 
 // Cópia local mutável — inclui rota_ativa por disponibilidade
@@ -124,6 +133,8 @@ async function enviarPosicao(trajeto, rotaId, pos) {
 
 onUnmounted(() => {
     Object.keys(watchIds.value).forEach(did => pararGPS(did))
+    window.removeEventListener('online', atualizarOnline)
+    window.removeEventListener('offline', atualizarOnline)
 })
 
 // ── Iniciar / Encerrar ────────────────────────────────────────────────────────
@@ -145,9 +156,34 @@ async function iniciarTrajeto(trajetoIdx) {
     }
 }
 
+function progressoTrajeto(trajeto) {
+    if (!trajeto.rota_ativa) return { concluidas: 0, total: 0 }
+    const desembarques = trajeto.rota_ativa.paradas.filter(p => p.tipo === 'desembarque').flatMap(p => p.passageiros)
+    return { concluidas: desembarques.filter(p => p.desembarque_em).length, total: desembarques.length }
+}
+
+function paradaCompleta(parada) {
+    return parada.passageiros.every(p => parada.tipo === 'embarque' ? p.embarque_em : p.desembarque_em)
+}
+
+function proximaParadaOrdem(trajeto) {
+    if (!trajeto.rota_ativa) return null
+    return trajeto.rota_ativa.paradas.find(p => !paradaCompleta(p))?.ordem ?? null
+}
+
 async function encerrarTrajeto(trajetoIdx) {
     const trajeto = listas.value[trajetoIdx]
     if (!trajeto.rota_ativa) return
+
+    const { concluidas, total } = progressoTrajeto(trajeto)
+    const pendentes = total - concluidas
+    if (pendentes > 0) {
+        const confirma = confirm(
+            `Ainda há ${pendentes} passageiro${pendentes > 1 ? 's' : ''} sem confirmação de desembarque. Encerrar o trajeto mesmo assim?`
+        )
+        if (!confirma) return
+    }
+
     trajeto.encerrando = true
     try {
         await axios.post(route('motorista.rotas.encerrar', trajeto.rota_ativa.id_rota))
@@ -160,14 +196,26 @@ async function encerrarTrajeto(trajetoIdx) {
     }
 }
 
+// ── Conectividade ──────────────────────────────────────────────────────────
+
+const online = ref(navigator.onLine)
+function atualizarOnline() { online.value = navigator.onLine }
+
+onMounted(() => {
+    window.addEventListener('online', atualizarOnline)
+    window.addEventListener('offline', atualizarOnline)
+})
+
 // ── Confirmar embarque / desembarque ─────────────────────────────────────────
 
-const confirmando = ref({}) // key: `${rotaId}-${paradaId}-${passageiroId}`
+const confirmando = ref({})       // key: `${rotaId}-${paradaId}-${passageiroId}`
+const errosConfirmacao = ref({})  // mesma key → mensagem de erro
 
 async function confirmar(trajeto, parada, passageiro, tipo) {
     const key = `${trajeto.rota_ativa.id_rota}-${parada.id_parada}-${passageiro.id_passageiro}`
     if (confirmando.value[key]) return
     confirmando.value[key] = true
+    delete errosConfirmacao.value[key]
 
     try {
         const { data } = await axios.post(
@@ -182,7 +230,9 @@ async function confirmar(trajeto, parada, passageiro, tipo) {
         passageiro[campo] = data.hora
         if (!parada.horario_real) parada.horario_real = data.hora
     } catch {
-        // ignora — botão volta ao estado normal
+        errosConfirmacao.value[key] = online.value
+            ? 'Não confirmou. Toque para tentar de novo.'
+            : 'Sem internet — toque para tentar quando a conexão voltar.'
     } finally {
         delete confirmando.value[key]
     }
@@ -198,9 +248,16 @@ listas.value.forEach((t) => {
     <div class="space-y-4">
 
         <!-- Header -->
-        <div class="rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 p-5 text-white shadow-lg">
+        <div class="rounded-2xl bg-gradient-to-br from-amber-700 to-amber-800 p-5 text-white shadow-lg">
             <h3 class="text-lg font-bold">Meus trajetos</h3>
             <p class="text-sm text-amber-100 mt-1">Gerencie a ordem de embarque e inicie os trajetos de hoje.</p>
+        </div>
+
+        <!-- Sem internet -->
+        <div v-if="!online"
+            class="flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 font-medium">
+            <ExclamationTriangleIcon class="w-4 h-4 shrink-0" />
+            Sem conexão com a internet. Embarques, desembarques e localização não estão sendo enviados.
         </div>
 
         <!-- Empty state -->
@@ -231,6 +288,11 @@ listas.value.forEach((t) => {
                 <span v-else-if="trajeto.rota_ativa" class="flex items-center gap-1 text-xs text-amber-700 font-medium animate-pulse">
                     <SignalIcon class="w-3.5 h-3.5" />
                     Em andamento
+                </span>
+                <span v-else-if="trajetoAtrasado(trajeto)"
+                    class="flex items-center gap-1 text-xs text-red-600 font-semibold bg-red-50 border border-red-200 rounded-full px-2 py-0.5">
+                    <ExclamationTriangleIcon class="w-3.5 h-3.5" />
+                    Ainda não iniciado
                 </span>
                 <span v-else class="text-xs text-slate-400">{{ trajeto.passageiros.length }} passageiro{{ trajeto.passageiros.length !== 1 ? 's' : '' }} hoje</span>
                 <span v-if="trajeto.salvando" class="text-xs text-amber-600 animate-pulse">Salvando…</span>
@@ -274,13 +336,13 @@ listas.value.forEach((t) => {
                             <button @click="mover(ti, pi, -1)"
                                 :disabled="pi === 0 || trajeto.salvando"
                                 class="w-6 h-6 rounded-lg flex items-center justify-center transition"
-                                :class="pi === 0 ? 'text-slate-200 cursor-not-allowed' : 'text-slate-500 hover:bg-amber-100 hover:text-amber-700'">
+                                :class="pi === 0 ? 'text-slate-200 cursor-not-allowed' : 'text-slate-500 hover:bg-slate-100 hover:text-amber-800'">
                                 <ChevronUpIcon class="w-3.5 h-3.5" />
                             </button>
                             <button @click="mover(ti, pi, +1)"
                                 :disabled="pi === trajeto.passageiros.length - 1 || trajeto.salvando"
                                 class="w-6 h-6 rounded-lg flex items-center justify-center transition"
-                                :class="pi === trajeto.passageiros.length - 1 ? 'text-slate-200 cursor-not-allowed' : 'text-slate-500 hover:bg-amber-100 hover:text-amber-700'">
+                                :class="pi === trajeto.passageiros.length - 1 ? 'text-slate-200 cursor-not-allowed' : 'text-slate-500 hover:bg-slate-100 hover:text-amber-800'">
                                 <ChevronDownIcon class="w-3.5 h-3.5" />
                             </button>
                         </div>
@@ -291,8 +353,8 @@ listas.value.forEach((t) => {
                 <div class="px-5 py-4 border-t border-slate-100">
                     <button @click="iniciarTrajeto(ti)"
                         :disabled="trajeto.iniciando || !trajeto.passageiros.length"
-                        class="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition shadow-lg shadow-amber-200 disabled:opacity-50"
-                        :class="trajeto.passageiros.length ? 'bg-amber-500 hover:bg-amber-600 text-white' : 'bg-slate-100 text-slate-400 cursor-not-allowed'">
+                        class="w-full flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition disabled:opacity-50"
+                        :class="trajeto.passageiros.length ? 'bg-amber-700 hover:bg-amber-800 text-white shadow-lg shadow-amber-900/20' : 'bg-amber-100 text-amber-600 cursor-not-allowed'">
                         <PlayIcon class="w-4 h-4" />
                         {{ trajeto.iniciando ? 'Iniciando…' : 'Iniciar trajeto' }}
                     </button>
@@ -313,23 +375,49 @@ listas.value.forEach((t) => {
                     </p>
                 </div>
 
-                <div v-else class="divide-y divide-amber-100">
+                <template v-else>
+
+                <!-- Progresso do trajeto -->
+                <div class="px-5 pt-4 pb-1">
+                    <div class="flex items-center justify-between text-xs font-semibold text-slate-500 mb-1.5">
+                        <span>Progresso</span>
+                        <span>{{ progressoTrajeto(trajeto).concluidas }} de {{ progressoTrajeto(trajeto).total }} desembarcados</span>
+                    </div>
+                    <div class="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+                        <div class="h-full bg-amber-600 transition-all duration-300 ease-out"
+                            :style="{ width: (progressoTrajeto(trajeto).total ? progressoTrajeto(trajeto).concluidas / progressoTrajeto(trajeto).total * 100 : 0) + '%' }">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="divide-y divide-amber-100">
                     <div v-for="parada in trajeto.rota_ativa.paradas" :key="parada.id_parada"
-                        class="px-5 py-4">
+                        class="px-5 py-4 transition-colors"
+                        :class="{
+                            'bg-amber-50/70': parada.ordem === proximaParadaOrdem(trajeto),
+                            'opacity-55': paradaCompleta(parada) && parada.ordem !== proximaParadaOrdem(trajeto),
+                        }">
 
                         <!-- Cabeçalho da parada -->
                         <div class="flex items-start gap-2 mb-3">
                             <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5"
-                                :class="parada.tipo === 'embarque' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'">
-                                {{ parada.ordem }}
+                                :class="paradaCompleta(parada)
+                                    ? 'bg-slate-100 text-slate-400'
+                                    : parada.tipo === 'embarque' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'">
+                                <CheckIcon v-if="paradaCompleta(parada)" class="w-3.5 h-3.5" />
+                                <template v-else>{{ parada.ordem }}</template>
                             </span>
                             <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-2">
+                                <div class="flex items-center gap-2 flex-wrap">
                                     <span class="text-xs font-semibold uppercase tracking-wide"
                                         :class="parada.tipo === 'embarque' ? 'text-emerald-600' : 'text-blue-600'">
                                         {{ parada.tipo === 'embarque' ? 'Embarque' : 'Desembarque' }}
                                     </span>
-                                    <span v-if="parada.horario_real" class="text-xs text-slate-400">
+                                    <span v-if="parada.ordem === proximaParadaOrdem(trajeto)"
+                                        class="text-xs font-bold text-amber-700 bg-amber-100 rounded-full px-2 py-0.5">
+                                        Próxima parada
+                                    </span>
+                                    <span v-else-if="parada.horario_real" class="text-xs text-slate-400">
                                         {{ parada.horario_real }}
                                     </span>
                                 </div>
@@ -342,31 +430,49 @@ listas.value.forEach((t) => {
 
                         <!-- Passageiros desta parada -->
                         <ul class="space-y-2 pl-8">
-                            <li v-for="pas in parada.passageiros" :key="pas.id_passageiro"
-                                class="flex items-center gap-2">
-                                <p class="flex-1 text-sm font-medium text-slate-700 truncate">{{ pas.nome }}</p>
+                            <li v-for="pas in parada.passageiros" :key="pas.id_passageiro" class="space-y-1">
+                                <div class="flex items-center gap-2.5">
+                                    <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0 text-xs font-bold overflow-hidden"
+                                        :class="parada.tipo === 'embarque' ? 'bg-emerald-100 text-emerald-700' : 'bg-blue-100 text-blue-700'">
+                                        <img v-if="pas.foto_url" :src="pas.foto_url" class="w-full h-full object-cover" :alt="pas.nome" />
+                                        <template v-else>{{ pas.nome?.charAt(0)?.toUpperCase() }}</template>
+                                    </div>
+                                    <p class="flex-1 text-sm font-medium text-slate-700 truncate">{{ pas.nome }}</p>
 
-                                <!-- Confirmado -->
-                                <span v-if="parada.tipo === 'embarque' ? pas.embarque_em : pas.desembarque_em"
-                                    class="flex items-center gap-1 text-xs font-semibold text-emerald-600 px-2 py-1 bg-emerald-50 rounded-lg">
-                                    <CheckIcon class="w-3.5 h-3.5" />
-                                    {{ parada.tipo === 'embarque' ? pas.embarque_em : pas.desembarque_em }}
-                                </span>
+                                    <!-- Confirmado -->
+                                    <span v-if="parada.tipo === 'embarque' ? pas.embarque_em : pas.desembarque_em"
+                                        class="flex items-center gap-1 text-xs font-semibold text-emerald-600 px-2 py-1 bg-emerald-50 rounded-lg">
+                                        <CheckIcon class="w-3.5 h-3.5" />
+                                        {{ parada.tipo === 'embarque' ? pas.embarque_em : pas.desembarque_em }}
+                                    </span>
 
-                                <!-- Botão confirmar -->
-                                <button v-else
-                                    @click="confirmar(trajeto, parada, pas, parada.tipo)"
-                                    :disabled="confirmando[`${trajeto.rota_ativa.id_rota}-${parada.id_parada}-${pas.id_passageiro}`]"
-                                    class="text-xs font-semibold px-3 py-1.5 rounded-lg transition disabled:opacity-50"
-                                    :class="parada.tipo === 'embarque'
-                                        ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
-                                        : 'bg-blue-500 hover:bg-blue-600 text-white'">
-                                    {{ parada.tipo === 'embarque' ? 'Embarcou' : 'Chegou' }}
-                                </button>
+                                    <!-- Botão confirmar -->
+                                    <button v-else
+                                        @click="confirmar(trajeto, parada, pas, parada.tipo)"
+                                        :disabled="confirmando[`${trajeto.rota_ativa.id_rota}-${parada.id_parada}-${pas.id_passageiro}`]"
+                                        class="text-xs font-semibold px-3 py-2 rounded-lg transition disabled:opacity-50 shadow-sm"
+                                        :class="errosConfirmacao[`${trajeto.rota_ativa.id_rota}-${parada.id_parada}-${pas.id_passageiro}`]
+                                            ? 'bg-red-500 hover:bg-red-600 text-white'
+                                            : parada.tipo === 'embarque'
+                                                ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                                                : 'bg-blue-500 hover:bg-blue-600 text-white'">
+                                        {{ confirmando[`${trajeto.rota_ativa.id_rota}-${parada.id_parada}-${pas.id_passageiro}`]
+                                            ? '…'
+                                            : errosConfirmacao[`${trajeto.rota_ativa.id_rota}-${parada.id_parada}-${pas.id_passageiro}`]
+                                                ? 'Tentar de novo'
+                                                : (parada.tipo === 'embarque' ? 'Embarcou' : 'Chegou') }}
+                                    </button>
+                                </div>
+                                <p v-if="errosConfirmacao[`${trajeto.rota_ativa.id_rota}-${parada.id_parada}-${pas.id_passageiro}`]"
+                                    class="text-xs text-red-600 pl-9">
+                                    {{ errosConfirmacao[`${trajeto.rota_ativa.id_rota}-${parada.id_parada}-${pas.id_passageiro}`] }}
+                                </p>
                             </li>
                         </ul>
                     </div>
                 </div>
+
+                </template>
 
                 <!-- Botão encerrar -->
                 <div class="px-5 py-4 border-t border-amber-100 bg-amber-50/40">

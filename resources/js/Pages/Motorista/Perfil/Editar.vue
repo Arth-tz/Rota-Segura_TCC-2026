@@ -34,6 +34,15 @@ function handleFotoChange(event) {
 
 function submit() { form.put(route('motorista.perfil.update')) }
 
+function maskTelefone(e) {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 11)
+    if (v.length > 10)     v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3')
+    else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d+)$/, '($1) $2-$3')
+    else if (v.length > 2) v = v.replace(/^(\d{2})(\d+)$/, '($1) $2')
+    e.target.value = v
+    form.telefone = v
+}
+
 function formatCpf(cpf) {
     if (!cpf) return '—'
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
@@ -66,7 +75,7 @@ const statusConfig = {
     <div class="min-h-screen bg-slate-50">
 
         <!-- Topbar -->
-        <header class="bg-gradient-to-b from-amber-500 to-amber-600 shadow-sm">
+        <header class="bg-gradient-to-b from-amber-700 to-amber-800 shadow-sm">
             <div class="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
                 <Link :href="route('motorista.dashboard')"
                     class="w-9 h-9 rounded-xl bg-white/20 hover:bg-white/30 flex items-center justify-center transition shrink-0">
@@ -86,10 +95,10 @@ const statusConfig = {
                 <div class="px-5 py-5">
                     <div class="flex items-center gap-5">
                         <button type="button" @click="fileInput.click()" :disabled="formFoto.processing"
-                            class="relative group shrink-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-400">
+                            class="relative group shrink-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600">
                             <div class="w-20 h-20 rounded-2xl overflow-hidden bg-amber-100 flex items-center justify-center">
                                 <img v-if="fotoAtual" :src="fotoAtual" class="w-full h-full object-cover" alt="Foto de perfil" />
-                                <span v-else class="text-2xl font-bold text-amber-400">
+                                <span v-else class="text-2xl font-bold text-amber-600">
                                     {{ dados.nome?.[0]?.toUpperCase() }}
                                 </span>
                             </div>
@@ -100,7 +109,7 @@ const statusConfig = {
                         <div class="min-w-0">
                             <p class="text-sm font-semibold text-slate-700 truncate">{{ dados.nome }}</p>
                             <button type="button" @click="fileInput.click()" :disabled="formFoto.processing"
-                                class="text-xs text-amber-600 hover:text-amber-700 transition mt-0.5">
+                                class="text-xs text-amber-700 hover:text-amber-800 transition mt-0.5">
                                 {{ formFoto.processing ? 'Enviando foto…' : 'Alterar foto de perfil' }}
                             </button>
                             <p v-if="formFoto.errors.foto" class="text-xs text-red-500 mt-1">{{ formFoto.errors.foto }}</p>
@@ -115,7 +124,7 @@ const statusConfig = {
             <!-- ── SEÇÃO 1: Dados pessoais (editáveis) ── -->
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div class="flex items-center gap-3 px-5 py-4 border-b border-amber-100 bg-amber-50/60">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-amber-700 flex items-center justify-center shrink-0">
                         <UserIcon class="w-4 h-4 text-white" />
                     </div>
                     <div>
@@ -129,7 +138,7 @@ const statusConfig = {
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Nome completo</label>
                         <input v-model="form.nome" type="text"
                             class="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition"
-                            :class="form.errors.nome ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100'" />
+                            :class="form.errors.nome ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-600 focus:ring-2 focus:ring-amber-100'" />
                         <p v-if="form.errors.nome" class="mt-1 text-xs text-red-600">{{ form.errors.nome }}</p>
                     </div>
 
@@ -137,9 +146,10 @@ const statusConfig = {
                         <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
                             <span class="flex items-center gap-1"><PhoneIcon class="w-3.5 h-3.5" />Telefone / WhatsApp</span>
                         </label>
-                        <input v-model="form.telefone" type="tel" placeholder="(51) 99999-9999"
+                        <input :value="form.telefone" @input="maskTelefone"
+                            type="tel" placeholder="(00) 00000-0000" maxlength="15"
                             class="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition"
-                            :class="form.errors.telefone ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100'" />
+                            :class="form.errors.telefone ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-600 focus:ring-2 focus:ring-amber-100'" />
                         <p class="mt-1 text-xs text-slate-400">Usado para contato pelos responsáveis no marketplace</p>
                         <p v-if="form.errors.telefone" class="mt-1 text-xs text-red-600">{{ form.errors.telefone }}</p>
                     </div>
@@ -211,7 +221,7 @@ const statusConfig = {
             <!-- ── SEÇÃO 4: Acesso (editável) ── -->
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div class="flex items-center gap-3 px-5 py-4 border-b border-amber-100 bg-amber-50/60">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-amber-700 flex items-center justify-center shrink-0">
                         <LockClosedIcon class="w-4 h-4 text-white" />
                     </div>
                     <div>
@@ -227,7 +237,7 @@ const statusConfig = {
                         </label>
                         <input v-model="form.email" type="email" autocomplete="off"
                             class="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition"
-                            :class="form.errors.email ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100'" />
+                            :class="form.errors.email ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-600 focus:ring-2 focus:ring-amber-100'" />
                         <p v-if="form.errors.email" class="mt-1 text-xs text-red-600">{{ form.errors.email }}</p>
                     </div>
 
@@ -236,13 +246,13 @@ const statusConfig = {
                             <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Nova senha</label>
                             <input v-model="form.senha" type="password" autocomplete="new-password" placeholder="Deixe em branco para manter"
                                 class="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition"
-                                :class="form.errors.senha ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100'" />
+                                :class="form.errors.senha ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-600 focus:ring-2 focus:ring-amber-100'" />
                             <p v-if="form.errors.senha" class="mt-1 text-xs text-red-600">{{ form.errors.senha }}</p>
                         </div>
                         <div>
                             <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Confirmar senha</label>
                             <input v-model="form.senha_confirmation" type="password" autocomplete="new-password"
-                                class="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition border-slate-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100" />
+                                class="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition border-slate-200 focus:border-amber-600 focus:ring-2 focus:ring-amber-100" />
                         </div>
                     </div>
 
@@ -256,7 +266,7 @@ const statusConfig = {
                     Cancelar
                 </Link>
                 <button @click="submit" :disabled="form.processing"
-                    class="flex-1 flex items-center justify-center rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-60 py-3 text-sm font-bold text-white transition shadow-sm">
+                    class="flex-1 flex items-center justify-center rounded-xl bg-amber-700 hover:bg-amber-800 disabled:opacity-60 py-3 text-sm font-bold text-white transition shadow-sm shadow-amber-900/20">
                     {{ form.processing ? 'Salvando…' : 'Salvar alterações' }}
                 </button>
             </div>

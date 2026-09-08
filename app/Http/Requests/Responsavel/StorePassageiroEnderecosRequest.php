@@ -81,6 +81,7 @@ class StorePassageiroEnderecosRequest extends FormRequest
             'desembarque_longitude' => $enderecoRules['longitude'],
 
             'desembarque_nome' => ['nullable', 'string', 'max:150'],
+            'foto'             => ['nullable', 'image', 'max:2048', 'mimes:jpg,jpeg,png,webp'],
         ];
     }
 }

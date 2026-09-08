@@ -43,7 +43,7 @@ function confirmarEncerrar() {
     <div class="space-y-4">
 
         <!-- Header -->
-        <div class="rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 p-5 text-white shadow-lg">
+        <div class="rounded-2xl bg-gradient-to-br from-amber-700 to-amber-800 p-5 text-white shadow-lg">
             <div class="flex items-center justify-between">
                 <div>
                     <h3 class="text-lg font-bold">Meus passageiros</h3>
@@ -78,7 +78,7 @@ function confirmarEncerrar() {
         <div v-if="!passageiros.length"
             class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-amber-200 bg-amber-50/50 py-14 px-6 text-center">
             <div class="w-12 h-12 rounded-2xl bg-amber-100 flex items-center justify-center mb-4">
-                <UsersIcon class="w-6 h-6 text-amber-500" />
+                <UsersIcon class="w-6 h-6 text-amber-700" />
             </div>
             <p class="font-semibold text-slate-800">Nenhum passageiro vinculado</p>
             <p class="mt-1 text-sm text-slate-500 max-w-xs">Quando responsáveis solicitarem vagas e você aceitar, os passageiros aparecerão aqui.</p>
@@ -127,7 +127,7 @@ function confirmarEncerrar() {
                 <div class="flex items-center gap-2">
                     <div class="flex-1 rounded-xl bg-slate-50 px-3 py-2 text-xs">
                         <p class="text-slate-400">Mensalidade</p>
-                        <p class="font-bold text-amber-600 mt-0.5">R$ {{ Number(p.preco_total).toFixed(2).replace('.', ',') }}</p>
+                        <p class="font-bold text-amber-700 mt-0.5">R$ {{ Number(p.preco_total).toFixed(2).replace('.', ',') }}</p>
                     </div>
                     <button @click="abrirEncerrar(p)"
                         class="shrink-0 flex items-center gap-1 text-xs font-semibold text-red-500 hover:text-red-700 border border-red-200 hover:bg-red-50 px-2.5 py-1.5 rounded-xl transition">

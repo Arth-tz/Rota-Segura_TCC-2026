@@ -34,6 +34,10 @@ class VanMotoristaSeeder extends Seeder
             'status_aprovacao'       => 'aprovado',
             'status_operacional'     => 'ativa',
             'documentacao_completa'  => false,
+            // Fotos placeholder para aparecer no marketplace
+            'foto_url'              => 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80',
+            'foto_verso_url'        => 'https://images.unsplash.com/photo-1570125909232-eb263c188f7e?w=800&q=80',
+            'foto_interior_url'     => 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&q=80',
         ]);
 
         // Disponibilidade manhã
@@ -44,7 +48,7 @@ class VanMotoristaSeeder extends Seeder
             'preco_mensal'      => 350.00,
             'capacidade_total'  => 12,
             'ativa'             => true,
-            'bairros_atendidos' => ['Igara', 'Olaria', 'NSG'],
+            'regioes_atendidas' => [['cidade' => 'Canoas', 'bairros' => ['Igara', 'Olaria', 'NSG']]],
             'escolas_atendidas' => ['E.M. Nossa Senhora das Graças', 'EMEF Presidente Vargas'],
         ]);
         $manha->dias()->createMany([
@@ -60,7 +64,7 @@ class VanMotoristaSeeder extends Seeder
             'preco_mensal'      => 350.00,
             'capacidade_total'  => 12,
             'ativa'             => true,
-            'bairros_atendidos' => ['Igara', 'Olaria', 'NSG'],
+            'regioes_atendidas' => [['cidade' => 'Canoas', 'bairros' => ['Igara', 'Olaria', 'NSG']]],
             'escolas_atendidas' => ['E.M. Nossa Senhora das Graças', 'EMEF Presidente Vargas'],
         ]);
         $tarde->dias()->createMany([

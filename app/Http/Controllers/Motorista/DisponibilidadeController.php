@@ -46,13 +46,16 @@ class DisponibilidadeController extends Controller
             'dias.*'            => 'in:seg,ter,qua,qui,sex,sab,dom',
             'preco_mensal'      => 'required|numeric|min:0|max:9999.99',
             'capacidade_total'  => 'required|integer|min:1|max:' . $van->capacidade_passageiros,
-            'bairros_atendidos' => 'nullable|array',
-            'bairros_atendidos.*' => 'string|max:100',
+            'regioes_atendidas'          => 'nullable|array',
+            'regioes_atendidas.*.cidade' => 'required|string|max:100',
+            'regioes_atendidas.*.bairros'   => 'nullable|array',
+            'regioes_atendidas.*.bairros.*' => 'string|max:100',
             'escolas_atendidas' => 'nullable|array',
             'escolas_atendidas.*' => 'string|max:150',
         ], [
             'dias.required'        => 'Selecione ao menos um dia da semana.',
             'capacidade_total.max' => "A capacidade não pode exceder a da van ({$van->capacidade_passageiros}).",
+            'regioes_atendidas.*.cidade.required' => 'Informe o nome da cidade em cada região adicionada.',
         ]);
 
         DB::transaction(function () use ($dados, $van) {
@@ -63,7 +66,7 @@ class DisponibilidadeController extends Controller
                 'preco_mensal'      => $dados['preco_mensal'],
                 'capacidade_total'  => $dados['capacidade_total'],
                 'ativa'             => true,
-                'bairros_atendidos' => $dados['bairros_atendidos'] ?? [],
+                'regioes_atendidas' => $dados['regioes_atendidas'] ?? [],
                 'escolas_atendidas' => $dados['escolas_atendidas'] ?? [],
             ]);
 
@@ -95,7 +98,7 @@ class DisponibilidadeController extends Controller
                 'capacidade_total'   => $disp->capacidade_total,
                 'ativa'              => $disp->ativa,
                 'dias'               => $disp->dias->pluck('dia_semana')->values(),
-                'bairros_atendidos'  => $disp->bairros_atendidos ?? [],
+                'regioes_atendidas'  => $disp->regioes_atendidas ?? [],
                 'escolas_atendidas'  => $disp->escolas_atendidas ?? [],
             ],
             'capacidade_van' => $van->capacidade_passageiros,
@@ -119,10 +122,14 @@ class DisponibilidadeController extends Controller
             'preco_mensal'        => 'required|numeric|min:0|max:9999.99',
             'capacidade_total'    => 'required|integer|min:1|max:' . $van->capacidade_passageiros,
             'ativa'               => 'boolean',
-            'bairros_atendidos'   => 'nullable|array',
-            'bairros_atendidos.*' => 'string|max:100',
+            'regioes_atendidas'          => 'nullable|array',
+            'regioes_atendidas.*.cidade' => 'required|string|max:100',
+            'regioes_atendidas.*.bairros'   => 'nullable|array',
+            'regioes_atendidas.*.bairros.*' => 'string|max:100',
             'escolas_atendidas'   => 'nullable|array',
             'escolas_atendidas.*' => 'string|max:150',
+        ], [
+            'regioes_atendidas.*.cidade.required' => 'Informe o nome da cidade em cada região adicionada.',
         ]);
 
         DB::transaction(function () use ($dados, $disp) {
@@ -132,7 +139,7 @@ class DisponibilidadeController extends Controller
                 'preco_mensal'      => $dados['preco_mensal'],
                 'capacidade_total'  => $dados['capacidade_total'],
                 'ativa'             => $dados['ativa'] ?? $disp->ativa,
-                'bairros_atendidos' => $dados['bairros_atendidos'] ?? [],
+                'regioes_atendidas' => $dados['regioes_atendidas'] ?? [],
                 'escolas_atendidas' => $dados['escolas_atendidas'] ?? [],
             ]);
 

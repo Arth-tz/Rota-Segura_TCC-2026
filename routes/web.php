@@ -13,6 +13,7 @@ use App\Http\Controllers\Motorista\VanController;
 use App\Http\Controllers\Motorista\DisponibilidadeController;
 use App\Http\Controllers\Motorista\VinculoController;
 use App\Http\Controllers\Motorista\PerfilController as MotoristaPerfilController;
+use App\Http\Controllers\Motorista\DocumentosPessoaisController;
 use App\Http\Controllers\Motorista\RotaController;
 use App\Http\Controllers\Responsavel\AcompanharController;
 use App\Http\Controllers\Responsavel\DashboardController as ResponsavelDashboard;
@@ -115,11 +116,25 @@ Route::middleware(['auth', 'role:responsavel'])->prefix('responsavel')->name('re
 //-- Rota com autenticação para dashboard de Motorista (controller MotoristaDashboard)
 Route::middleware(['auth', 'role:motorista'/*, 'verified' //isso aqui faria validacao de email (mandaria cod para confirmacao no email*/ ])->prefix('motorista')->name('motorista.')->group(function(){
     Route::get('/dashboard', [MotoristaDashboard::class, 'index'])->name('dashboard');
-    Route::get('/van/criar',  [VanController::class, 'create'])->name('van.create');
-    Route::post('/van',       [VanController::class, 'store'])->name('van.store');
-    Route::get('/van/editar', [VanController::class, 'edit'])->name('van.edit');
-    Route::put('/van',        [VanController::class, 'update'])->name('van.update');
-    Route::post('/van/foto',  [VanController::class, 'uploadFoto'])->name('van.foto');
+    Route::get('/van/criar',      [VanController::class, 'create'])->name('van.create');
+    Route::post('/van',           [VanController::class, 'store'])->name('van.store');
+    Route::get('/van/editar',     [VanController::class, 'edit'])->name('van.edit');
+    Route::put('/van',            [VanController::class, 'update'])->name('van.update');
+    Route::get('/van/documentos', [VanController::class, 'documentos'])->name('van.documentos');
+    Route::post('/van/documentos/{tipo}', [VanController::class, 'uploadDocumento'])
+        ->where('tipo', 'crlv|seguro|autorizacao_municipal|ipva')
+        ->name('van.documento.upload');
+    Route::post('/van/inspecao',  [VanController::class, 'updateInspecao'])->name('van.inspecao');
+    Route::post('/van/foto',              [VanController::class, 'uploadFoto'])->name('van.foto');
+    Route::post('/van/foto/verso',        [VanController::class, 'uploadFotoVerso'])->name('van.foto.verso');
+    Route::post('/van/foto/interior',     [VanController::class, 'uploadFotoInterior'])->name('van.foto.interior');
+    Route::post('/van/foto/lateral-esq',  [VanController::class, 'uploadFotoLateralEsq'])->name('van.foto.lateral_esq');
+    Route::post('/van/foto/lateral-dir',  [VanController::class, 'uploadFotoLateralDir'])->name('van.foto.lateral_dir');
+
+    Route::get('/documentos-pessoais',         [DocumentosPessoaisController::class, 'index'])->name('documentos.index');
+    Route::post('/documentos-pessoais/{tipo}', [DocumentosPessoaisController::class, 'upload'])
+        ->where('tipo', 'cnh|certidao')
+        ->name('documentos.upload');
 
     Route::get('/perfil',         [MotoristaPerfilController::class, 'edit'])->name('perfil.edit');
     Route::put('/perfil',         [MotoristaPerfilController::class, 'update'])->name('perfil.update');

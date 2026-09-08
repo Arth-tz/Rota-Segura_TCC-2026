@@ -7,6 +7,7 @@ import {
     MapIcon,
     UserCircleIcon,
     ArrowRightOnRectangleIcon,
+    IdentificationIcon,
 } from '@heroicons/vue/24/outline'
 
 const emit = defineEmits(['mudar'])
@@ -27,10 +28,10 @@ const navItems = [
 </script>
 
 <template>
-    <aside class="hidden md:flex md:w-64 flex-col sticky top-0 h-screen bg-gradient-to-b from-amber-500 to-amber-700 text-white border-r border-amber-600/30">
+    <aside class="hidden md:flex md:w-64 flex-col sticky top-0 h-screen bg-gradient-to-b from-amber-700 to-amber-900 text-white border-r border-amber-800/30">
 
         <!-- Logo -->
-        <div class="px-5 py-5 border-b border-amber-600/30">
+        <div class="px-5 py-5 border-b border-amber-800/30">
             <Link :href="route('home')" class="flex items-center gap-2.5">
                 <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-9 w-auto" />
                 <div>
@@ -48,24 +49,33 @@ const navItems = [
                 @click="emit('mudar', item.key)"
                 class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all"
                 :class="secaoAtiva === item.key
-                    ? 'bg-amber-600/80 text-white shadow-md shadow-amber-900/30'
-                    : 'text-amber-100/80 hover:bg-amber-600/40 hover:text-white'"
+                    ? 'bg-amber-800/80 text-white shadow-md shadow-amber-900/30'
+                    : 'text-amber-100/80 hover:bg-amber-800/40 hover:text-white'"
             >
                 <component :is="item.icon" class="shrink-0" style="width:18px;height:18px;" />
                 <span class="flex-1 text-left">{{ item.label }}</span>
                 <span v-if="item.key === 'solicitacoes' && solicitacoesPendentes > 0"
-                    class="flex items-center justify-center w-5 h-5 rounded-full bg-white text-amber-700 text-xs font-bold shrink-0">
+                    class="flex items-center justify-center w-5 h-5 rounded-full bg-white text-amber-900 text-xs font-bold shrink-0">
                     {{ solicitacoesPendentes }}
                 </span>
             </button>
+
+            <!-- Documentos pessoais — página separada -->
+            <div class="pt-2 mt-1 border-t border-amber-800/30">
+                <Link :href="route('motorista.documentos.index')"
+                    class="w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium text-amber-100/80 hover:bg-amber-800/40 hover:text-white transition-all">
+                    <IdentificationIcon style="width:18px;height:18px;" class="shrink-0" />
+                    <span class="flex-1 text-left">Documentos Pessoais</span>
+                </Link>
+            </div>
         </nav>
 
         <!-- Rodapé: usuário + logout -->
-        <div class="p-3 border-t border-amber-600/30 space-y-1">
+        <div class="p-3 border-t border-amber-800/30 space-y-1">
             <div class="flex items-center gap-3 px-3 py-2">
                 <div class="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center shrink-0">
                     <img v-if="usuario?.foto_url" :src="usuario.foto_url" class="w-full h-full object-cover" alt="" />
-                    <span v-else class="text-amber-600 text-xs font-bold">
+                    <span v-else class="text-amber-700 text-xs font-bold">
                         {{ usuario?.nome?.charAt(0)?.toUpperCase() ?? 'M' }}
                     </span>
                 </div>

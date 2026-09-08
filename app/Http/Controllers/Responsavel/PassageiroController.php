@@ -59,7 +59,7 @@ class PassageiroController extends Controller
         $dadosEnderecos = $this->enriquecerCoordenadasFaltantes($request->validated());
 
         try {
-            DB::transaction(function () use ($dadosEnderecos, $essencial): void {
+            ['pessoa' => $pessoa, 'passageiro' => $passageiro] = DB::transaction(function () use ($dadosEnderecos, $essencial) {
                 $responsavel = auth()->user()->responsavel;
 
                 if (!$responsavel) {
@@ -74,10 +74,11 @@ class PassageiroController extends Controller
                 ]);
 
                 $passageiro = Passageiro::create([
-                    'id_pessoa'           => $pessoa->id_pessoa,
-                    'observacoes_medicas' => $essencial['obs_medica'] ?? null,
-                    'ativo'               => true,
-                    'data_inscricao'      => now()->toDateString(),
+                    'id_pessoa'                => $pessoa->id_pessoa,
+                    'observacoes_medicas'      => $essencial['obs_medica'] ?? null,
+                    'foto_consentimento_lgpd'  => (bool) ($essencial['foto_consentimento_lgpd'] ?? false),
+                    'ativo'                    => true,
+                    'data_inscricao'           => now()->toDateString(),
                 ]);
 
                 $responsavel->passageiros()->attach($passageiro->id_passageiro, [
@@ -86,7 +87,15 @@ class PassageiroController extends Controller
                 ]);
 
                 $this->salvarEnderecos($passageiro, $dadosEnderecos);
+
+                return ['pessoa' => $pessoa, 'passageiro' => $passageiro];
             });
+
+            if ($request->hasFile('foto')) {
+                $ext  = $request->file('foto')->getClientOriginalExtension();
+                $path = $request->file('foto')->storeAs("passageiros/{$passageiro->id_passageiro}", "foto.{$ext}", 'public');
+                $pessoa->update(['foto_url' => Storage::disk('public')->url($path)]);
+            }
 
             $request->session()->forget('cadastro_passageiro');
             return redirect()->route('responsavel.dashboard');
@@ -107,11 +116,13 @@ class PassageiroController extends Controller
     public function storeCompleto(Request $request): RedirectResponse
     {
         $request->validate([
-            'nome'            => 'required|string|min:2|max:150',
-            'cpf'             => 'required|cpf|unique:pessoa,cpf',
-            'data_nascimento' => 'required|date|before:today',
-            'telefone'        => 'nullable|string|max:20',
-            'obs_medica'      => 'nullable|string|max:5000',
+            'nome'                   => 'required|string|min:2|max:150',
+            'cpf'                    => 'required|cpf|unique:pessoa,cpf',
+            'data_nascimento'        => 'required|date|before:today',
+            'telefone'               => 'nullable|string|max:20',
+            'obs_medica'             => 'nullable|string|max:5000',
+            'foto'                   => 'nullable|image|max:2048|mimes:jpg,jpeg,png,webp',
+            'foto_consentimento_lgpd' => ['accepted'],
             // endereços são opcionais ao adicionar pelo dashboard
             'embarques'    => 'nullable|array',
             'desembarques' => 'nullable|array',
@@ -119,7 +130,7 @@ class PassageiroController extends Controller
         ]);
 
         try {
-            DB::transaction(function () use ($request): void {
+            ['pessoa' => $pessoa, 'passageiro' => $passageiro] = DB::transaction(function () use ($request) {
                 $responsavel = auth()->user()->responsavel;
 
                 if (!$responsavel) {
@@ -134,10 +145,11 @@ class PassageiroController extends Controller
                 ]);
 
                 $passageiro = Passageiro::create([
-                    'id_pessoa'           => $pessoa->id_pessoa,
-                    'observacoes_medicas' => $request->obs_medica,
-                    'ativo'               => true,
-                    'data_inscricao'      => now()->toDateString(),
+                    'id_pessoa'               => $pessoa->id_pessoa,
+                    'observacoes_medicas'     => $request->obs_medica,
+                    'foto_consentimento_lgpd' => (bool) $request->foto_consentimento_lgpd,
+                    'ativo'                   => true,
+                    'data_inscricao'          => now()->toDateString(),
                 ]);
 
                 $responsavel->passageiros()->attach($passageiro->id_passageiro, [
@@ -152,7 +164,14 @@ class PassageiroController extends Controller
                     $this->salvarEnderecosArray($passageiro, $dados);
                 }
 
+                return ['pessoa' => $pessoa, 'passageiro' => $passageiro];
             });
+
+            if ($request->hasFile('foto')) {
+                $ext  = $request->file('foto')->getClientOriginalExtension();
+                $path = $request->file('foto')->storeAs("passageiros/{$passageiro->id_passageiro}", "foto.{$ext}", 'public');
+                $pessoa->update(['foto_url' => Storage::disk('public')->url($path)]);
+            }
 
             return redirect()->route('responsavel.dashboard')
                 ->with('sucesso', 'Passageiro cadastrado com sucesso!');

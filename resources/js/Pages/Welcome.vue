@@ -100,8 +100,8 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
                         </div>
                         <div class="rs-trust__sep" aria-hidden="true">·</div>
                         <div class="rs-trust__item">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="rs-trust__icon" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
-                            Notificações instantâneas
+                            <svg xmlns="http://www.w3.org/2000/svg" class="rs-trust__icon" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z"/></svg>
+                            Motoristas verificados
                         </div>
                     </div>
                 </div>
@@ -151,8 +151,8 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
                         <div class="rs-feature-card__icon rs-feature-card__icon--orange">
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/></svg>
                         </div>
-                        <h3 class="rs-feature-card__title">Alertas de embarque</h3>
-                        <p class="rs-feature-card__desc">Receba uma notificação quando seu filho entra ou sai da van. Sempre informado.</p>
+                        <h3 class="rs-feature-card__title">Acompanhamento de embarque</h3>
+                        <p class="rs-feature-card__desc">Veja no mapa quando o veículo passa pelo ponto de embarque e desembarque do seu filho.</p>
                     </div>
                    
                 </div>
@@ -185,7 +185,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
                         </div>
                         <div class="rs-step__body">
                             <h3 class="rs-step__title">Encontre uma van</h3>
-                            <p class="rs-step__desc">Filtre por região, turno e disponibilidade. Veja avaliações e encontre o preço ideal.</p>
+                            <p class="rs-step__desc">Filtre por região, turno e disponibilidade. Compare valores e escolha com confiança.</p>
                         </div>
                     </div>
                     <div class="rs-step reveal" style="--d:0.32s">
@@ -194,7 +194,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
                         </div>
                         <div class="rs-step__body">
                             <h3 class="rs-step__title">Acompanhe em tempo real</h3>
-                            <p class="rs-step__desc">Monitore a rota ao vivo e receba confirmação de embarque e desembarque.</p>
+                            <p class="rs-step__desc">Monitore a rota ao vivo. Veja em tempo real onde o veículo está no trajeto do seu filho.</p>
                         </div>
                     </div>
                 </div>

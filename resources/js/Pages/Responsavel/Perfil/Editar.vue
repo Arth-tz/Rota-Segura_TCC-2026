@@ -43,6 +43,24 @@ function handleFotoChange(event) {
 
 function submit() { form.put(route('responsavel.perfil.update')) }
 
+function maskTelefone(e) {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 11)
+    if (v.length > 10)     v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3')
+    else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d+)$/, '($1) $2-$3')
+    else if (v.length > 2) v = v.replace(/^(\d{2})(\d+)$/, '($1) $2')
+    e.target.value = v
+    form.telefone = v
+}
+
+function maskTelefoneEmergencia(e) {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 11)
+    if (v.length > 10)     v = v.replace(/^(\d{2})(\d{5})(\d{4})$/, '($1) $2-$3')
+    else if (v.length > 6) v = v.replace(/^(\d{2})(\d{4})(\d+)$/, '($1) $2-$3')
+    else if (v.length > 2) v = v.replace(/^(\d{2})(\d+)$/, '($1) $2')
+    e.target.value = v
+    form.telefone_emergencia = v
+}
+
 function formatCpf(cpf) {
     if (!cpf) return '—'
     return cpf.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, '$1.$2.$3-$4')
@@ -133,7 +151,8 @@ function formatDate(d) {
                             <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
                                 <span class="flex items-center gap-1"><PhoneIcon class="w-3.5 h-3.5" />Telefone / WhatsApp</span>
                             </label>
-                            <input v-model="form.telefone" type="tel" placeholder="(51) 99999-9999"
+                            <input :value="form.telefone" @input="maskTelefone"
+                                type="tel" placeholder="(00) 00000-0000" maxlength="15"
                                 class="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition"
                                 :class="form.errors.telefone ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100'" />
                             <p v-if="form.errors.telefone" class="mt-1 text-xs text-red-600">{{ form.errors.telefone }}</p>
@@ -142,7 +161,8 @@ function formatDate(d) {
                             <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
                                 <span class="flex items-center gap-1"><PhoneIcon class="w-3.5 h-3.5" />Telefone de emergência</span>
                             </label>
-                            <input v-model="form.telefone_emergencia" type="tel" placeholder="(51) 99999-9999"
+                            <input :value="form.telefone_emergencia" @input="maskTelefoneEmergencia"
+                                type="tel" placeholder="(00) 00000-0000" maxlength="15"
                                 class="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition"
                                 :class="form.errors.telefone_emergencia ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100'" />
                             <p v-if="form.errors.telefone_emergencia" class="mt-1 text-xs text-red-600">{{ form.errors.telefone_emergencia }}</p>

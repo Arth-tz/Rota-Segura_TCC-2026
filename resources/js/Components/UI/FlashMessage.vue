@@ -8,9 +8,9 @@ const visible = ref(false)
 const current = ref({ type: '', text: '' })
 
 const config = {
-    sucesso: { icon: CheckCircleIcon,        bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-800', icon: 'text-emerald-500' },
-    aviso:   { icon: ExclamationTriangleIcon, bg: 'bg-amber-50',   border: 'border-amber-200',   text: 'text-amber-800',   icon: 'text-amber-500'   },
-    erro:    { icon: XCircleIcon,             bg: 'bg-red-50',     border: 'border-red-200',     text: 'text-red-800',     icon: 'text-red-500'     },
+    sucesso: { iconComponent: CheckCircleIcon,        iconColor: 'text-emerald-500', bg: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-800' },
+    aviso:   { iconComponent: ExclamationTriangleIcon, iconColor: 'text-amber-500',   bg: 'bg-amber-50',   border: 'border-amber-200',   text: 'text-amber-800'   },
+    erro:    { iconComponent: XCircleIcon,             iconColor: 'text-red-500',     bg: 'bg-red-50',     border: 'border-red-200',     text: 'text-red-800'     },
 }
 
 watch(() => page.props.flash, (flash) => {
@@ -37,7 +37,7 @@ const cfg = computed(() => config[current.value.type] ?? config.sucesso)
             class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-full max-w-sm mx-auto px-4">
             <div class="flex items-start gap-3 rounded-2xl border px-4 py-3 shadow-lg"
                 :class="[cfg.bg, cfg.border]">
-                <component :is="cfg.icon" class="w-5 h-5 shrink-0 mt-0.5" :class="cfg.icon" />
+                <component :is="cfg.iconComponent" class="w-5 h-5 shrink-0 mt-0.5" :class="cfg.iconColor" />
                 <p class="flex-1 text-sm font-medium" :class="cfg.text">{{ current.text }}</p>
                 <button @click="visible = false" class="shrink-0 opacity-60 hover:opacity-100 transition">
                     <XMarkIcon class="w-4 h-4" :class="cfg.text" />

@@ -134,7 +134,7 @@ function statusLabel(status) {
 <template>
     <!-- MODO INÍCIO — card completo -->
     <article v-if="modo === 'inicio'"
-        class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-blue-200 transition-all">
+        class="min-w-0 bg-white border border-slate-200 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-blue-200 transition-all">
 
         <!-- Cabeçalho: avatar + nome + status + ações -->
         <div class="flex items-center justify-between gap-3">
@@ -374,7 +374,7 @@ function statusLabel(status) {
 
     <!-- MODO LISTA — linha compacta -->
     <article v-else
-        class="bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm hover:shadow-md hover:border-blue-200 transition-all">
+        class="min-w-0 bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-sm hover:shadow-md hover:border-blue-200 transition-all">
         <div class="flex items-center justify-between gap-3">
             <div class="flex items-center gap-3 min-w-0">
                 <div class="h-9 w-9 rounded-full bg-blue-100 flex items-center justify-center shrink-0 overflow-hidden">

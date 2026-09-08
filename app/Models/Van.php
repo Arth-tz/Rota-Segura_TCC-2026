@@ -27,10 +27,17 @@ class Van extends Model
         'id_usuario_avaliador',
         'data_avaliacao',
         'foto_url',
+        'foto_verso_url',
+        'foto_interior_url',
+        'foto_lateral_esq_url',
+        'foto_lateral_dir_url',
         'crlv_url',
         'crlv_validade',
         'seguro_url',
         'seguro_validade',
+        'autorizacao_municipal_url',
+        'autorizacao_municipal_validade',
+        'prefixo_municipal',
         'ipva_comprovante_url',
         'ipva_comprovante_data',
         'documentacao_completa',
@@ -39,13 +46,14 @@ class Van extends Model
     ];
 
     protected $casts = [
-        'crlv_validade'             => 'date',
-        'seguro_validade'           => 'date',
-        'ipva_comprovante_data'     => 'date',
-        'data_ultima_inspecao'      => 'date',
-        'proxima_inspecao_prevista' => 'date',
-        'data_avaliacao'            => 'datetime',
-        'documentacao_completa'     => 'boolean',
+        'crlv_validade'                  => 'date',
+        'seguro_validade'                => 'date',
+        'autorizacao_municipal_validade' => 'date',
+        'ipva_comprovante_data'          => 'date',
+        'data_ultima_inspecao'           => 'date',
+        'proxima_inspecao_prevista'      => 'date',
+        'data_avaliacao'                 => 'datetime',
+        'documentacao_completa'          => 'boolean',
     ];
 
     public function motorista()

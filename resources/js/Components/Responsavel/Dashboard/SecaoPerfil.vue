@@ -1,7 +1,7 @@
 <script setup>
 import { ref } from 'vue'
 import { Link } from '@inertiajs/vue3'
-import { UserCircleIcon } from '@heroicons/vue/24/outline'
+import { ArrowRightOnRectangleIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
     usuario: { type: Object, default: null },
@@ -82,9 +82,7 @@ const showLogoutModal = ref(false)
                     <div v-if="showLogoutModal" class="bg-white rounded-2xl p-6 max-w-sm w-full shadow-2xl border border-slate-100">
                         <div class="flex flex-col items-center text-center">
                             <div class="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mb-4">
-                                <svg class="w-7 h-7 text-red-500" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />
-                                </svg>
+                                <ArrowRightOnRectangleIcon class="w-7 h-7 text-red-500" />
                             </div>
                             <h3 class="text-lg font-bold text-slate-900 mb-1">Deseja sair?</h3>
                             <p class="text-sm text-slate-500 mb-6">Você precisará fazer login novamente para acessar o painel.</p>

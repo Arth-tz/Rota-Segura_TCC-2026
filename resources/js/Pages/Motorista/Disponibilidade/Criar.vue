@@ -2,6 +2,7 @@
 import { useForm, Head, Link } from '@inertiajs/vue3'
 import { ArrowLeftIcon, MapIcon, ClockIcon, CalendarDaysIcon, CurrencyDollarIcon, UsersIcon, HomeModernIcon, AcademicCapIcon } from '@heroicons/vue/24/outline'
 import TagInput from '@/Components/UI/TagInput.vue'
+import RegiaoInput from '@/Components/UI/RegiaoInput.vue'
 import FlashMessage from '@/Components/UI/FlashMessage.vue'
 
 const props = defineProps({
@@ -31,12 +32,15 @@ const form = useForm({
     dias:               [],
     preco_mensal:       '',
     capacidade_total:   '',
-    bairros_atendidos:  [],
+    regioes_atendidas:  [],
     escolas_atendidas:  [],
 })
 
 function submit() {
-    form.post(route('motorista.disponibilidades.store'))
+    form.transform((data) => ({
+        ...data,
+        regioes_atendidas: data.regioes_atendidas.filter((r) => r.cidade.trim()),
+    })).post(route('motorista.disponibilidades.store'))
 }
 </script>
 
@@ -47,7 +51,7 @@ function submit() {
     <div class="min-h-screen bg-slate-50">
 
         <!-- Topbar -->
-        <header class="bg-gradient-to-b from-amber-500 to-amber-600 shadow-sm">
+        <header class="bg-gradient-to-b from-amber-700 to-amber-800 shadow-sm">
             <div class="max-w-2xl mx-auto px-4 py-4 flex items-center gap-3">
                 <Link :href="route('motorista.dashboard')"
                     class="w-9 h-9 rounded-xl bg-white/20 hover:bg-white/30 flex items-center justify-center transition shrink-0">
@@ -55,7 +59,7 @@ function submit() {
                 </Link>
                 <div>
                     <p class="text-xs font-semibold text-amber-200 uppercase tracking-widest">Motorista</p>
-                    <h1 class="text-lg font-bold text-white">Novo trajeto</h1>
+                    <h1 class="text-2xl font-bold text-white">Novo trajeto</h1>
                 </div>
             </div>
         </header>
@@ -71,17 +75,17 @@ function submit() {
             <!-- Nome -->
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div class="flex items-center gap-3 px-5 py-4 border-b border-amber-100 bg-amber-50/60">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-amber-700 flex items-center justify-center shrink-0">
                         <MapIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800">Identificação</h2>
+                    <h2 class="text-base font-semibold text-slate-800">Identificação</h2>
                 </div>
                 <div class="px-5 py-4">
                     <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">Nome do trajeto</label>
                     <input v-model="form.nome" type="text" maxlength="100"
                         placeholder="Ex: Centro – Escola Municipal Manhã"
                         class="w-full rounded-xl border px-4 py-2.5 text-sm text-slate-900 outline-none transition"
-                        :class="form.errors.nome ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100'" />
+                        :class="form.errors.nome ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-600 focus:ring-2 focus:ring-amber-100'" />
                     <p v-if="form.errors.nome" class="mt-1 text-xs text-red-600">{{ form.errors.nome }}</p>
                 </div>
             </div>
@@ -89,10 +93,10 @@ function submit() {
             <!-- Turno -->
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div class="flex items-center gap-3 px-5 py-4 border-b border-amber-100 bg-amber-50/60">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-amber-700 flex items-center justify-center shrink-0">
                         <ClockIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800">Turno</h2>
+                    <h2 class="text-base font-semibold text-slate-800">Turno</h2>
                 </div>
                 <div class="px-5 py-4">
                     <div class="grid grid-cols-3 gap-3">
@@ -101,8 +105,8 @@ function submit() {
                             @click="form.turno = t.value"
                             class="rounded-xl border py-3 text-sm font-semibold transition"
                             :class="form.turno === t.value
-                                ? 'border-amber-400 bg-amber-50 text-amber-700 shadow-sm'
-                                : 'border-slate-200 text-slate-600 hover:border-amber-200 hover:bg-amber-50/50 hover:text-amber-700'">
+                                ? 'border-amber-600 bg-amber-50 text-amber-700 shadow-sm'
+                                : 'border-slate-200 text-slate-600 hover:border-amber-300 hover:bg-slate-50 hover:text-amber-800'">
                             {{ t.label }}
                         </button>
                     </div>
@@ -113,10 +117,10 @@ function submit() {
             <!-- Dias da semana -->
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div class="flex items-center gap-3 px-5 py-4 border-b border-amber-100 bg-amber-50/60">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-amber-700 flex items-center justify-center shrink-0">
                         <CalendarDaysIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800">Dias da semana</h2>
+                    <h2 class="text-base font-semibold text-slate-800">Dias da semana</h2>
                 </div>
                 <div class="px-5 py-4">
                     <div class="grid grid-cols-4 sm:grid-cols-7 gap-2">
@@ -125,8 +129,8 @@ function submit() {
                             @click="form.dias.includes(d.value) ? form.dias = form.dias.filter(x => x !== d.value) : form.dias.push(d.value)"
                             class="rounded-xl border py-2.5 text-xs font-semibold transition"
                             :class="form.dias.includes(d.value)
-                                ? 'border-amber-400 bg-amber-500 text-white shadow-sm'
-                                : 'border-slate-200 text-slate-600 hover:border-amber-200 hover:bg-amber-50/50 hover:text-amber-700'">
+                                ? 'border-amber-600 bg-amber-700 text-white shadow-sm'
+                                : 'border-slate-200 text-slate-600 hover:border-amber-300 hover:bg-slate-50 hover:text-amber-800'">
                             {{ d.label.slice(0, 3) }}
                         </button>
                     </div>
@@ -137,10 +141,10 @@ function submit() {
             <!-- Preço e capacidade -->
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div class="flex items-center gap-3 px-5 py-4 border-b border-amber-100 bg-amber-50/60">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-amber-700 flex items-center justify-center shrink-0">
                         <CurrencyDollarIcon class="w-4 h-4 text-white" />
                     </div>
-                    <h2 class="text-sm font-bold text-slate-800">Preço e vagas</h2>
+                    <h2 class="text-base font-semibold text-slate-800">Preço e vagas</h2>
                 </div>
                 <div class="px-5 py-4 grid gap-4 sm:grid-cols-2">
                     <div>
@@ -152,7 +156,7 @@ function submit() {
                             <input v-model="form.preco_mensal" type="number" min="0" max="9999.99" step="0.01"
                                 placeholder="0,00"
                                 class="w-full rounded-xl border pl-9 pr-4 py-2.5 text-sm text-slate-900 outline-none transition"
-                                :class="form.errors.preco_mensal ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100'" />
+                                :class="form.errors.preco_mensal ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-600 focus:ring-2 focus:ring-amber-100'" />
                         </div>
                         <p v-if="form.errors.preco_mensal" class="mt-1 text-xs text-red-600">{{ form.errors.preco_mensal }}</p>
                     </div>
@@ -166,7 +170,7 @@ function submit() {
                             <input v-model="form.capacidade_total" type="number" min="1" :max="capacidade_van ?? 99"
                                 placeholder="Ex: 10"
                                 class="w-full rounded-xl border pl-9 pr-4 py-2.5 text-sm text-slate-900 outline-none transition"
-                                :class="form.errors.capacidade_total ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-400 focus:ring-2 focus:ring-amber-100'" />
+                                :class="form.errors.capacidade_total ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-600 focus:ring-2 focus:ring-amber-100'" />
                         </div>
                         <p v-if="form.errors.capacidade_total" class="mt-1 text-xs text-red-600">{{ form.errors.capacidade_total }}</p>
                     </div>
@@ -176,21 +180,21 @@ function submit() {
             <!-- Bairros e escolas -->
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div class="flex items-center gap-3 px-5 py-4 border-b border-amber-100 bg-amber-50/60">
-                    <div class="w-8 h-8 rounded-xl bg-amber-500 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-xl bg-amber-700 flex items-center justify-center shrink-0">
                         <HomeModernIcon class="w-4 h-4 text-white" />
                     </div>
                     <div>
-                        <h2 class="text-sm font-bold text-slate-800">Área de atuação</h2>
+                        <h2 class="text-base font-semibold text-slate-800">Área de atuação</h2>
                         <p class="text-xs text-slate-400 mt-0.5">Ajuda responsáveis a te encontrarem no marketplace</p>
                     </div>
                 </div>
                 <div class="px-5 py-4 space-y-4">
                     <div>
                         <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
-                            <HomeModernIcon class="w-3.5 h-3.5" /> Bairros atendidos
+                            <HomeModernIcon class="w-3.5 h-3.5" /> Cidades e bairros atendidos
                         </label>
-                        <TagInput v-model="form.bairros_atendidos" placeholder="Ex: Igara · pressione Enter para adicionar" />
-                        <p v-if="form.errors.bairros_atendidos" class="mt-1 text-xs text-red-600">{{ form.errors.bairros_atendidos }}</p>
+                        <RegiaoInput v-model="form.regioes_atendidas" />
+                        <p v-if="form.errors.regioes_atendidas" class="mt-1 text-xs text-red-600">{{ form.errors.regioes_atendidas }}</p>
                     </div>
                     <div>
                         <label class="flex items-center gap-1.5 text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
@@ -209,7 +213,7 @@ function submit() {
                     Cancelar
                 </Link>
                 <button @click="submit" :disabled="form.processing"
-                    class="flex-1 flex items-center justify-center rounded-xl bg-amber-500 hover:bg-amber-600 disabled:opacity-60 py-3 text-sm font-bold text-white transition shadow-sm">
+                    class="flex-1 flex items-center justify-center rounded-xl bg-amber-700 hover:bg-amber-800 disabled:opacity-60 py-3 text-sm font-bold text-white transition shadow-sm">
                     {{ form.processing ? 'Salvando…' : 'Criar trajeto' }}
                 </button>
             </div>

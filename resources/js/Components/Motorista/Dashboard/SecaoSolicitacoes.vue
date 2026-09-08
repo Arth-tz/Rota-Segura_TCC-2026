@@ -67,7 +67,7 @@ function confirmarRecusa() {
     <div class="space-y-4">
 
         <!-- Header -->
-        <div class="rounded-2xl bg-gradient-to-br from-amber-500 to-amber-600 p-5 text-white shadow-lg">
+        <div class="rounded-2xl bg-gradient-to-br from-amber-700 to-amber-800 p-5 text-white shadow-lg">
             <h3 class="text-lg font-bold">Solicitações pendentes</h3>
             <p class="text-sm text-amber-100 mt-1">
                 {{ solicitacoes.length === 0
@@ -91,7 +91,7 @@ function confirmarRecusa() {
             <!-- Cabeçalho: passageiro -->
             <div class="flex items-center gap-3 px-5 py-4 bg-slate-50 border-b border-slate-100">
                 <div class="w-10 h-10 rounded-full flex items-center justify-center shrink-0"
-                    :class="s.tipo === 'alteracao' ? 'bg-blue-500' : 'bg-amber-500'">
+                    :class="s.tipo === 'alteracao' ? 'bg-blue-500' : 'bg-amber-700'">
                     <ArrowsRightLeftIcon v-if="s.tipo === 'alteracao'" class="w-5 h-5 text-white" />
                     <span v-else class="text-white font-bold text-sm">{{ s.passageiro.nome?.charAt(0)?.toUpperCase() ?? '?' }}</span>
                 </div>
@@ -186,7 +186,7 @@ function confirmarRecusa() {
                         </template>
                         <template v-else>
                             <span v-for="dia in d.dias_contratados" :key="dia"
-                                class="text-xs px-2 py-0.5 rounded-md bg-amber-500 text-white font-medium">
+                                class="text-xs px-2 py-0.5 rounded-md bg-amber-700 text-white font-medium">
                                 {{ DIAS_MAP[dia] ?? dia }}
                             </span>
                             <span v-if="!d.dias_contratados?.length" class="text-xs text-slate-400 italic">Dias não especificados</span>

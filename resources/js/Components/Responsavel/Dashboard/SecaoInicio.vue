@@ -11,84 +11,166 @@ const props = defineProps({
 
 const emit = defineEmits(['buscar-van'])
 
-const comVan   = computed(() => props.passageiros.filter(p => p.status === 'vinculo_ativo').length)
-const semVan   = computed(() => props.passageiros.filter(p => p.status !== 'vinculo_ativo').length)
-const pendente = computed(() => props.passageiros.filter(p => p.status === 'solicitacao_pendente').length)
+const passageirosAtivos = computed(() => props.passageiros.filter(p => p.status === 'vinculo_ativo'))
+const passageirosAguard = computed(() => props.passageiros.filter(p => p.status === 'solicitacao_pendente'))
+const passageirosSemVan = computed(() => props.passageiros.filter(
+    p => p.status !== 'vinculo_ativo' && p.status !== 'solicitacao_pendente'
+))
+
+const statusGlobal = computed(() => {
+    if (!props.passageiros.length) return 'vazio'
+    if (passageirosSemVan.value.length === 0 && passageirosAguard.value.length === 0) return 'ok'
+    if (passageirosAtivos.value.length === 0 && passageirosSemVan.value.length === 0) return 'aguardando'
+    if (passageirosAtivos.value.length === 0) return 'atencao'
+    return 'parcial'
+})
+
+const saudacao = computed(() => {
+    const h = new Date().getHours()
+    if (h < 12) return 'Bom dia'
+    if (h < 18) return 'Boa tarde'
+    return 'Boa noite'
+})
 </script>
 
 <template>
     <div class="space-y-5">
 
-        <!-- Hero -->
+        <!-- Hero: status-first, não métrica -->
         <div class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 p-6 text-white shadow-lg">
             <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,_rgba(255,255,255,0.12),_transparent_60%)] pointer-events-none"></div>
-            <div class="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-5">
-                <div>
-                    <p class="text-xs font-semibold text-blue-200 uppercase tracking-widest mb-1">
-                        Olá, {{ usuario?.nome?.split(' ')[0] ?? 'Responsável' }}
-                    </p>
-                    <p class="text-4xl font-bold">{{ passageiros.length }}</p>
-                    <p class="mt-1 text-sm text-blue-200">{{ passageiros.length === 1 ? 'passageiro cadastrado' : 'passageiros cadastrados' }}</p>
-                </div>
+            <div class="relative">
+                <p class="text-sm text-blue-200 mb-3">{{ saudacao }}, {{ usuario?.nome?.split(' ')[0] ?? 'Responsável' }}</p>
 
-                <!-- Stats inline -->
-                <div v-if="passageiros.length" class="flex gap-4 text-sm">
-                    <div class="text-center">
-                        <p class="text-2xl font-bold">{{ comVan }}</p>
-                        <p class="text-blue-200 text-xs mt-0.5">com van</p>
-                    </div>
-                    <div class="w-px bg-white/20"></div>
-                    <div class="text-center">
-                        <p class="text-2xl font-bold">{{ semVan }}</p>
-                        <p class="text-blue-200 text-xs mt-0.5">sem van</p>
-                    </div>
-                    <template v-if="pendente > 0">
-                        <div class="w-px bg-white/20"></div>
-                        <div class="text-center">
-                            <p class="text-2xl font-bold">{{ pendente }}</p>
-                            <p class="text-blue-200 text-xs mt-0.5">pendente{{ pendente > 1 ? 's' : '' }}</p>
-                        </div>
-                    </template>
-                </div>
+                <div class="flex flex-wrap items-end justify-between gap-4">
+                    <div>
+                        <!-- "Tudo certo" -->
+                        <template v-if="statusGlobal === 'ok'">
+                            <p class="text-2xl font-bold">Tudo certo por aqui.</p>
+                            <p class="text-sm text-blue-100 mt-1.5">
+                                {{ passageiros.length === 1 ? 'Seu passageiro tem' : 'Todos os passageiros têm' }} transporte ativo.
+                            </p>
+                        </template>
 
-                <!-- CTAs -->
-                <div class="flex flex-wrap gap-2">
-                    <Link
-                        :href="route('responsavel.passageiros.adicionar')"
-                        class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2.5 text-sm font-semibold text-blue-700 hover:bg-blue-50 transition shadow-sm"
-                    >
-                        <UserPlusIcon class="w-4 h-4" />
-                        Novo passageiro
-                    </Link>
-                    <Link
-                        :href="route('responsavel.marketplace')"
-                        class="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white hover:bg-white/20 transition"
-                    >
-                        <MagnifyingGlassIcon class="w-4 h-4" />
-                        Buscar van
-                    </Link>
+                        <!-- Sem van nenhuma -->
+                        <template v-else-if="statusGlobal === 'atencao'">
+                            <p class="text-2xl font-bold">
+                                {{ passageiros.length === 1 ? 'Seu passageiro está' : `${passageiros.length} passageiros estão` }} sem van.
+                            </p>
+                            <p class="text-sm text-blue-100 mt-1.5">Busque motoristas disponíveis no marketplace.</p>
+                        </template>
+
+                        <!-- Todos aguardando -->
+                        <template v-else-if="statusGlobal === 'aguardando'">
+                            <p class="text-2xl font-bold">Aguardando confirmação.</p>
+                            <p class="text-sm text-blue-100 mt-1.5">
+                                {{ passageiros.length === 1 ? 'Sua solicitação está sendo' : `${passageiros.length} solicitações estão sendo` }} analisada{{ passageiros.length > 1 ? 's' : '' }} pelo motorista.
+                            </p>
+                        </template>
+
+                        <!-- Parcial -->
+                        <template v-else-if="statusGlobal === 'parcial'">
+                            <p class="text-2xl font-bold">{{ passageirosAtivos.length }} de {{ passageiros.length }} com transporte ativo.</p>
+                            <div class="flex flex-wrap items-center gap-x-2 mt-1.5 text-sm text-blue-100">
+                                <span v-if="passageirosAguard.length" class="text-amber-300 font-medium">
+                                    {{ passageirosAguard.length }} aguardando confirmação
+                                </span>
+                                <span v-if="passageirosAguard.length && passageirosSemVan.length" class="opacity-40">·</span>
+                                <span v-if="passageirosSemVan.length">{{ passageirosSemVan.length }} sem van</span>
+                            </div>
+                        </template>
+
+                        <!-- Vazio -->
+                        <template v-else>
+                            <p class="text-2xl font-bold">Comece por aqui.</p>
+                            <p class="text-sm text-blue-100 mt-1.5">Cadastre o primeiro passageiro para organizar o transporte.</p>
+                        </template>
+                    </div>
+
+                    <div class="flex flex-wrap gap-2">
+                        <Link
+                            :href="route('responsavel.passageiros.adicionar')"
+                            class="inline-flex items-center gap-2 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-blue-700 hover:bg-blue-50 transition shadow-sm"
+                        >
+                            <UserPlusIcon class="w-4 h-4" />
+                            Novo passageiro
+                        </Link>
+                        <Link
+                            :href="route('responsavel.marketplace')"
+                            class="inline-flex items-center gap-2 rounded-xl border border-white/25 bg-white/10 px-4 py-2 text-sm font-semibold text-white hover:bg-white/20 transition"
+                        >
+                            <MagnifyingGlassIcon class="w-4 h-4" />
+                            Buscar van
+                        </Link>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Alerta de pendentes -->
-        <div v-if="pendente > 0" class="flex items-center gap-3 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
-            <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></div>
-            <span>
-                {{ pendente === 1 ? '1 solicitação aguarda' : `${pendente} solicitações aguardam` }} aprovação do motorista.
-            </span>
-        </div>
+        <!-- Passageiros: agrupados por status -->
+        <template v-if="passageiros.length">
 
-        <!-- Lista de passageiros -->
-        <div v-if="passageiros.length" class="grid gap-3 lg:grid-cols-2">
-            <CardPassageiro
-                v-for="p in passageiros"
-                :key="p.id_passageiro"
-                :passageiro="p"
-                modo="inicio"
-                @buscar-van="emit('buscar-van')"
-            />
-        </div>
+            <!-- Com van ativa -->
+            <div v-if="passageirosAtivos.length">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                    <p class="text-xs font-semibold text-slate-500">
+                        Com van ativa
+                        <span class="font-normal text-slate-400 ml-1">{{ passageirosAtivos.length }}</span>
+                    </p>
+                </div>
+                <div class="grid gap-3 lg:grid-cols-2">
+                    <CardPassageiro
+                        v-for="p in passageirosAtivos"
+                        :key="p.id_passageiro"
+                        :passageiro="p"
+                        modo="inicio"
+                        @buscar-van="emit('buscar-van')"
+                    />
+                </div>
+            </div>
+
+            <!-- Aguardando confirmação -->
+            <div v-if="passageirosAguard.length" :class="passageirosAtivos.length ? 'mt-6' : ''">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="w-2 h-2 rounded-full bg-amber-400 animate-pulse shrink-0"></span>
+                    <p class="text-xs font-semibold text-slate-500">
+                        Aguardando confirmação
+                        <span class="font-normal text-slate-400 ml-1">{{ passageirosAguard.length }}</span>
+                    </p>
+                </div>
+                <div class="grid gap-3 lg:grid-cols-2">
+                    <CardPassageiro
+                        v-for="p in passageirosAguard"
+                        :key="p.id_passageiro"
+                        :passageiro="p"
+                        modo="inicio"
+                        @buscar-van="emit('buscar-van')"
+                    />
+                </div>
+            </div>
+
+            <!-- Sem van -->
+            <div v-if="passageirosSemVan.length" :class="(passageirosAtivos.length || passageirosAguard.length) ? 'mt-6' : ''">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="w-2 h-2 rounded-full bg-slate-300 shrink-0"></span>
+                    <p class="text-xs font-semibold text-slate-500">
+                        Sem van
+                        <span class="font-normal text-slate-400 ml-1">{{ passageirosSemVan.length }}</span>
+                    </p>
+                </div>
+                <div class="grid gap-3 lg:grid-cols-2">
+                    <CardPassageiro
+                        v-for="p in passageirosSemVan"
+                        :key="p.id_passageiro"
+                        :passageiro="p"
+                        modo="inicio"
+                        @buscar-van="emit('buscar-van')"
+                    />
+                </div>
+            </div>
+
+        </template>
 
         <!-- Empty state -->
         <div v-else class="flex flex-col items-center justify-center rounded-2xl border border-dashed border-blue-200 bg-blue-50/50 py-14 px-6 text-center">

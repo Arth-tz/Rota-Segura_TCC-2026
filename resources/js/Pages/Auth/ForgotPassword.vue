@@ -41,7 +41,7 @@ const submit = () => {
             <div class="lg-aside__body">
                 <div class="lg-aside__tag">Recuperação de acesso</div>
                 <h2 class="lg-aside__title">Vamos te enviar um link seguro</h2>
-                <p class="lg-aside__sub">Informe o e-mail cadastrado. Se ele existir na plataforma, você receberá as instruções para criar uma nova senha.</p>
+                <p class="lg-aside__sub">Informe o e-mail cadastrado e enviaremos as instruções para criar uma nova senha.</p>
             </div>
 
             <p class="lg-aside__copy">© 2026 Rota Segura</p>

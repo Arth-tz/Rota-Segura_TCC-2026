@@ -27,7 +27,7 @@ class RegisterMotoristaRequest extends FormRequest
         return [
             'nome'            => ['required', 'string', 'min:2', 'max:150'],
             'cpf'             => ['required', 'cpf', Rule::unique('pessoa', 'cpf')],
-            'data_nascimento' => ['required', 'date', 'before:today'],
+            'data_nascimento' => ['required', 'date', 'before_or_equal:' . now()->subYears(21)->format('Y-m-d')],
             'telefone'        => [
                 'required',
                 'celular_com_ddd',
@@ -44,6 +44,14 @@ class RegisterMotoristaRequest extends FormRequest
             'cnh_numero'      => ['required', 'digits:11', Rule::unique('motorista', 'cnh_numero')],
             'cnh_categoria'   => ['required', 'in:D,E'],
             'cnh_validade'    => ['required', 'date', 'after:today'],
+            'foto'            => ['nullable', 'image', 'max:2048', 'mimes:jpg,jpeg,png,webp'],
+        ];
+    }
+
+    public function messages(): array
+    {
+        return [
+            'data_nascimento.before_or_equal' => 'O motorista precisa ter pelo menos 21 anos (art. 138, I do CTB).',
         ];
     }
 

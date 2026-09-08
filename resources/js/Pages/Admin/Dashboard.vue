@@ -5,7 +5,7 @@ import FlashMessage from '@/Components/UI/FlashMessage.vue'
 import {
     UserIcon, TruckIcon, UsersIcon,
     CheckCircleIcon, XCircleIcon, ClockIcon,
-    ShieldCheckIcon,
+    ShieldCheckIcon, DocumentTextIcon, ArrowTopRightOnSquareIcon, PhotoIcon,
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
@@ -17,8 +17,23 @@ const props = defineProps({
 const secao = ref('motoristas')
 
 // ─── MODAIS ───────────────────────────────────────────────────────────────────
-const modalRejeitar = ref(null) // { tipo: 'motorista'|'van', id, nome }
-const motivoRejeicao = ref('')
+const modalRejeitar    = ref(null) // { tipo: 'motorista'|'van', id, nome }
+const motivoRejeicao   = ref('')
+const modalDocumentos  = ref(null) // van object
+
+function abrirDocumentos(van) {
+    modalDocumentos.value = van
+}
+
+function aprovarEFechar(tipo, id) {
+    aprovar(tipo, id)
+    modalDocumentos.value = null
+}
+
+function rejeitarEFechar(tipo, id, nome) {
+    modalDocumentos.value = null
+    abrirRejeitar(tipo, id, nome)
+}
 
 function abrirRejeitar(tipo, id, nome) {
     modalRejeitar.value = { tipo, id, nome }
@@ -52,7 +67,7 @@ const statusConfig = {
 </script>
 
 <template>
-    <Head title="Dashboard — Admin" />
+    <Head title="Painel — Admin" />
     <FlashMessage />
 
     <div class="min-h-screen bg-slate-100 flex flex-col">
@@ -186,6 +201,22 @@ const statusConfig = {
                             <p class="uppercase tracking-wide text-slate-400 mb-0.5">Validade CNH</p>
                             <p class="font-medium text-slate-700">{{ m.cnh_validade ?? '—' }}</p>
                         </div>
+                        <div v-if="m.cnh_foto_url">
+                            <p class="uppercase tracking-wide text-slate-400 mb-0.5">Foto CNH</p>
+                            <a :href="m.cnh_foto_url" target="_blank" rel="noopener noreferrer"
+                                class="flex items-center gap-1 font-medium text-blue-600 hover:underline">
+                                <ArrowTopRightOnSquareIcon class="w-3 h-3" />
+                                Ver arquivo
+                            </a>
+                        </div>
+                        <div v-if="m.certidao_antecedentes_url">
+                            <p class="uppercase tracking-wide text-slate-400 mb-0.5">Certidão</p>
+                            <a :href="m.certidao_antecedentes_url" target="_blank" rel="noopener noreferrer"
+                                class="flex items-center gap-1 font-medium text-blue-600 hover:underline">
+                                <ArrowTopRightOnSquareIcon class="w-3 h-3" />
+                                Ver arquivo
+                            </a>
+                        </div>
                         <div v-if="m.van">
                             <p class="uppercase tracking-wide text-slate-400 mb-0.5">Van</p>
                             <p class="font-medium text-slate-700">{{ m.van.placa }} — {{ m.van.modelo }}</p>
@@ -272,27 +303,139 @@ const statusConfig = {
                         <span class="font-semibold">Motivo:</span> {{ v.motivo_rejeicao }}
                     </div>
 
-                    <div v-if="v.status_aprovacao === 'pendente'" class="flex gap-2 px-5 pb-4">
-                        <button @click="aprovar('van', v.id_van)"
-                            class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition">
-                            <CheckCircleIcon class="w-4 h-4" /> Aprovar
+                    <div class="flex gap-2 px-5 pb-4 flex-wrap">
+                        <button @click="abrirDocumentos(v)"
+                            class="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-blue-200 text-blue-600 hover:bg-blue-50 text-xs font-semibold transition">
+                            <DocumentTextIcon class="w-4 h-4" /> Ver documentos
                         </button>
-                        <button @click="abrirRejeitar('van', v.id_van, v.placa)"
-                            class="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold transition">
-                            <XCircleIcon class="w-4 h-4" /> Rejeitar
-                        </button>
-                    </div>
-                    <div v-else-if="v.status_aprovacao === 'aprovado'" class="flex gap-2 px-5 pb-4">
-                        <button @click="abrirRejeitar('van', v.id_van, v.placa)"
-                            class="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 text-xs font-semibold transition">
-                            <XCircleIcon class="w-4 h-4" /> Revogar aprovação
-                        </button>
+                        <template v-if="v.status_aprovacao === 'pendente'">
+                            <button @click="aprovar('van', v.id_van)"
+                                class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition">
+                                <CheckCircleIcon class="w-4 h-4" /> Aprovar
+                            </button>
+                            <button @click="abrirRejeitar('van', v.id_van, v.placa)"
+                                class="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold transition">
+                                <XCircleIcon class="w-4 h-4" /> Rejeitar
+                            </button>
+                        </template>
+                        <template v-else-if="v.status_aprovacao === 'aprovado'">
+                            <button @click="abrirRejeitar('van', v.id_van, v.placa)"
+                                class="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 text-xs font-semibold transition">
+                                <XCircleIcon class="w-4 h-4" /> Revogar aprovação
+                            </button>
+                        </template>
                     </div>
                 </div>
             </div>
 
         </div>
     </div>
+
+    <!-- Modal documentos da van -->
+    <Teleport to="body">
+        <Transition name="fade">
+            <div v-if="modalDocumentos"
+                class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+                @click.self="modalDocumentos = null">
+                <Transition name="pop">
+                    <div v-if="modalDocumentos" class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+
+                        <!-- Header -->
+                        <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+                            <div>
+                                <h3 class="text-base font-bold text-slate-900">{{ modalDocumentos.placa }}</h3>
+                                <p class="text-xs text-slate-400 mt-0.5">
+                                    {{ modalDocumentos.marca }} {{ modalDocumentos.modelo }} · {{ modalDocumentos.ano_fabricacao }} · {{ modalDocumentos.nome_motorista }}
+                                </p>
+                            </div>
+                            <button @click="modalDocumentos = null" class="text-slate-400 hover:text-slate-600 transition">
+                                <XCircleIcon class="w-5 h-5" />
+                            </button>
+                        </div>
+
+                        <div class="px-6 py-5 space-y-6">
+
+                            <!-- Fotos -->
+                            <div>
+                                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Fotos da van</p>
+                                <div class="grid grid-cols-5 gap-2">
+                                    <a v-for="foto in [
+                                        { url: modalDocumentos.foto_url,              label: 'Frontal'   },
+                                        { url: modalDocumentos.foto_verso_url,        label: 'Verso'     },
+                                        { url: modalDocumentos.foto_interior_url,     label: 'Interior'  },
+                                        { url: modalDocumentos.foto_lateral_esq_url,  label: 'Lat. Esq.' },
+                                        { url: modalDocumentos.foto_lateral_dir_url,  label: 'Lat. Dir.' },
+                                    ]" :key="foto.label"
+                                    :href="foto.url || undefined" :target="foto.url ? '_blank' : undefined"
+                                    class="group flex flex-col items-center gap-1"
+                                    :class="foto.url ? 'cursor-pointer' : 'cursor-default opacity-40'">
+                                        <div class="w-full aspect-square rounded-xl overflow-hidden bg-slate-100 border border-slate-200 flex items-center justify-center">
+                                            <img v-if="foto.url" :src="foto.url" :alt="foto.label"
+                                                class="w-full h-full object-cover group-hover:scale-105 transition duration-200" />
+                                            <PhotoIcon v-else class="w-6 h-6 text-slate-300" />
+                                        </div>
+                                        <p class="text-[10px] text-slate-400 text-center">{{ foto.label }}</p>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <!-- Documentos -->
+                            <div>
+                                <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Documentos</p>
+                                <div class="space-y-2">
+                                    <div v-for="doc in [
+                                        { url: modalDocumentos.crlv_url,                  label: 'CRLV',                    validade: modalDocumentos.crlv_validade                  },
+                                        { url: modalDocumentos.seguro_url,                label: 'Seguro obrigatório',       validade: modalDocumentos.seguro_validade                },
+                                        { url: modalDocumentos.autorizacao_municipal_url, label: 'Autorização municipal',   validade: modalDocumentos.autorizacao_municipal_validade  },
+                                    ]" :key="doc.label"
+                                    class="flex items-center justify-between px-4 py-3 rounded-xl border"
+                                    :class="doc.url ? 'border-slate-200 bg-white' : 'border-dashed border-slate-200 bg-slate-50'">
+                                        <div class="flex items-center gap-3">
+                                            <DocumentTextIcon class="w-4 h-4 shrink-0"
+                                                :class="doc.url ? 'text-blue-500' : 'text-slate-300'" />
+                                            <div>
+                                                <p class="text-sm font-medium text-slate-800">{{ doc.label }}</p>
+                                                <p v-if="doc.validade" class="text-xs text-slate-400">Validade: {{ doc.validade }}</p>
+                                            </div>
+                                        </div>
+                                        <a v-if="doc.url" :href="doc.url" target="_blank"
+                                            class="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-semibold transition">
+                                            Abrir <ArrowTopRightOnSquareIcon class="w-3.5 h-3.5" />
+                                        </a>
+                                        <span v-else class="text-xs text-slate-400 italic">Não enviado</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer com ações -->
+                        <div class="flex items-center gap-2 px-6 py-4 border-t border-slate-100 flex-wrap">
+                            <template v-if="modalDocumentos.status_aprovacao === 'pendente'">
+                                <button @click="aprovarEFechar('van', modalDocumentos.id_van)"
+                                    class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-semibold transition">
+                                    <CheckCircleIcon class="w-4 h-4" /> Aprovar van
+                                </button>
+                                <button @click="rejeitarEFechar('van', modalDocumentos.id_van, modalDocumentos.placa)"
+                                    class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-red-200 text-red-600 hover:bg-red-50 text-sm font-semibold transition">
+                                    <XCircleIcon class="w-4 h-4" /> Rejeitar van
+                                </button>
+                            </template>
+                            <template v-else-if="modalDocumentos.status_aprovacao === 'aprovado'">
+                                <button @click="rejeitarEFechar('van', modalDocumentos.id_van, modalDocumentos.placa)"
+                                    class="flex items-center gap-1.5 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 text-sm font-semibold transition">
+                                    <XCircleIcon class="w-4 h-4" /> Revogar aprovação
+                                </button>
+                            </template>
+                            <button @click="modalDocumentos = null"
+                                class="ml-auto px-4 py-2.5 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-50 text-sm font-semibold transition">
+                                Fechar
+                            </button>
+                        </div>
+                    </div>
+                </Transition>
+            </div>
+        </Transition>
+    </Teleport>
 
     <!-- Modal rejeição -->
     <Teleport to="body">

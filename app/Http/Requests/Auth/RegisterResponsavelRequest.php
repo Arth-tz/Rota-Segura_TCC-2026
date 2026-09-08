@@ -41,6 +41,7 @@ class RegisterResponsavelRequest extends FormRequest
             ],
             'email'           => ['required', 'email:rfc,dns', 'max:150', Rule::unique('usuario', 'email')],
             'password'        => ['required', 'confirmed', Password::defaults()],
+            'foto'            => ['nullable', 'image', 'max:2048', 'mimes:jpg,jpeg,png,webp'],
         ];
     }
 

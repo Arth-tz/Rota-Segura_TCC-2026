@@ -25,8 +25,10 @@ class DashboardController extends Controller
                 'email'            => $m->usuario?->email ?? '—',
                 'cnh_numero'       => $m->cnh_numero,
                 'cnh_categoria'    => $m->cnh_categoria,
-                'cnh_validade'     => $m->cnh_validade,
-                'status_aprovacao' => $m->status_aprovacao,
+                'cnh_validade'              => $m->cnh_validade,
+                'cnh_foto_url'              => $m->cnh_foto_url,
+                'certidao_antecedentes_url' => $m->certidao_antecedentes_url,
+                'status_aprovacao'          => $m->status_aprovacao,
                 'motivo_rejeicao'  => $m->motivo_rejeicao,
                 'data_avaliacao'   => $m->data_avaliacao_documento,
                 'van'              => $m->van ? [
@@ -43,18 +45,31 @@ class DashboardController extends Controller
             ->orderByRaw("FIELD(status_aprovacao, 'pendente', 'aprovado', 'rejeitado')")
             ->get()
             ->map(fn($v) => [
-                'id_van'               => $v->id_van,
-                'placa'                => $v->placa,
-                'marca'                => $v->marca,
-                'modelo'               => $v->modelo,
-                'ano_fabricacao'       => $v->ano_fabricacao,
-                'cor'                  => $v->cor,
-                'capacidade'           => $v->capacidade_passageiros,
-                'status_aprovacao'     => $v->status_aprovacao,
-                'motivo_rejeicao'      => $v->motivo_rejeicao,
-                'documentacao_completa'=> $v->documentacao_completa,
-                'nome_motorista'       => $v->motorista?->usuario?->pessoa?->nome ?? '—',
-                'id_motorista'         => $v->id_motorista,
+                'id_van'                         => $v->id_van,
+                'placa'                          => $v->placa,
+                'marca'                          => $v->marca,
+                'modelo'                         => $v->modelo,
+                'ano_fabricacao'                 => $v->ano_fabricacao,
+                'cor'                            => $v->cor,
+                'capacidade'                     => $v->capacidade_passageiros,
+                'status_aprovacao'               => $v->status_aprovacao,
+                'motivo_rejeicao'                => $v->motivo_rejeicao,
+                'documentacao_completa'          => $v->documentacao_completa,
+                'nome_motorista'                 => $v->motorista?->usuario?->pessoa?->nome ?? '—',
+                'id_motorista'                   => $v->id_motorista,
+                // fotos
+                'foto_url'                       => $v->foto_url,
+                'foto_verso_url'                 => $v->foto_verso_url,
+                'foto_interior_url'              => $v->foto_interior_url,
+                'foto_lateral_esq_url'           => $v->foto_lateral_esq_url,
+                'foto_lateral_dir_url'           => $v->foto_lateral_dir_url,
+                // documentos
+                'crlv_url'                       => $v->crlv_url,
+                'crlv_validade'                  => $v->crlv_validade?->format('d/m/Y'),
+                'seguro_url'                     => $v->seguro_url,
+                'seguro_validade'                => $v->seguro_validade?->format('d/m/Y'),
+                'autorizacao_municipal_url'      => $v->autorizacao_municipal_url,
+                'autorizacao_municipal_validade' => $v->autorizacao_municipal_validade?->format('d/m/Y'),
             ]);
 
         return Inertia::render('Admin/Dashboard', [

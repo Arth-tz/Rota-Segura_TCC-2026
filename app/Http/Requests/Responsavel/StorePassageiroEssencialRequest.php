@@ -25,7 +25,8 @@ class StorePassageiroEssencialRequest extends FormRequest
             'nome' => ['required', 'string', 'min:2', 'max:150'],
             'cpf' => ['required', 'cpf', Rule::unique('pessoa', 'cpf')],
             'data_nascimento' => ['required', 'date', 'before:today'],
-            'obs_medica' => ['nullable', 'string', 'max:5000'],
+            'obs_medica'               => ['nullable', 'string', 'max:5000'],
+            'foto_consentimento_lgpd'  => ['accepted'],
         ];
     }
 }
