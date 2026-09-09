@@ -60,6 +60,18 @@ const titulos = {
                         <p class="text-xs text-blue-300 font-medium">Portal Responsável</p>
                         <h2 class="text-xl font-bold leading-tight">{{ titulos[secaoAtiva] }}</h2>
                     </div>
+
+                    <!-- Avatar → Meu Perfil (só desktop) -->
+                    <button
+                        @click="secaoAtiva = 'perfil'"
+                        class="hidden md:flex items-center gap-2.5 rounded-xl px-2 py-1.5 hover:bg-white/10 transition-colors"
+                    >
+                        <span class="text-sm font-medium text-blue-100 truncate max-w-[140px]">{{ usuario?.nome }}</span>
+                        <div class="w-9 h-9 rounded-full overflow-hidden bg-blue-600/60 border-2 border-white/30 flex items-center justify-center shrink-0">
+                            <img v-if="usuario?.foto_url" :src="usuario.foto_url" class="w-full h-full object-cover" alt="" />
+                            <span v-else class="text-white text-sm font-bold">{{ usuario?.nome?.charAt(0)?.toUpperCase() ?? '?' }}</span>
+                        </div>
+                    </button>
                 </div>
             </header>
 

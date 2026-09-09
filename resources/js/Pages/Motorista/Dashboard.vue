@@ -55,10 +55,26 @@ const titulos = {
                             {{ titulos[secaoAtiva] }}
                         </h2>
                     </div>
-                    <div v-if="solicitacoesPendentes > 0"
-                        class="flex items-center gap-2 rounded-xl bg-white/15 border border-white/20 px-3 py-1.5 text-xs font-semibold">
-                        <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
-                        {{ solicitacoesPendentes }} pendente{{ solicitacoesPendentes > 1 ? 's' : '' }}
+
+                    <div class="flex items-center gap-3">
+                        <!-- Badge de solicitações pendentes -->
+                        <div v-if="solicitacoesPendentes > 0"
+                            class="flex items-center gap-2 rounded-xl bg-white/15 border border-white/20 px-3 py-1.5 text-xs font-semibold">
+                            <span class="w-1.5 h-1.5 rounded-full bg-white animate-pulse"></span>
+                            {{ solicitacoesPendentes }} pendente{{ solicitacoesPendentes > 1 ? 's' : '' }}
+                        </div>
+
+                        <!-- Avatar → Meu Perfil (só desktop) -->
+                        <button
+                            @click="secaoAtiva = 'perfil'"
+                            class="hidden md:flex items-center gap-2.5 rounded-xl px-2 py-1.5 hover:bg-white/10 transition-colors"
+                        >
+                            <span class="text-sm font-medium text-amber-100 truncate max-w-[140px]">{{ usuario?.nome }}</span>
+                            <div class="w-9 h-9 rounded-full overflow-hidden bg-amber-900/60 border-2 border-white/30 flex items-center justify-center shrink-0">
+                                <img v-if="usuario?.foto_url" :src="usuario.foto_url" class="w-full h-full object-cover" alt="" />
+                                <span v-else class="text-white text-sm font-bold">{{ usuario?.nome?.charAt(0)?.toUpperCase() ?? '?' }}</span>
+                            </div>
+                        </button>
                     </div>
                 </div>
             </header>

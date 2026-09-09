@@ -123,10 +123,14 @@ class PassageiroController extends Controller
             'obs_medica'             => 'nullable|string|max:5000',
             'foto'                   => 'nullable|image|max:2048|mimes:jpg,jpeg,png,webp',
             'foto_consentimento_lgpd' => ['accepted'],
-            // endereços são opcionais ao adicionar pelo dashboard
             'embarques'    => 'nullable|array',
             'desembarques' => 'nullable|array',
             'residencia'   => 'nullable|array',
+        ], [
+            'foto.image'                        => 'O arquivo deve ser uma imagem.',
+            'foto.max'                          => 'A imagem deve ter no máximo 2 MB.',
+            'foto.mimes'                        => 'Formato aceito: JPG, PNG ou WebP.',
+            'foto_consentimento_lgpd.accepted'  => 'É necessário aceitar o consentimento para uso da foto.',
         ]);
 
         try {
@@ -300,9 +304,15 @@ class PassageiroController extends Controller
                 ->withErrors(['geral' => 'Passageiro não encontrado.']);
         }
 
-        $request->validate([
-            'foto' => ['required', 'image', 'max:2048', 'mimes:jpg,jpeg,png,webp'],
-        ]);
+        $request->validate(
+            ['foto' => ['required', 'image', 'max:2048', 'mimes:jpg,jpeg,png,webp']],
+            [
+                'foto.required' => 'Selecione uma imagem.',
+                'foto.image'    => 'O arquivo deve ser uma imagem.',
+                'foto.max'      => 'A imagem deve ter no máximo 2 MB.',
+                'foto.mimes'    => 'Formato aceito: JPG, PNG ou WebP.',
+            ]
+        );
 
         $passageiro->load('pessoa');
 

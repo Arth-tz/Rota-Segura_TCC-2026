@@ -323,7 +323,15 @@ class VanController extends Controller
         $van = auth()->user()->motorista?->van;
         if (!$van) return redirect()->route('motorista.dashboard');
 
-        $request->validate(['foto' => ['required', 'image', 'max:2048', 'mimes:jpg,jpeg,png,webp']]);
+        $request->validate(
+            ['foto' => ['required', 'image', 'max:2048', 'mimes:jpg,jpeg,png,webp']],
+            [
+                'foto.required' => 'Selecione uma imagem.',
+                'foto.image'    => 'O arquivo deve ser uma imagem.',
+                'foto.max'      => 'A imagem deve ter no máximo 2 MB.',
+                'foto.mimes'    => 'Formato aceito: JPG, PNG ou WebP.',
+            ]
+        );
 
         $this->salvarFoto($van, $request->file('foto'), $coluna, $arquivo);
         $this->recalcularDocumentacaoCompleta($van);

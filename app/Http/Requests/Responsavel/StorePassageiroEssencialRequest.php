@@ -29,5 +29,12 @@ class StorePassageiroEssencialRequest extends FormRequest
             'foto_consentimento_lgpd'  => ['accepted'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'foto_consentimento_lgpd.accepted' => 'É necessário aceitar o consentimento para uso da foto.',
+        ];
+    }
 }
 

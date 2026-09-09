@@ -45,6 +45,15 @@ class RegisterResponsavelRequest extends FormRequest
         ];
     }
 
+    public function messages(): array
+    {
+        return [
+            'foto.image' => 'O arquivo deve ser uma imagem.',
+            'foto.max'   => 'A imagem deve ter no máximo 2 MB.',
+            'foto.mimes' => 'Formato aceito: JPG, PNG ou WebP.',
+        ];
+    }
+
     protected function passedValidation(): void
     {
         $this->merge([

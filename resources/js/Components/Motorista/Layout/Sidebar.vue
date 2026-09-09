@@ -70,20 +70,8 @@ const navItems = [
             </div>
         </nav>
 
-        <!-- Rodapé: usuário + logout -->
-        <div class="p-3 border-t border-amber-800/30 space-y-1">
-            <div class="flex items-center gap-3 px-3 py-2">
-                <div class="w-8 h-8 rounded-full overflow-hidden bg-white flex items-center justify-center shrink-0">
-                    <img v-if="usuario?.foto_url" :src="usuario.foto_url" class="w-full h-full object-cover" alt="" />
-                    <span v-else class="text-amber-700 text-xs font-bold">
-                        {{ usuario?.nome?.charAt(0)?.toUpperCase() ?? 'M' }}
-                    </span>
-                </div>
-                <div class="min-w-0 flex-1">
-                    <p class="text-sm font-semibold text-white truncate leading-tight">{{ usuario?.nome ?? 'Motorista' }}</p>
-                    <p class="text-xs text-amber-200 truncate leading-tight">{{ usuario?.email ?? '' }}</p>
-                </div>
-            </div>
+        <!-- Rodapé: logout -->
+        <div class="p-3 border-t border-amber-800/30">
             <Link
                 :href="route('logout')"
                 method="post"
