@@ -19,6 +19,7 @@ const form = useForm({
 const formFoto    = useForm({ foto: null })
 const fotoPreview = ref(null)
 const fileInput   = ref(null)
+const fotoSalva   = ref(false)
 const fotoAtual   = computed(() => fotoPreview.value ?? props.dados.foto_url ?? null)
 
 function handleFotoChange(event) {
@@ -28,7 +29,11 @@ function handleFotoChange(event) {
     formFoto.foto = file
     formFoto.post(route('motorista.perfil.foto'), {
         forceFormData: true,
-        onSuccess: () => { fotoPreview.value = null },
+        onSuccess: () => {
+            fotoPreview.value = null
+            fotoSalva.value = true
+            setTimeout(() => { fotoSalva.value = false }, 2500)
+        },
     })
 }
 
@@ -94,26 +99,44 @@ const statusConfig = {
             <div class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
                 <div class="px-5 py-5">
                     <div class="flex items-center gap-5">
-                        <button type="button" @click="fileInput.click()" :disabled="formFoto.processing"
-                            class="relative group shrink-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600">
+                        <button type="button" @click="!formFoto.processing && fileInput.click()"
+                            class="relative group shrink-0 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-600"
+                            :class="formFoto.processing ? 'cursor-wait' : 'cursor-pointer'">
                             <div class="w-20 h-20 rounded-2xl overflow-hidden bg-amber-100 flex items-center justify-center">
                                 <img v-if="fotoAtual" :src="fotoAtual" class="w-full h-full object-cover" alt="Foto de perfil" />
                                 <span v-else class="text-2xl font-bold text-amber-600">
                                     {{ dados.nome?.[0]?.toUpperCase() }}
                                 </span>
                             </div>
-                            <div class="absolute inset-0 rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                            <!-- Overlay: uploading -->
+                            <div v-if="formFoto.processing"
+                                class="absolute inset-0 rounded-2xl bg-black/50 flex items-center justify-center">
+                                <svg class="w-6 h-6 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"/>
+                                </svg>
+                            </div>
+                            <!-- Overlay: hover (when idle) -->
+                            <div v-else class="absolute inset-0 rounded-2xl bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
                                 <CameraIcon class="w-6 h-6 text-white" />
                             </div>
                         </button>
                         <div class="min-w-0">
                             <p class="text-sm font-semibold text-slate-700 truncate">{{ dados.nome }}</p>
                             <button type="button" @click="fileInput.click()" :disabled="formFoto.processing"
-                                class="text-xs text-amber-700 hover:text-amber-800 transition mt-0.5">
+                                class="text-xs transition mt-0.5 disabled:opacity-50"
+                                :class="formFoto.processing ? 'text-slate-400' : 'text-amber-700 hover:text-amber-800'">
                                 {{ formFoto.processing ? 'Enviando foto…' : 'Alterar foto de perfil' }}
                             </button>
-                            <p v-if="formFoto.errors.foto" class="text-xs text-red-500 mt-1">{{ formFoto.errors.foto }}</p>
-                            <p class="text-xs text-slate-400 mt-1">JPG, PNG ou WebP · máx. 2 MB</p>
+                            <!-- Confirmação inline -->
+                            <Transition name="fade-up">
+                                <p v-if="fotoSalva" class="text-xs text-emerald-600 font-medium mt-1 flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/></svg>
+                                    Foto salva
+                                </p>
+                                <p v-else-if="formFoto.errors.foto" class="text-xs text-red-500 mt-1">{{ formFoto.errors.foto }}</p>
+                                <p v-else class="text-xs text-slate-400 mt-1">JPG, PNG ou WebP · máx. 2 MB</p>
+                            </Transition>
                         </div>
                         <input ref="fileInput" type="file" accept="image/jpeg,image/png,image/webp"
                             class="hidden" @change="handleFotoChange" />
@@ -274,3 +297,9 @@ const statusConfig = {
         </main>
     </div>
 </template>
+
+<style scoped>
+.fade-up-enter-active, .fade-up-leave-active { transition: all 0.3s ease; }
+.fade-up-enter-from { opacity: 0; transform: translateY(4px); }
+.fade-up-leave-to   { opacity: 0; }
+</style>

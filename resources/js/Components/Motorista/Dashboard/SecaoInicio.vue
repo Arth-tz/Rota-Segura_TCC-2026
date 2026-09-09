@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { Link } from '@inertiajs/vue3'
-import { TruckIcon, UserGroupIcon, MapIcon, PlusIcon, PencilSquareIcon, CameraIcon, ExclamationCircleIcon, CheckCircleIcon, XCircleIcon, ArrowRightIcon, ShieldCheckIcon } from '@heroicons/vue/24/outline'
+import { TruckIcon, UserGroupIcon, MapIcon, PlusIcon, PencilSquareIcon, CameraIcon, ExclamationCircleIcon, CheckCircleIcon, XCircleIcon, ArrowRightIcon, ShieldCheckIcon, EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
     motorista:             { type: Object, default: null },
@@ -78,6 +78,27 @@ const statusConfig = {
     rejeitado: { label: 'Rejeitado',            classes: 'bg-red-100 text-red-700 border-red-200' },
 }
 
+// ─── VISIBILIDADE NO ANÚNCIO DE MOTORISTAS ───────────────────────────────────
+const statusVisibilidade = computed(() => {
+    if (props.motorista?.status_aprovacao !== 'aprovado') {
+        return { visivel: false, motivo: 'Seu cadastro ainda está aguardando aprovação pelo administrador.', link: null, cta: null }
+    }
+    if (!props.van) {
+        return { visivel: false, motivo: 'Cadastre sua van para aparecer na busca de motoristas.', link: route('motorista.van.create'), cta: 'Cadastrar van' }
+    }
+    if (props.van.status_aprovacao !== 'aprovado') {
+        return { visivel: false, motivo: 'Sua van está aguardando aprovação pelo administrador.', link: null, cta: null }
+    }
+    if (!props.van.foto_url) {
+        return { visivel: false, motivo: 'Adicione a foto frontal da van — ela é obrigatória para aparecer na busca.', link: route('motorista.van.documentos'), cta: 'Adicionar foto' }
+    }
+    const dispAtivas = props.disponibilidades.filter(d => d.ativa)
+    if (dispAtivas.length === 0) {
+        return { visivel: false, motivo: 'Crie ao menos uma disponibilidade ativa para os responsáveis encontrarem você.', link: null, cta: null }
+    }
+    return { visivel: true, dispAtivas }
+})
+
 const turnoLabel = { manha: 'Manhã', tarde: 'Tarde', integral: 'Integral' }
 const diasLabel  = { seg: 'Seg', ter: 'Ter', qua: 'Qua', qui: 'Qui', sex: 'Sex', sab: 'Sáb', dom: 'Dom' }
 
@@ -133,6 +154,36 @@ function bairrosResumo(regioes) {
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- ── Card de visibilidade na busca de motoristas ──────────────────── -->
+        <div v-if="statusVisibilidade.visivel"
+            class="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
+            <EyeIcon class="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-emerald-800">Visível para responsáveis</p>
+                <p class="text-xs text-emerald-700 mt-0.5">
+                    Sua van está aparecendo na busca de motoristas.
+                    <span v-if="statusVisibilidade.dispAtivas?.length">
+                        Disponibilidades ativas:
+                        <span v-for="(d, i) in statusVisibilidade.dispAtivas" :key="d.id_disponibilidade">
+                            <strong>{{ d.nome }}</strong> ({{ turnoLabel[d.turno] ?? d.turno }}){{ i < statusVisibilidade.dispAtivas.length - 1 ? ', ' : '.' }}
+                        </span>
+                    </span>
+                </p>
+            </div>
+        </div>
+        <div v-else-if="motorista?.status_aprovacao === 'aprovado'"
+            class="flex items-start gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
+            <EyeSlashIcon class="w-4 h-4 text-slate-400 shrink-0 mt-0.5" />
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-slate-700">Não aparece na busca de motoristas</p>
+                <p class="text-xs text-slate-500 mt-0.5">{{ statusVisibilidade.motivo }}</p>
+            </div>
+            <Link v-if="statusVisibilidade.link" :href="statusVisibilidade.link"
+                class="shrink-0 flex items-center gap-1.5 text-xs font-bold text-slate-600 hover:text-slate-900 bg-white border border-slate-200 px-3 py-1.5 rounded-lg transition whitespace-nowrap">
+                {{ statusVisibilidade.cta }}
+            </Link>
         </div>
 
         <!-- Alerta: foto frontal ausente -->
