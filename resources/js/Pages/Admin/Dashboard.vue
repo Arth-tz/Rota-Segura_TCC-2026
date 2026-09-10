@@ -217,6 +217,24 @@ const statusConfig = {
                                 Ver arquivo
                             </a>
                         </div>
+                        <div>
+                            <p class="uppercase tracking-wide text-slate-400 mb-0.5">SEST SENAT</p>
+                            <a v-if="m.curso_transporte_url" :href="m.curso_transporte_url" target="_blank" rel="noopener noreferrer"
+                                class="flex items-center gap-1 font-medium text-blue-600 hover:underline">
+                                <ArrowTopRightOnSquareIcon class="w-3 h-3" />
+                                Ver certificado
+                            </a>
+                            <span v-else class="text-slate-400 text-xs">Não enviado</span>
+                        </div>
+                        <div>
+                            <p class="uppercase tracking-wide text-slate-400 mb-0.5">RENACH</p>
+                            <a v-if="m.renach_url" :href="m.renach_url" target="_blank" rel="noopener noreferrer"
+                                class="flex items-center gap-1 font-medium text-blue-600 hover:underline">
+                                <ArrowTopRightOnSquareIcon class="w-3 h-3" />
+                                Ver extrato
+                            </a>
+                            <span v-else class="text-slate-400 text-xs">Não enviado</span>
+                        </div>
                         <div v-if="m.van">
                             <p class="uppercase tracking-wide text-slate-400 mb-0.5">Van</p>
                             <p class="font-medium text-slate-700">{{ m.van.placa }} — {{ m.van.modelo }}</p>

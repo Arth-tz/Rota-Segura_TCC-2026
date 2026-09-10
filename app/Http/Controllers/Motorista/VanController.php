@@ -360,7 +360,7 @@ class VanController extends Controller
     private function recalcularDocumentacaoCompleta(Van $van): void
     {
         $van->refresh();
-        $essenciais = ['foto_url', 'crlv_url', 'seguro_url', 'autorizacao_municipal_url'];
+        $essenciais = ['foto_url', 'crlv_url'];
         $completo   = collect($essenciais)->every(fn($c) => !empty($van->$c));
         $van->update(['documentacao_completa' => $completo]);
     }

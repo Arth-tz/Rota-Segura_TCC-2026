@@ -28,6 +28,8 @@ class DashboardController extends Controller
                 'cnh_validade'              => $m->cnh_validade,
                 'cnh_foto_url'              => $m->cnh_foto_url,
                 'certidao_antecedentes_url' => $m->certidao_antecedentes_url,
+                'curso_transporte_url'      => $m->curso_transporte_url,
+                'renach_url'                => $m->renach_url,
                 'status_aprovacao'          => $m->status_aprovacao,
                 'motivo_rejeicao'  => $m->motivo_rejeicao,
                 'data_avaliacao'   => $m->data_avaliacao_documento,

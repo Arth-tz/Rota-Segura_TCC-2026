@@ -15,6 +15,7 @@ import {
     SignalIcon,
     CheckIcon,
     ExclamationTriangleIcon,
+    XMarkIcon,
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
@@ -137,6 +138,18 @@ onUnmounted(() => {
     window.removeEventListener('offline', atualizarOnline)
 })
 
+// ── Modal de confirmação de encerramento ──────────────────────────────────────
+
+const modalEncerrar  = ref(false)
+const trajetoAlvoIdx = ref(null)
+const pendentesModal = ref(0)
+
+function abrirModalEncerrar(idx, pendentes) {
+    trajetoAlvoIdx.value = idx
+    pendentesModal.value = pendentes
+    modalEncerrar.value  = true
+}
+
 // ── Iniciar / Encerrar ────────────────────────────────────────────────────────
 
 async function iniciarTrajeto(trajetoIdx) {
@@ -178,12 +191,16 @@ async function encerrarTrajeto(trajetoIdx) {
     const { concluidas, total } = progressoTrajeto(trajeto)
     const pendentes = total - concluidas
     if (pendentes > 0) {
-        const confirma = confirm(
-            `Ainda há ${pendentes} passageiro${pendentes > 1 ? 's' : ''} sem confirmação de desembarque. Encerrar o trajeto mesmo assim?`
-        )
-        if (!confirma) return
+        abrirModalEncerrar(trajetoIdx, pendentes)
+        return
     }
 
+    await executarEncerramento(trajetoIdx)
+}
+
+async function executarEncerramento(trajetoIdx) {
+    modalEncerrar.value = false
+    const trajeto = listas.value[trajetoIdx]
     trajeto.encerrando = true
     try {
         await axios.post(route('motorista.rotas.encerrar', trajeto.rota_ativa.id_rota))
@@ -488,4 +505,55 @@ listas.value.forEach((t) => {
         </div>
 
     </div>
+
+    <!-- Modal: confirmar encerramento com passageiros pendentes -->
+    <Teleport to="body">
+        <Transition name="fade">
+            <div v-if="modalEncerrar"
+                class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+                @click.self="modalEncerrar = false">
+                <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl border border-slate-100">
+
+                    <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                        <div class="flex items-center gap-2">
+                            <ExclamationTriangleIcon class="w-5 h-5 text-amber-600 shrink-0" />
+                            <h3 class="text-base font-bold text-slate-800">Encerrar trajeto?</h3>
+                        </div>
+                        <button @click="modalEncerrar = false"
+                            class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition">
+                            <XMarkIcon class="w-4 h-4 text-slate-500" />
+                        </button>
+                    </div>
+
+                    <div class="px-5 py-4">
+                        <p class="text-sm text-slate-600">
+                            Ainda há
+                            <span class="font-bold text-slate-800">{{ pendentesModal }} passageiro{{ pendentesModal > 1 ? 's' : '' }}</span>
+                            sem confirmação de desembarque.
+                        </p>
+                        <p class="text-sm text-slate-500 mt-1">
+                            Ao encerrar, eles serão marcados automaticamente pelo sistema.
+                        </p>
+                    </div>
+
+                    <div class="px-5 pb-5 flex gap-3">
+                        <button @click="modalEncerrar = false"
+                            class="flex-1 py-3 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition">
+                            Cancelar
+                        </button>
+                        <button @click="executarEncerramento(trajetoAlvoIdx)"
+                            class="flex-1 py-3 rounded-xl bg-slate-700 hover:bg-slate-800 text-white text-sm font-bold transition">
+                            Encerrar mesmo assim
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </Transition>
+    </Teleport>
+
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>

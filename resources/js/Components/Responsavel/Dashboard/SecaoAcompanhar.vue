@@ -16,12 +16,6 @@ import {
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
 
-delete L.Icon.Default.prototype._getIconUrl
-L.Icon.Default.mergeOptions({
-    iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
-    iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
-    shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
-})
 
 // ── Estado ────────────────────────────────────────────────────────────────────
 
@@ -107,7 +101,8 @@ function atualizarMapaGrupo(grupo) {
     const idVan = grupo.van.id_van
     if (!grupo.posicao_van || !mapDivs[idVan]) return
 
-    if (!mapas[idVan]) {
+    const primeiraVez = !mapas[idVan]
+    if (primeiraVez) {
         const mapa = L.map(mapDivs[idVan], { zoomControl: true })
             .setView([grupo.posicao_van.latitude, grupo.posicao_van.longitude], 14)
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -118,35 +113,55 @@ function atualizarMapaGrupo(grupo) {
     }
 
     const m = mapas[idVan]
-    const bounds = []
-
     const latlngVan = [grupo.posicao_van.latitude, grupo.posicao_van.longitude]
-    bounds.push(latlngVan)
+
+    // ── Marcador da van ────────────────────────────────────────────────────────
     if (m.marcadorVan) {
         m.marcadorVan.setLatLng(latlngVan)
     } else {
-        m.marcadorVan = L.marker(latlngVan, { icon: iconVan }).addTo(m.mapa).bindPopup(`<b>${grupo.van.nome_servico || grupo.van.placa}</b>`)
+        m.marcadorVan = L.marker(latlngVan, { icon: iconVan })
+            .addTo(m.mapa)
+            .bindPopup(`<b>${grupo.van.nome_servico || grupo.van.placa}</b>`)
     }
 
+    // Segue a van quando sai da área visível; na primeira vez usa fitBounds
+    if (primeiraVez) {
+        const boundsIniciais = [latlngVan]
+        grupo.passageiros.forEach(p => {
+            if (p.embarque?.latitude && p.embarque?.longitude) boundsIniciais.push([p.embarque.latitude, p.embarque.longitude])
+            if (p.desembarque?.latitude && p.desembarque?.longitude) boundsIniciais.push([p.desembarque.latitude, p.desembarque.longitude])
+        })
+        if (boundsIniciais.length > 1) m.mapa.fitBounds(boundsIniciais, { padding: [36, 36], maxZoom: 15 })
+    } else if (!m.mapa.getBounds().contains(latlngVan)) {
+        m.mapa.panTo(latlngVan, { animate: true, duration: 0.5 })
+    }
+
+    // ── Marcadores de paradas — sincroniza com status atual ───────────────────
     grupo.passageiros.forEach(p => {
-        if (p.embarque?.latitude && p.embarque?.longitude && !m.marcadoresEmb[p.id_passageiro] && ['aguardando'].includes(p.status)) {
-            const latlng = [p.embarque.latitude, p.embarque.longitude]
-            bounds.push(latlng)
-            m.marcadoresEmb[p.id_passageiro] = L.marker(latlng, { icon: iconParada('#10b981') })
-                .addTo(m.mapa).bindPopup(`<b>Embarque — ${p.nome}</b><br>${p.embarque.logradouro}, ${p.embarque.bairro}`)
+        const deveEmb  = p.embarque?.latitude && p.embarque?.longitude && p.status === 'aguardando'
+        const deveDesemb = p.desembarque?.latitude && p.desembarque?.longitude && ['aguardando', 'a_bordo'].includes(p.status)
+
+        // Embarque: adiciona se deve existir e não existe; remove se não deve mais existir
+        if (deveEmb && !m.marcadoresEmb[p.id_passageiro]) {
+            m.marcadoresEmb[p.id_passageiro] = L.marker([p.embarque.latitude, p.embarque.longitude], { icon: iconParada('#10b981') })
+                .addTo(m.mapa)
+                .bindPopup(`<b>Embarque — ${p.nome}</b><br>${p.embarque.logradouro}, ${p.embarque.bairro}`)
+        } else if (!deveEmb && m.marcadoresEmb[p.id_passageiro]) {
+            m.marcadoresEmb[p.id_passageiro].remove()
+            delete m.marcadoresEmb[p.id_passageiro]
         }
-        if (p.desembarque?.latitude && p.desembarque?.longitude && !m.marcadoresDesemb[p.id_passageiro] && ['aguardando', 'a_bordo'].includes(p.status)) {
-            const latlng = [p.desembarque.latitude, p.desembarque.longitude]
-            bounds.push(latlng)
+
+        // Desembarque: idem
+        if (deveDesemb && !m.marcadoresDesemb[p.id_passageiro]) {
             const nome = p.desembarque.nome ? `${p.desembarque.nome} — ` : ''
-            m.marcadoresDesemb[p.id_passageiro] = L.marker(latlng, { icon: iconParada('#3b82f6') })
-                .addTo(m.mapa).bindPopup(`<b>${nome}${p.nome}</b><br>${p.desembarque.logradouro}, ${p.desembarque.bairro}`)
+            m.marcadoresDesemb[p.id_passageiro] = L.marker([p.desembarque.latitude, p.desembarque.longitude], { icon: iconParada('#3b82f6') })
+                .addTo(m.mapa)
+                .bindPopup(`<b>${nome}${p.nome}</b><br>${p.desembarque.logradouro}, ${p.desembarque.bairro}`)
+        } else if (!deveDesemb && m.marcadoresDesemb[p.id_passageiro]) {
+            m.marcadoresDesemb[p.id_passageiro].remove()
+            delete m.marcadoresDesemb[p.id_passageiro]
         }
     })
-
-    if (bounds.length > 1) {
-        m.mapa.fitBounds(bounds, { padding: [36, 36], maxZoom: 15 })
-    }
 }
 
 // Remove instâncias de mapa de vans que saíram da lista (ex: rota foi encerrada)

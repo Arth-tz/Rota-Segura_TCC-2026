@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Motorista;
 
 use App\Http\Controllers\Controller;
+use App\Models\Disponibilidade;
 use App\Models\DisponibilidadePassageiro;
 use App\Models\Localizacao;
 use App\Models\Parada;
@@ -19,6 +20,11 @@ class RotaController extends Controller
     {
         $van = $this->van();
         if (!$van) return response()->json(['error' => 'Van não encontrada.'], 422);
+
+        $pertenceAoMotorista = Disponibilidade::where('id_disponibilidade', $disponibilidadeId)
+            ->where('id_van', $van->id_van)
+            ->exists();
+        if (!$pertenceAoMotorista) return response()->json(['error' => 'Não autorizado.'], 403);
 
         $rotaExistente = Rota::where('id_van', $van->id_van)
             ->where('id_disponibilidade', $disponibilidadeId)

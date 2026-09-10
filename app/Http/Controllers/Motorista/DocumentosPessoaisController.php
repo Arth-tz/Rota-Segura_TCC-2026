@@ -12,8 +12,10 @@ use Inertia\Response;
 class DocumentosPessoaisController extends Controller
 {
     private const DOC_MAP = [
-        'cnh'      => 'cnh_foto_url',
-        'certidao' => 'certidao_antecedentes_url',
+        'cnh'              => 'cnh_foto_url',
+        'certidao'         => 'certidao_antecedentes_url',
+        'curso_transporte' => 'curso_transporte_url',
+        'renach'           => 'renach_url',
     ];
 
     public function index(): Response|RedirectResponse
@@ -31,6 +33,8 @@ class DocumentosPessoaisController extends Controller
                 'cnh_validade'              => $motorista->cnh_validade?->format('d/m/Y'),
                 'cnh_foto_url'              => $motorista->cnh_foto_url,
                 'certidao_antecedentes_url' => $motorista->certidao_antecedentes_url,
+                'curso_transporte_url'      => $motorista->curso_transporte_url,
+                'renach_url'                => $motorista->renach_url,
                 'status_aprovacao'          => $motorista->status_aprovacao,
             ],
         ]);

@@ -98,6 +98,7 @@ const titulos = {
                 <SecaoPassageiros
                     v-else-if="secaoAtiva === 'passageiros'"
                     :passageiros="passageiros"
+                    :motorista="motorista"
                 />
                 <SecaoTrajetos
                     v-else-if="secaoAtiva === 'trajetos'"

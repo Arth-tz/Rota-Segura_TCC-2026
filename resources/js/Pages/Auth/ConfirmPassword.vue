@@ -31,7 +31,7 @@ const submit = () => {
 
             <a href="/" class="lg-aside__logo">
                 <div class="lg-aside__logo-ring">
-                    <img src="/images/Logo_rota-segura_branco.png" alt="Logo Rota Segura" class="lg-aside__logo-img" />
+                    <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Logo Rota Segura" class="lg-aside__logo-img" />
                 </div>
                 <span class="lg-aside__logo-text">Rota Segura</span>
             </a>
@@ -52,7 +52,7 @@ const submit = () => {
                 <!-- Logo mobile -->
                 <div class="lg-mobile-logo">
                     <div class="lg-mobile-logo__ring">
-                        <img src="/images/Logo_rota_segura-azul.png" alt="Rota Segura" class="lg-mobile-logo__img" />
+                        <img src="/rota-segura/public/images/Logo_rota_segura-azul.png" alt="Rota Segura" class="lg-mobile-logo__img" />
                     </div>
                     <span class="lg-mobile-logo__text">Rota Segura</span>
                 </div>

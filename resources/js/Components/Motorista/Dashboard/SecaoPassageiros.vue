@@ -1,11 +1,22 @@
 <script setup>
 import { computed, ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
-import { UsersIcon, CheckCircleIcon, XCircleIcon, XMarkIcon } from '@heroicons/vue/24/outline'
+import { UsersIcon, CheckCircleIcon, XCircleIcon, XMarkIcon, LinkIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
-    passageiros: { type: Array, default: () => [] },
+    passageiros:  { type: Array,  default: () => [] },
+    motorista:    { type: Object, default: null },
 })
+
+const linkCopiado = ref(false)
+
+function copiarLinkConvite() {
+    const url = route('register.responsavel') + '?via=' + props.motorista?.id_motorista
+    navigator.clipboard.writeText(url).then(() => {
+        linkCopiado.value = true
+        setTimeout(() => { linkCopiado.value = false }, 2500)
+    })
+}
 
 const MOTIVOS = {
     doenca:  'Doença',
@@ -49,9 +60,17 @@ function confirmarEncerrar() {
                     <h3 class="text-lg font-bold">Meus passageiros</h3>
                     <p class="text-xs text-amber-200 mt-0.5 capitalize">{{ hojeLabel }}</p>
                 </div>
-                <div class="text-right">
-                    <p class="text-2xl font-bold">{{ passageiros.length }}</p>
-                    <p class="text-xs text-amber-200">vinculado{{ passageiros.length !== 1 ? 's' : '' }}</p>
+                <div class="flex items-center gap-3">
+                    <!-- Botão copiar link de convite -->
+                    <button @click="copiarLinkConvite"
+                        class="flex items-center gap-1.5 rounded-xl bg-white/15 hover:bg-white/25 border border-white/20 px-3 py-1.5 text-xs font-semibold transition-colors">
+                        <LinkIcon class="w-3.5 h-3.5 shrink-0" />
+                        {{ linkCopiado ? 'Link copiado!' : 'Convidar cliente' }}
+                    </button>
+                    <div class="text-right">
+                        <p class="text-2xl font-bold">{{ passageiros.length }}</p>
+                        <p class="text-xs text-amber-200">vinculado{{ passageiros.length !== 1 ? 's' : '' }}</p>
+                    </div>
                 </div>
             </div>
 
