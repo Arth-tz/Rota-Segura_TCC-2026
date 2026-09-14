@@ -46,6 +46,22 @@ const estadosUF = {
     'Sergipe':'SE','Tocantins':'TO',
 }
 
+async function geocodificar(addr) {
+    if (addr.latitude && addr.longitude) return addr
+    const q = [addr.logradouro, addr.numero, addr.bairro, addr.cidade, addr.estado]
+        .filter(Boolean).join(', ')
+    if (!q) return addr
+    try {
+        const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=br`,
+            { headers: { 'Accept-Language': 'pt-BR' } }
+        )
+        const data = await res.json()
+        if (data[0]) return { ...addr, latitude: data[0].lat, longitude: data[0].lon }
+    } catch {}
+    return addr
+}
+
 async function buscarEndereco(prefixo, query) {
     if (!query || query.length < 4) { sugestoes.value[prefixo] = []; return }
     loadings.value[prefixo] = true
@@ -82,9 +98,28 @@ function maskCep(field, event) {
     form[field] = v
 }
 
-function submit() {
+async function submit() {
+    if (form.processing) return
+
+    const embGeo = await geocodificar({
+        logradouro: form.embarque_logradouro, numero: form.embarque_numero,
+        bairro: form.embarque_bairro, cidade: form.embarque_cidade,
+        estado: form.embarque_estado,
+        latitude: form.embarque_latitude, longitude: form.embarque_longitude,
+    })
+    const desGeo = await geocodificar({
+        logradouro: form.desembarque_logradouro, numero: form.desembarque_numero,
+        bairro: form.desembarque_bairro, cidade: form.desembarque_cidade,
+        estado: form.desembarque_estado,
+        latitude: form.desembarque_latitude, longitude: form.desembarque_longitude,
+    })
+
     form.transform(data => ({
         ...data,
+        embarque_latitude:     embGeo.latitude,
+        embarque_longitude:    embGeo.longitude,
+        desembarque_latitude:  desGeo.latitude,
+        desembarque_longitude: desGeo.longitude,
         residencia_logradouro:  data.embarque_logradouro,
         residencia_numero:      data.embarque_numero,
         residencia_complemento: data.embarque_complemento,
@@ -92,8 +127,8 @@ function submit() {
         residencia_cidade:      data.embarque_cidade,
         residencia_estado:      data.embarque_estado,
         residencia_cep:         data.embarque_cep,
-        residencia_latitude:    data.embarque_latitude,
-        residencia_longitude:   data.embarque_longitude,
+        residencia_latitude:    embGeo.latitude,
+        residencia_longitude:   embGeo.longitude,
     })).post(route('responsavel.passageiros.store'), { forceFormData: true })
 }
 
@@ -174,7 +209,7 @@ const addrInput = (ring = 'emerald') =>
         </aside>
 
         <!-- ── FORMULÁRIO ─────────────────────────────────────────────────── -->
-        <main class="flex-1 flex items-start justify-center px-4 py-10 overflow-y-auto">
+        <main class="flex-1 flex items-start justify-center px-4 py-10">
             <div class="w-full max-w-xl">
 
                 <!-- Logo mobile -->
@@ -192,8 +227,8 @@ const addrInput = (ring = 'emerald') =>
                 <form @submit.prevent="submit" class="space-y-5">
 
                     <!-- ── A: DE ONDE SAI ─────────────────────────────────── -->
-                    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                        <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
+                    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm">
+                        <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50 rounded-t-2xl overflow-hidden">
                             <div class="w-7 h-7 bg-emerald-500 rounded-full flex items-center justify-center shrink-0">
                                 <span class="text-white text-xs font-bold">A</span>
                             </div>
@@ -255,8 +290,8 @@ const addrInput = (ring = 'emerald') =>
                     </div>
 
                     <!-- ── B: PARA ONDE VAI ───────────────────────────────── -->
-                    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                        <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50">
+                    <div class="bg-white border border-slate-200 rounded-2xl shadow-sm">
+                        <div class="flex items-center gap-3 px-6 py-4 border-b border-slate-100 bg-slate-50 rounded-t-2xl overflow-hidden">
                             <div class="w-7 h-7 bg-red-500 rounded-full flex items-center justify-center shrink-0">
                                 <span class="text-white text-xs font-bold">B</span>
                             </div>

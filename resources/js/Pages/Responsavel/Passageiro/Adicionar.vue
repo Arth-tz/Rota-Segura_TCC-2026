@@ -79,23 +79,46 @@ function parseDateBrToIso(value) {
     return `${yyyy}-${mm}-${dd}`
 }
 
+// ─── GEOCODIFICAÇÃO SILENCIOSA ────────────────────────────────────────────────
+async function geocodificar(addr) {
+    if (addr.latitude && addr.longitude) return addr
+    const q = [addr.logradouro, addr.numero, addr.bairro, addr.cidade, addr.estado]
+        .filter(Boolean).join(', ')
+    if (!q) return addr
+    try {
+        const res = await fetch(
+            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=br`,
+            { headers: { 'Accept-Language': 'pt-BR' } }
+        )
+        const data = await res.json()
+        if (data[0]) return { ...addr, latitude: data[0].lat, longitude: data[0].lon }
+    } catch {}
+    return addr
+}
+
 // ─── SUBMIT ──────────────────────────────────────────────────────────────────
-function submit() {
-    form.transform(data => ({
-        nome:            data.nome,
-        cpf:             data.cpf.replace(/\D/g, ''),
-        data_nascimento: parseDateBrToIso(data.data_nascimento),
-        telefone:        data.telefone.replace(/\D/g, '') || null,
-        obs_medica:      data.obs_medica || null,
-        foto:            data.foto,
-        foto_consentimento_lgpd: data.foto_consentimento_lgpd,
-        embarques:  [{ ...data.embarque }],
-        residencia: data.residencia_mesmo_embarque
-            ? [{ ...data.embarque }]
-            : [{ ...data.residencia }],
-        desembarques: data.desembarque.logradouro
-            ? [{ ...data.desembarque, nome: data.desembarque_nome }]
-            : [],
+async function submit() {
+    if (form.processing) return
+
+    const embGeo = await geocodificar({ ...form.embarque })
+    const resGeo = form.residencia_mesmo_embarque
+        ? embGeo
+        : await geocodificar({ ...form.residencia })
+    const desGeo = form.desembarque.logradouro
+        ? await geocodificar({ ...form.desembarque })
+        : null
+
+    form.transform(() => ({
+        nome:            form.nome,
+        cpf:             form.cpf.replace(/\D/g, ''),
+        data_nascimento: parseDateBrToIso(form.data_nascimento),
+        telefone:        form.telefone.replace(/\D/g, '') || null,
+        obs_medica:      form.obs_medica || null,
+        foto:            form.foto,
+        foto_consentimento_lgpd: form.foto_consentimento_lgpd,
+        embarques:  [embGeo],
+        residencia: [resGeo],
+        desembarques: desGeo ? [{ ...desGeo, nome: form.desembarque_nome }] : [],
     })).post(route('responsavel.passageiros.adicionar.store'), { forceFormData: true })
 }
 
@@ -129,8 +152,8 @@ const inputClass = computed(() => (err) =>
             <form @submit.prevent="submit" class="space-y-4">
 
                 <!-- ── DADOS PESSOAIS ─────────────────────────────────────── -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50">
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50 rounded-t-2xl overflow-hidden">
                         <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
                             <UserIcon class="w-4 h-4 text-white" />
                         </div>
@@ -235,8 +258,8 @@ const inputClass = computed(() => (err) =>
                 </section>
 
                 <!-- ── LOCAL DE EMBARQUE ───────────────────────────────────── -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50">
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50 rounded-t-2xl overflow-hidden">
                         <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
                             <MapPinIcon class="w-4 h-4 text-white" />
                         </div>
@@ -273,8 +296,8 @@ const inputClass = computed(() => (err) =>
                 </section>
 
                 <!-- ── ESCOLA / DESTINO ───────────────────────────────────── -->
-                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50">
+                <section class="bg-white rounded-2xl border border-slate-200 shadow-sm">
+                    <div class="flex items-center gap-3 px-5 py-4 border-b border-slate-100 bg-slate-50 rounded-t-2xl overflow-hidden">
                         <div class="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shrink-0">
                             <AcademicCapIcon class="w-4 h-4 text-white" />
                         </div>
