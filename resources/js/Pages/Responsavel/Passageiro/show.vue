@@ -12,16 +12,41 @@ const props = defineProps({
 // ─── SEÇÃO ATIVA ────────────────────────────────────────────────────────────
 const secaoAberta = ref('dados') // 'dados' | 'enderecos' | 'vinculos'
 
+// ─── HELPERS DE DATA ─────────────────────────────────────────────────────────
+function parseIsoToBr(value) {
+    if (!value) return ''
+    const [yyyy, mm, dd] = value.split('-')
+    return `${dd}/${mm}/${yyyy}`
+}
+
+function maskDateBr(e, field, form) {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 8)
+    if (v.length > 4)      v = v.replace(/^(\d{2})(\d{2})(\d{0,4}).*$/, '$1/$2/$3')
+    else if (v.length > 2) v = v.replace(/^(\d{2})(\d{0,2}).*$/, '$1/$2')
+    e.target.value = v
+    form[field] = v
+}
+
+function parseDateBrToIso(value) {
+    const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+    if (!match) return value
+    const [, dd, mm, yyyy] = match
+    return `${yyyy}-${mm}-${dd}`
+}
+
 // ─── FORM DADOS PESSOAIS ─────────────────────────────────────────────────────
 const formDados = useForm({
     nome:            props.passageiro.nome,
-    data_nascimento: props.passageiro.data_nascimento,
+    data_nascimento: parseIsoToBr(props.passageiro.data_nascimento),
     telefone:        props.passageiro.telefone ?? '',
     obs_medica:      props.passageiro.observacoes_medicas ?? '',
 })
 
 function salvarDados() {
-    formDados.put(route('responsavel.passageiros.update', props.passageiro.id_passageiro))
+    formDados.transform(data => ({
+        ...data,
+        data_nascimento: parseDateBrToIso(data.data_nascimento),
+    })).put(route('responsavel.passageiros.update', props.passageiro.id_passageiro))
 }
 
 // ─── ENDEREÇOS ───────────────────────────────────────────────────────────────
@@ -208,9 +233,13 @@ const vinculoAtivo = computed(() => props.passageiro.vinculos?.find(v => v.statu
                         <div>
                             <label class="block text-sm font-medium text-slate-700 mb-1.5">Data de nascimento</label>
                             <input
-                                v-model="formDados.data_nascimento"
-                                type="date"
+                                :value="formDados.data_nascimento"
+                                type="text"
+                                inputmode="numeric"
+                                maxlength="10"
+                                placeholder="DD/MM/AAAA"
                                 required
+                                @input="maskDateBr($event, 'data_nascimento', formDados)"
                                 class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                                 :class="{ 'border-red-400': formDados.errors.data_nascimento }"
                             />

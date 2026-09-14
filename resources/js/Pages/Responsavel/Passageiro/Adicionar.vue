@@ -64,12 +64,27 @@ function maskTel(e) {
     form.telefone = v
 }
 
+function maskDateBr(e, field) {
+    let v = e.target.value.replace(/\D/g, '').slice(0, 8)
+    if (v.length > 4)      v = v.replace(/^(\d{2})(\d{2})(\d{0,4}).*$/, '$1/$2/$3')
+    else if (v.length > 2) v = v.replace(/^(\d{2})(\d{0,2}).*$/, '$1/$2')
+    e.target.value = v
+    form[field] = v
+}
+
+function parseDateBrToIso(value) {
+    const match = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/)
+    if (!match) return value
+    const [, dd, mm, yyyy] = match
+    return `${yyyy}-${mm}-${dd}`
+}
+
 // ─── SUBMIT ──────────────────────────────────────────────────────────────────
 function submit() {
     form.transform(data => ({
         nome:            data.nome,
         cpf:             data.cpf.replace(/\D/g, ''),
-        data_nascimento: data.data_nascimento,
+        data_nascimento: parseDateBrToIso(data.data_nascimento),
         telefone:        data.telefone.replace(/\D/g, '') || null,
         obs_medica:      data.obs_medica || null,
         foto:            data.foto,
@@ -179,7 +194,9 @@ const inputClass = computed(() => (err) =>
                                 <label class="block text-sm font-medium text-slate-700 mb-1.5">
                                     Data de nascimento <span class="text-red-400">*</span>
                                 </label>
-                                <input v-model="form.data_nascimento" type="date" required
+                                <input :value="form.data_nascimento" type="text"
+                                    inputmode="numeric" maxlength="10" placeholder="DD/MM/AAAA"
+                                    required @input="maskDateBr($event, 'data_nascimento')"
                                     :class="inputClass(form.errors.data_nascimento)" />
                                 <p v-if="form.errors.data_nascimento" class="text-red-500 text-xs mt-1">{{ form.errors.data_nascimento }}</p>
                             </div>

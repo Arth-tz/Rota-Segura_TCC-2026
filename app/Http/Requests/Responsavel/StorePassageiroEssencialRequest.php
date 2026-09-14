@@ -33,6 +33,7 @@ class StorePassageiroEssencialRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'data_nascimento.before'           => 'O campo data de nascimento deve conter uma data anterior a hoje.',
             'foto_consentimento_lgpd.accepted' => 'É necessário aceitar o consentimento para uso da foto.',
         ];
     }

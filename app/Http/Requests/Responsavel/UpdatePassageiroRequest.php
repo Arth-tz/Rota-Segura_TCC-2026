@@ -29,4 +29,11 @@ class UpdatePassageiroRequest extends FormRequest
             'obs_medica'      => ['nullable', 'string', 'max:5000'],
         ];
     }
+
+    public function messages(): array
+    {
+        return [
+            'data_nascimento.before' => 'O campo data de nascimento deve conter uma data anterior a hoje.',
+        ];
+    }
 }

@@ -52,6 +52,7 @@ class RegisterMotoristaRequest extends FormRequest
     {
         return [
             'data_nascimento.before_or_equal' => 'O motorista precisa ter pelo menos 21 anos (art. 138, I do CTB).',
+            'cnh_validade.after'              => 'A validade da CNH deve ser uma data posterior a hoje.',
             'foto.image' => 'O arquivo deve ser uma imagem.',
             'foto.max'   => 'A imagem deve ter no máximo 2 MB.',
             'foto.mimes' => 'Formato aceito: JPG, PNG ou WebP.',

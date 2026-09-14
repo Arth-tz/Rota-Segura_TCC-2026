@@ -48,6 +48,7 @@ class RegisterResponsavelRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'data_nascimento.before' => 'O campo data de nascimento deve conter uma data anterior a hoje.',
             'foto.image' => 'O arquivo deve ser uma imagem.',
             'foto.max'   => 'A imagem deve ter no máximo 2 MB.',
             'foto.mimes' => 'Formato aceito: JPG, PNG ou WebP.',

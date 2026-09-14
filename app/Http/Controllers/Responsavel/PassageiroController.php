@@ -127,6 +127,7 @@ class PassageiroController extends Controller
             'desembarques' => 'nullable|array',
             'residencia'   => 'nullable|array',
         ], [
+            'data_nascimento.before'            => 'O campo data de nascimento deve conter uma data anterior a hoje.',
             'foto.image'                        => 'O arquivo deve ser uma imagem.',
             'foto.max'                          => 'A imagem deve ter no máximo 2 MB.',
             'foto.mimes'                        => 'Formato aceito: JPG, PNG ou WebP.',
