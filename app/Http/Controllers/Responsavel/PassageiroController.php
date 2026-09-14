@@ -93,8 +93,8 @@ class PassageiroController extends Controller
 
             if ($request->hasFile('foto')) {
                 $ext  = $request->file('foto')->getClientOriginalExtension();
-                $path = $request->file('foto')->storeAs("passageiros/{$passageiro->id_passageiro}", "foto.{$ext}", 'public');
-                $pessoa->update(['foto_url' => Storage::disk('public')->url($path)]);
+                $path = $request->file('foto')->storeAs("passageiros/{$passageiro->id_passageiro}", "foto.{$ext}", config('filesystems.upload'));
+                $pessoa->update(['foto_url' => Storage::disk(config('filesystems.upload'))->url($path)]);
             }
 
             $request->session()->forget('cadastro_passageiro');
@@ -174,8 +174,8 @@ class PassageiroController extends Controller
 
             if ($request->hasFile('foto')) {
                 $ext  = $request->file('foto')->getClientOriginalExtension();
-                $path = $request->file('foto')->storeAs("passageiros/{$passageiro->id_passageiro}", "foto.{$ext}", 'public');
-                $pessoa->update(['foto_url' => Storage::disk('public')->url($path)]);
+                $path = $request->file('foto')->storeAs("passageiros/{$passageiro->id_passageiro}", "foto.{$ext}", config('filesystems.upload'));
+                $pessoa->update(['foto_url' => Storage::disk(config('filesystems.upload'))->url($path)]);
             }
 
             return redirect()->route('responsavel.dashboard')
@@ -319,14 +319,14 @@ class PassageiroController extends Controller
 
         // Remove qualquer foto anterior do passageiro
         foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
-            Storage::disk('public')->delete("passageiros/{$id}/foto.{$ext}");
+            Storage::disk(config('filesystems.upload'))->delete("passageiros/{$id}/foto.{$ext}");
         }
 
         $ext  = $request->file('foto')->getClientOriginalExtension();
-        $path = $request->file('foto')->storeAs("passageiros/{$id}", "foto.{$ext}", 'public');
+        $path = $request->file('foto')->storeAs("passageiros/{$id}", "foto.{$ext}", config('filesystems.upload'));
 
         $passageiro->pessoa->update([
-            'foto_url' => Storage::disk('public')->url($path),
+            'foto_url' => Storage::disk(config('filesystems.upload'))->url($path),
         ]);
 
         return back()->with('sucesso', 'Foto atualizada com sucesso!');

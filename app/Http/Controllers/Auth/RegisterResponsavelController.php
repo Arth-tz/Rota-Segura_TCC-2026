@@ -52,8 +52,8 @@ class RegisterResponsavelController extends Controller
 
             if ($request->hasFile('foto')) {
                 $ext  = $request->file('foto')->getClientOriginalExtension();
-                $path = $request->file('foto')->storeAs("responsaveis/{$responsavel->id_responsavel}", "foto.{$ext}", 'public');
-                $pessoa->update(['foto_url' => Storage::disk('public')->url($path)]);
+                $path = $request->file('foto')->storeAs("responsaveis/{$responsavel->id_responsavel}", "foto.{$ext}", config('filesystems.upload'));
+                $pessoa->update(['foto_url' => Storage::disk(config('filesystems.upload'))->url($path)]);
             }
 
             return redirect()->route('responsavel.passageiros.create');

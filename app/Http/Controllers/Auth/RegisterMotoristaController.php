@@ -54,8 +54,8 @@ class RegisterMotoristaController extends Controller
 
             if ($request->hasFile('foto')) {
                 $ext  = $request->file('foto')->getClientOriginalExtension();
-                $path = $request->file('foto')->storeAs("motoristas/{$motorista->id_motorista}", "foto.{$ext}", 'public');
-                $pessoa->update(['foto_url' => Storage::disk('public')->url($path)]);
+                $path = $request->file('foto')->storeAs("motoristas/{$motorista->id_motorista}", "foto.{$ext}", config('filesystems.upload'));
+                $pessoa->update(['foto_url' => Storage::disk(config('filesystems.upload'))->url($path)]);
             }
 
             return redirect()->route('motorista.van.create');

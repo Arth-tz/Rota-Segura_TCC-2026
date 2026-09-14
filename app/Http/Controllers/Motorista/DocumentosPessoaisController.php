@@ -63,14 +63,14 @@ class DocumentosPessoaisController extends Controller
 
         if ($motorista->$coluna) {
             $old = ltrim(parse_url($motorista->$coluna, PHP_URL_PATH), '/storage/');
-            Storage::disk('public')->delete($old);
+            Storage::disk(config('filesystems.upload'))->delete($old);
         }
 
         $file = $request->file('arquivo');
         $ext  = strtolower($file->getClientOriginalExtension());
-        $path = $file->storeAs("motoristas/{$motorista->id_motorista}/documentos", "{$tipo}.{$ext}", 'public');
+        $path = $file->storeAs("motoristas/{$motorista->id_motorista}/documentos", "{$tipo}.{$ext}", config('filesystems.upload'));
 
-        $motorista->update([$coluna => Storage::disk('public')->url($path)]);
+        $motorista->update([$coluna => Storage::disk(config('filesystems.upload'))->url($path)]);
 
         return back()->with('sucesso', 'Documento enviado com sucesso.');
     }

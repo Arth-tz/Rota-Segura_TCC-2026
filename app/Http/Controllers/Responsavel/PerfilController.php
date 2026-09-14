@@ -86,12 +86,12 @@ class PerfilController extends Controller
         ]);
 
         foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
-            Storage::disk('public')->delete("responsaveis/{$responsavel->id_responsavel}/foto.{$ext}");
+            Storage::disk(config('filesystems.upload'))->delete("responsaveis/{$responsavel->id_responsavel}/foto.{$ext}");
         }
 
         $ext  = $request->file('foto')->getClientOriginalExtension();
-        $path = $request->file('foto')->storeAs("responsaveis/{$responsavel->id_responsavel}", "foto.{$ext}", 'public');
-        $usuario->pessoa->update(['foto_url' => Storage::disk('public')->url($path)]);
+        $path = $request->file('foto')->storeAs("responsaveis/{$responsavel->id_responsavel}", "foto.{$ext}", config('filesystems.upload'));
+        $usuario->pessoa->update(['foto_url' => Storage::disk(config('filesystems.upload'))->url($path)]);
 
         return back()->with('sucesso', 'Foto atualizada com sucesso!');
     }

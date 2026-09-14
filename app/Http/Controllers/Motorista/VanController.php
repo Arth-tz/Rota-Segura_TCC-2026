@@ -246,13 +246,13 @@ class VanController extends Controller
 
             // Remove arquivo anterior
             if ($van->{$cfg['url_col']}) {
-                $oldRelative = ltrim(str_replace(Storage::disk('public')->url(''), '', $van->{$cfg['url_col']}), '/');
-                Storage::disk('public')->delete($oldRelative);
+                $oldRelative = ltrim(str_replace(Storage::disk(config('filesystems.upload'))->url(''), '', $van->{$cfg['url_col']}), '/');
+                Storage::disk(config('filesystems.upload'))->delete($oldRelative);
             }
 
             $ext  = strtolower($file->getClientOriginalExtension());
-            $path = $file->storeAs("vans/{$van->id_van}/documentos", "{$tipo}.{$ext}", 'public');
-            $updates[$cfg['url_col']] = Storage::disk('public')->url($path);
+            $path = $file->storeAs("vans/{$van->id_van}/documentos", "{$tipo}.{$ext}", config('filesystems.upload'));
+            $updates[$cfg['url_col']] = Storage::disk(config('filesystems.upload'))->url($path);
         }
 
         if (array_key_exists('validade', $dados)) {
@@ -286,7 +286,8 @@ class VanController extends Controller
             'proxima_inspecao_prevista' => $dados['proxima_inspecao_prevista'] ?? null,
         ]);
 
-        return back()->with('sucesso', 'Datas de inspeção atualizadas.');
+        return redirect()->route('motorista.dashboard')
+            ->with('sucesso', 'Datas de inspeção atualizadas.');
     }
 
     // ── UPLOADS DE FOTO (slots individuais) ──────────────────────────────────
@@ -349,12 +350,12 @@ class VanController extends Controller
     private function salvarFoto(Van $van, UploadedFile $file, string $coluna, string $arquivo): void
     {
         foreach (['jpg', 'jpeg', 'png', 'webp'] as $ext) {
-            Storage::disk('public')->delete("vans/{$van->id_van}/{$arquivo}.{$ext}");
+            Storage::disk(config('filesystems.upload'))->delete("vans/{$van->id_van}/{$arquivo}.{$ext}");
         }
 
         $ext  = $file->getClientOriginalExtension();
-        $path = $file->storeAs("vans/{$van->id_van}", "{$arquivo}.{$ext}", 'public');
-        $van->update([$coluna => Storage::disk('public')->url($path)]);
+        $path = $file->storeAs("vans/{$van->id_van}", "{$arquivo}.{$ext}", config('filesystems.upload'));
+        $van->update([$coluna => Storage::disk(config('filesystems.upload'))->url($path)]);
     }
 
     private function recalcularDocumentacaoCompleta(Van $van): void
