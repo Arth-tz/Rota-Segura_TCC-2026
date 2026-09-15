@@ -170,6 +170,7 @@ function enviarSolicitacao() {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function formatarPreco(v) {
+    if (v === null || v === undefined) return 'À combinar'
     return Number(v).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })
 }
 
@@ -435,7 +436,7 @@ function inicialNome(nome) {
                             <div class="flex items-center gap-1.5">
                                 <CurrencyDollarIcon class="w-4 h-4 text-emerald-600" />
                                 <span class="text-sm font-bold text-emerald-700">
-                                    {{ formatarPreco(disp.preco_mensal) }}<span class="text-xs font-normal text-slate-400">/mês</span>
+                                    {{ formatarPreco(disp.preco_mensal) }}<span v-if="disp.preco_mensal !== null" class="text-xs font-normal text-slate-400">/mês</span>
                                 </span>
                             </div>
                             <div class="flex items-center gap-1.5">

@@ -17,6 +17,7 @@ function diasOrdenados(dias) {
 }
 
 function formatarPreco(v) {
+    if (v === null || v === undefined) return 'À combinar'
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(v)
 }
 
@@ -122,7 +123,7 @@ const urlBusca = computed(() =>
                 <div class="flex items-center justify-between pt-1 border-t border-slate-100">
                     <span class="text-xl font-bold text-slate-800">
                         {{ formatarPreco(d.preco_mensal) }}
-                        <span class="text-sm font-normal text-slate-400">/mês</span>
+                        <span v-if="d.preco_mensal !== null" class="text-sm font-normal text-slate-400">/mês</span>
                     </span>
                     <span class="text-sm font-medium"
                         :class="vagasRestantes(d) > 0 ? 'text-emerald-600' : 'text-red-500'">

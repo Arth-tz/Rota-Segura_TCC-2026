@@ -444,7 +444,7 @@ const modalPrevia = ref(false)
                             class="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] text-blue-600">{{ e }}</span>
                     </div>
                     <p class="text-sm font-bold text-amber-700">
-                        R$ {{ Number(d.preco_mensal).toFixed(2).replace('.', ',') }}
+                        {{ d.preco_mensal !== null ? 'R$ ' + Number(d.preco_mensal).toFixed(2).replace('.', ',') : 'À combinar' }}
                         <span class="text-xs text-slate-400 font-normal">/mês</span>
                     </p>
                 </div>
@@ -523,7 +523,7 @@ const modalPrevia = ref(false)
                                     class="rounded-lg bg-slate-50 px-3 py-2">
                                     <div class="flex items-center justify-between gap-2">
                                         <span class="text-xs font-semibold text-slate-700 truncate">{{ d.nome }} · {{ turnoLabel[d.turno] ?? d.turno }}</span>
-                                        <span class="text-sm font-bold text-amber-700 shrink-0">R$ {{ Number(d.preco_mensal).toFixed(2).replace('.', ',') }}</span>
+                                        <span class="text-sm font-bold text-amber-700 shrink-0">{{ d.preco_mensal !== null ? 'R$ ' + Number(d.preco_mensal).toFixed(2).replace('.', ',') : 'À combinar' }}</span>
                                     </div>
                                     <div class="flex gap-1 mt-1.5 flex-wrap">
                                         <span v-for="dia in d.dias" :key="dia"

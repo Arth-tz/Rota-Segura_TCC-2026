@@ -1,4 +1,5 @@
 ﻿<script setup>
+import { ref } from 'vue'
 import { useForm, Head, Link } from '@inertiajs/vue3'
 import { ArrowLeftIcon, MapIcon, ClockIcon, CalendarDaysIcon, CurrencyDollarIcon, UsersIcon, HomeModernIcon, AcademicCapIcon } from '@heroicons/vue/24/outline'
 import TagInput from '@/Components/UI/TagInput.vue'
@@ -30,11 +31,18 @@ const form = useForm({
     nome:               '',
     turno:              '',
     dias:               [],
-    preco_mensal:       '',
+    preco_mensal:       null,
     capacidade_total:   '',
     regioes_atendidas:  [],
     escolas_atendidas:  [],
 })
+
+const aCombinar = ref(false)
+
+function toggleACombinar() {
+    aCombinar.value = !aCombinar.value
+    if (aCombinar.value) form.preco_mensal = null
+}
 
 function submit() {
     form.transform((data) => ({
@@ -148,15 +156,30 @@ function submit() {
                 </div>
                 <div class="px-5 py-4 grid gap-4 sm:grid-cols-2">
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1.5 uppercase tracking-wide">
-                            Preço mensal (R$)
-                        </label>
-                        <div class="relative">
+                        <div class="flex items-center justify-between mb-1.5">
+                            <label class="text-xs font-semibold text-slate-600 uppercase tracking-wide">
+                                Preço mensal (R$)
+                            </label>
+                            <button type="button" @click="toggleACombinar"
+                                class="flex items-center gap-1.5 text-xs font-medium transition"
+                                :class="aCombinar ? 'text-amber-700' : 'text-slate-400 hover:text-slate-600'">
+                                <span class="w-7 h-4 rounded-full transition-colors flex items-center px-0.5"
+                                    :class="aCombinar ? 'bg-amber-600' : 'bg-slate-200'">
+                                    <span class="w-3 h-3 rounded-full bg-white shadow transition-transform"
+                                        :class="aCombinar ? 'translate-x-3' : 'translate-x-0'" />
+                                </span>
+                                À combinar
+                            </button>
+                        </div>
+                        <div v-if="!aCombinar" class="relative">
                             <span class="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none">R$</span>
                             <input v-model="form.preco_mensal" type="number" min="0" max="9999.99" step="0.01"
                                 placeholder="0,00"
                                 class="w-full rounded-xl border pl-9 pr-4 py-2.5 text-sm text-slate-900 outline-none transition"
                                 :class="form.errors.preco_mensal ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-600 focus:ring-2 focus:ring-amber-100'" />
+                        </div>
+                        <div v-else class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm font-medium text-amber-700">
+                            À combinar com o motorista
                         </div>
                         <p v-if="form.errors.preco_mensal" class="mt-1 text-xs text-red-600">{{ form.errors.preco_mensal }}</p>
                     </div>
