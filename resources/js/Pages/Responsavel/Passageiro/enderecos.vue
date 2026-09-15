@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { MapPinIcon, LightBulbIcon, CameraIcon } from '@heroicons/vue/24/outline'
@@ -149,7 +149,7 @@ const addrInput = (ring = 'emerald') =>
                        shadow-[10px_0_50px_-15px_rgba(0,0,0,0.3)]">
 
             <Link :href="route('home')" class="flex items-center gap-2 hover:opacity-80 transition">
-                <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Logo Rota Segura" class="h-12 w-12" />
+                <img src="/images/Logo_rota-segura_branco.png" alt="Logo Rota Segura" class="h-12 w-12" />
                 <span class="text-white font-bold text-lg tracking-tight">Rota Segura</span>
             </Link>
 
@@ -214,7 +214,7 @@ const addrInput = (ring = 'emerald') =>
 
                 <!-- Logo mobile -->
                 <div class="lg:hidden flex items-center gap-2 mb-8">
-                    <img src="/rota-segura/public/images/Logo_rota_segura-azul.png" alt="Rota Segura" class="h-10 w-10">
+                    <img src="/images/Logo_rota_segura-azul.png" alt="Rota Segura" class="h-10 w-10">
                     <span class="text-slate-900 font-bold">Rota Segura</span>
                 </div>
 

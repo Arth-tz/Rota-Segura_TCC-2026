@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { CameraIcon, ArrowLeftIcon } from '@heroicons/vue/24/outline'
@@ -90,7 +90,7 @@ const inputClass = computed(() => (err) =>
                        shadow-[12px_0_40px_-12px_rgba(0,0,0,0.25)]">
 
             <Link :href="route('home')" class="inline-flex items-center">
-                <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-9 w-auto">
+                <img src="/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-9 w-auto">
             </Link>
 
             <div>
@@ -112,7 +112,7 @@ const inputClass = computed(() => (err) =>
 
                 <!-- Logo mobile -->
                 <div class="lg:hidden flex items-center gap-2 mb-8">
-                    <img src="/rota-segura/public/images/Logo_rota_segura-azul.png" alt="Rota Segura" class="h-9 w-9">
+                    <img src="/images/Logo_rota_segura-azul.png" alt="Rota Segura" class="h-9 w-9">
                     <span class="text-slate-900 font-bold">Rota Segura</span>
                 </div>
 

@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { Link } from '@inertiajs/vue3'
 import { ref, onMounted, onUnmounted } from 'vue';
 import { onClickOutside } from '@vueuse/core';
@@ -48,7 +48,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
             <div class="rs-nav__inner">
                 <Link href="/rota-segura/public/" class="rs-nav__logo">
                     <div class="rs-nav__logo-ring">
-                        <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Logo Rota Segura" class="rs-nav__logo-img" />
+                        <img src="/images/Logo_rota-segura_branco.png" alt="Logo Rota Segura" class="rs-nav__logo-img" />
                     </div>
                     <span class="rs-nav__logo-text">Rota Segura</span>
                 </Link>
@@ -110,7 +110,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
                 <div class="rs-hero__media" :class="{ 'rs-hero__media--in': heroVisible }">
                     <div class="rs-img-card">
                         <div class="rs-img-card__bg"></div>
-                        <img src="/rota-segura/public/images/mapa_tempo_real.png" alt="Mapa com acompanhamento em tempo real" class="rs-img-card__img" />
+                        <img src="/images/mapa_tempo_real.png" alt="Mapa com acompanhamento em tempo real" class="rs-img-card__img" />
                         <div class="rs-float rs-float--bottom-left">
                             <span class="rs-float__pulse"></span>
                             <span>Localização em tempo real!</span>
@@ -235,7 +235,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
                             <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="rs-modal__close-icon"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
                         </button>
                         <div class="rs-modal__logo">
-                            <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" class="rs-modal__logo-img" alt="" />
+                            <img src="/images/Logo_rota-segura_branco.png" class="rs-modal__logo-img" alt="" />
                         </div>
                         <h1 class="rs-modal__title">Criar conta</h1>
                         <p class="rs-modal__sub">Como você quer se cadastrar?</p>

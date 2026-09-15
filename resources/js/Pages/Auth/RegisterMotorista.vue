@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { CameraIcon, ArrowLeftIcon } from '@heroicons/vue/24/outline'
@@ -94,7 +94,7 @@ const inputClass = computed(() => (err) =>
                        shadow-[12px_0_40px_-12px_rgba(0,0,0,0.25)]">
 
             <Link :href="route('home')" class="inline-flex items-center">
-                <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-9 w-auto">
+                <img src="/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-9 w-auto">
             </Link>
 
             <div>
@@ -147,7 +147,7 @@ const inputClass = computed(() => (err) =>
                 <!-- Banner mobile (substitui o aside) -->
                 <div class="lg:hidden rounded-2xl bg-gradient-to-br from-amber-700 to-amber-800 px-5 py-5 mb-6 text-white">
                     <Link :href="route('home')" class="inline-flex items-center gap-2 mb-4 hover:opacity-80 transition">
-                        <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-7 w-7">
+                        <img src="/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-7 w-7">
                         <span class="font-bold text-sm">Rota Segura</span>
                     </Link>
                     <p class="text-xs font-semibold text-amber-200 tracking-widest uppercase mb-1.5">Para motoristas</p>

@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { useForm, Link, Head } from '@inertiajs/vue3'
 import { ref, onMounted } from 'vue'
 
@@ -37,7 +37,7 @@ const submit = () => {
 
             <Link :href="route('home')" class="lg-aside__logo">
                 <div class="lg-aside__logo-ring">
-                    <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Logo Rota Segura" class="lg-aside__logo-img" />
+                    <img src="/images/Logo_rota-segura_branco.png" alt="Logo Rota Segura" class="lg-aside__logo-img" />
                 </div>
                 <span class="lg-aside__logo-text">Rota Segura</span>
             </Link>
@@ -64,7 +64,7 @@ const submit = () => {
                 <!-- Logo mobile -->
                 <div class="lg-mobile-logo">
                     <div class="lg-mobile-logo__ring">
-                        <img src="/rota-segura/public/images/Logo_rota_segura-azul.png" alt="Logo Rota-Segura" class="lg-mobile-logo__img" />
+                        <img src="/images/Logo_rota_segura-azul.png" alt="Logo Rota-Segura" class="lg-mobile-logo__img" />
                     </div>
                     <span class="lg-mobile-logo__text">Rota Segura</span>
                 </div>

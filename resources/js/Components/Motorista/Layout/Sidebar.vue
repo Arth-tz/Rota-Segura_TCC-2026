@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { Link } from '@inertiajs/vue3'
 import {
     HomeIcon,
@@ -33,7 +33,7 @@ const navItems = [
         <!-- Logo -->
         <div class="px-5 py-5 border-b border-amber-800/30">
             <Link :href="route('home')" class="flex items-center gap-2.5">
-                <img src="/rota-segura/public/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-9 w-auto" />
+                <img src="/images/Logo_rota-segura_branco.png" alt="Rota Segura" class="h-9 w-auto" />
                 <div>
                     <p class="text-[10px] text-amber-200 font-semibold uppercase tracking-widest leading-none mb-0.5">Motorista</p>
                     <p class="text-sm font-bold text-white leading-none">Rota Segura</p>
