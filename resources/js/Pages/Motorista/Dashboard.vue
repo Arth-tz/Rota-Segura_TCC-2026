@@ -100,10 +100,6 @@ const titulos = {
                     :passageiros="passageiros"
                     :motorista="motorista"
                 />
-                <SecaoTrajetos
-                    v-else-if="secaoAtiva === 'trajetos'"
-                    :trajetos="trajetos"
-                />
                 <SecaoPerfil
                     v-else-if="secaoAtiva === 'perfil'"
                     :usuario="usuario"
@@ -111,6 +107,14 @@ const titulos = {
                     :van="van"
                 />
             </main>
+
+            <!-- Trajetos fica sempre montado para o GPS nunca parar durante um trajeto ativo -->
+            <div v-show="secaoAtiva === 'trajetos'" class="flex-1 min-w-0 overflow-x-hidden px-4 md:px-8 py-6 pb-24 md:pb-8">
+                <SecaoTrajetos
+                    :trajetos="trajetos"
+                    :ativa="secaoAtiva === 'trajetos'"
+                />
+            </div>
         </div>
 
         <BottomNav :secaoAtiva="secaoAtiva" :solicitacoesPendentes="solicitacoesPendentes" @mudar="secaoAtiva = $event" />

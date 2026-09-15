@@ -1,7 +1,7 @@
-<script setup>
-import { computed } from 'vue'
+﻿<script setup>
+import { computed, ref } from 'vue'
 import { Link } from '@inertiajs/vue3'
-import { TruckIcon, UserGroupIcon, MapIcon, PlusIcon, PencilSquareIcon, CameraIcon, ExclamationCircleIcon, CheckCircleIcon, XCircleIcon, ArrowRightIcon, ShieldCheckIcon, EyeIcon, EyeSlashIcon } from '@heroicons/vue/24/outline'
+import { TruckIcon, UserGroupIcon, MapIcon, PlusIcon, PencilSquareIcon, CameraIcon, ExclamationCircleIcon, CheckCircleIcon, XCircleIcon, ArrowRightIcon, ShieldCheckIcon, EyeIcon, EyeSlashIcon, ClipboardDocumentIcon, ClipboardDocumentCheckIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
     motorista:             { type: Object, default: null },
@@ -105,6 +105,25 @@ const diasLabel  = { seg: 'Seg', ter: 'Ter', qua: 'Qua', qui: 'Qui', sex: 'Sex',
 function bairrosResumo(regioes) {
     return (regioes ?? []).flatMap((r) => r.bairros ?? [])
 }
+
+// ── Copiar link ───────────────────────────────────────────────────────────────
+
+const copiado = ref(false)
+
+function copiarLink() {
+    const url = route('home')
+    navigator.clipboard.writeText(url).then(() => {
+        copiado.value = true
+        setTimeout(() => { copiado.value = false }, 2500)
+    }).catch(() => {
+        // fallback para browsers sem clipboard API
+        prompt('Copie o link:', url)
+    })
+}
+
+// ── Prévia do anúncio ─────────────────────────────────────────────────────────
+
+const modalPrevia = ref(false)
 </script>
 
 <template>
@@ -171,6 +190,20 @@ function bairrosResumo(regioes) {
                         </span>
                     </span>
                 </p>
+                <div class="flex items-center gap-3 mt-2.5 flex-wrap">
+                    <button @click="copiarLink"
+                        class="flex items-center gap-1.5 text-xs font-semibold bg-white border border-emerald-200 hover:bg-emerald-50 px-3 py-1.5 rounded-lg transition"
+                        :class="copiado ? 'text-emerald-600' : 'text-emerald-800'">
+                        <ClipboardDocumentCheckIcon v-if="copiado" class="w-3.5 h-3.5 shrink-0" />
+                        <ClipboardDocumentIcon v-else class="w-3.5 h-3.5 shrink-0" />
+                        {{ copiado ? 'Link copiado!' : 'Copiar link' }}
+                    </button>
+                    <button @click="modalPrevia = true"
+                        class="flex items-center gap-1 text-xs font-semibold text-emerald-700 hover:text-emerald-900 transition">
+                        <EyeIcon class="w-3.5 h-3.5 shrink-0" />
+                        Como apareço →
+                    </button>
+                </div>
             </div>
         </div>
         <div v-else-if="motorista?.status_aprovacao === 'aprovado'"
@@ -193,7 +226,7 @@ function bairrosResumo(regioes) {
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold text-amber-800">Adicione a foto da van</p>
                 <p class="text-xs text-amber-700 mt-0.5">
-                    A <strong>foto frontal</strong> é obrigatória para que sua van apareça no marketplace para os responsáveis.
+                    A <strong>foto frontal</strong> é obrigatória para que sua van apareça na busca de motoristas para os responsáveis.
                 </p>
             </div>
             <Link :href="route('motorista.van.documentos')"
@@ -221,7 +254,7 @@ function bairrosResumo(regioes) {
                         <p class="text-xs text-slate-500 mt-0.5">
                             {{ tudo_pronto
                                 ? 'Aguardando avaliação do administrador.'
-                                : 'Você não aparece no marketplace até estar aprovado.' }}
+                                : 'Você não aparece na busca de motoristas até estar aprovado.' }}
                         </p>
                     </div>
                 </div>
@@ -446,4 +479,82 @@ function bairrosResumo(regioes) {
         </div>
 
     </div>
+
+    <!-- Modal: Prévia do anúncio na busca de motoristas -->
+    <Teleport to="body">
+        <Transition name="fade">
+            <div v-if="modalPrevia"
+                class="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm"
+                @click.self="modalPrevia = false">
+                <div class="bg-white rounded-2xl w-full max-w-sm shadow-2xl overflow-hidden">
+
+                    <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+                        <p class="text-base font-bold text-slate-800">Como apareço na busca de motoristas</p>
+                        <button @click="modalPrevia = false"
+                            class="w-8 h-8 rounded-xl bg-slate-100 hover:bg-slate-200 flex items-center justify-center transition">
+                            <XMarkIcon class="w-4 h-4 text-slate-500" />
+                        </button>
+                    </div>
+
+                    <div class="p-4">
+                        <!-- Card simulando o marketplace -->
+                        <div class="rounded-xl border border-slate-200 overflow-hidden shadow-sm">
+
+                            <!-- Foto da van -->
+                            <div class="h-36 bg-slate-100 relative">
+                                <img v-if="van?.foto_url" :src="van.foto_url" class="w-full h-full object-cover" :alt="van.nome_servico || van.placa" />
+                                <div v-else class="flex flex-col items-center justify-center h-full text-slate-400 gap-1">
+                                    <TruckIcon class="w-10 h-10" />
+                                    <p class="text-xs">Sem foto — adicione para aparecer na busca de motoristas</p>
+                                </div>
+                                <div v-if="van?.capacidade_passageiros" class="absolute bottom-2 right-2 bg-white/90 backdrop-blur-sm text-slate-700 text-[10px] font-bold px-2 py-0.5 rounded-full shadow">
+                                    {{ van.capacidade_passageiros }} lugares
+                                </div>
+                            </div>
+
+                            <div class="px-4 py-3 space-y-2.5">
+                                <div>
+                                    <p class="font-bold text-slate-900">{{ van?.nome_servico || van?.placa || 'Seu serviço' }}</p>
+                                    <p class="text-xs text-slate-400 mt-0.5">{{ usuario?.nome }}</p>
+                                </div>
+
+                                <!-- Disponibilidades ativas -->
+                                <div v-for="d in statusVisibilidade.dispAtivas?.slice(0, 2)" :key="d.id_disponibilidade"
+                                    class="rounded-lg bg-slate-50 px-3 py-2">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="text-xs font-semibold text-slate-700 truncate">{{ d.nome }} · {{ turnoLabel[d.turno] ?? d.turno }}</span>
+                                        <span class="text-sm font-bold text-amber-700 shrink-0">R$ {{ Number(d.preco_mensal).toFixed(2).replace('.', ',') }}</span>
+                                    </div>
+                                    <div class="flex gap-1 mt-1.5 flex-wrap">
+                                        <span v-for="dia in d.dias" :key="dia"
+                                            class="text-[10px] bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-medium">
+                                            {{ diasLabel[dia] ?? dia }}
+                                        </span>
+                                    </div>
+                                </div>
+                                <div v-if="(statusVisibilidade.dispAtivas?.length ?? 0) > 2"
+                                    class="text-xs text-slate-400 text-center">
+                                    + {{ statusVisibilidade.dispAtivas.length - 2 }} disponibilidade{{ statusVisibilidade.dispAtivas.length - 2 > 1 ? 's' : '' }} a mais
+                                </div>
+
+                                <!-- Botão visual (não funcional — só prévia) -->
+                                <div class="pt-1">
+                                    <div class="w-full py-2.5 rounded-xl bg-amber-700 text-white text-sm font-semibold text-center select-none opacity-90">
+                                        Solicitar vaga
+                                    </div>
+                                    <p class="text-[10px] text-slate-400 text-center mt-1.5">Prévia — o botão é clicável para os responsáveis</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </Transition>
+    </Teleport>
+
 </template>
+
+<style scoped>
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
+</style>

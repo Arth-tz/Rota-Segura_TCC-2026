@@ -1,6 +1,8 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, watch, onMounted, onUnmounted, nextTick } from 'vue'
 import axios from 'axios'
+import 'leaflet/dist/leaflet.css'
+import L from 'leaflet'
 import {
     MapPinIcon,
     ChevronUpIcon,
@@ -20,6 +22,21 @@ import {
 
 const props = defineProps({
     trajetos: { type: Array, default: () => [] },
+    ativa:    { type: Boolean, default: false },
+})
+
+// Quando a seção volta a ficar visível, corrige dimensões do mapa Leaflet
+watch(() => props.ativa, async (visivel) => {
+    if (!visivel) return
+    await nextTick()
+    // Inicializa mapas de rotas ativas que ainda não foram inicializados
+    for (const t of listas.value) {
+        if (t.rota_ativa && !mapas[t.id_disponibilidade]) {
+            await inicializarMapa(t)
+        }
+    }
+    // Corrige tamanho de mapas já existentes (container estava display:none)
+    Object.values(mapas).forEach(m => m.mapa.invalidateSize())
 })
 
 const TURNOS = { manha: 'Manhã', tarde: 'Tarde', integral: 'Integral' }
@@ -84,6 +101,9 @@ async function salvar(trajetoIdx) {
 
 const watchIds = ref({}) // disponibilidadeId → watchId do navigator
 
+const mapDivs = {}  // id_disponibilidade -> elemento DOM
+const mapas   = {}  // id_disponibilidade -> { mapa, marcadorVan, marcadoresParadas: {} }
+
 const GPS_FALHAS_PARA_ALERTA = 3
 
 function iniciarGPS(trajeto) {
@@ -127,6 +147,7 @@ async function enviarPosicao(trajeto, rotaId, pos) {
         })
         trajeto.gpsFalhasConsecutivas = 0
         trajeto.gpsAlerta = false
+        atualizarPosicaoMapa(trajeto, pos.coords.latitude, pos.coords.longitude)
     } catch {
         registrarFalhaGPS(trajeto)
     }
@@ -134,9 +155,115 @@ async function enviarPosicao(trajeto, rotaId, pos) {
 
 onUnmounted(() => {
     Object.keys(watchIds.value).forEach(did => pararGPS(did))
+    Object.keys(mapas).forEach(did => destruirMapa(Number(did)))
     window.removeEventListener('online', atualizarOnline)
     window.removeEventListener('offline', atualizarOnline)
 })
+
+// ── Mapa (motorista) ──────────────────────────────────────────────────────────
+
+function criarIconeVan() {
+    return L.divIcon({
+        html: `<div style="background:#d97706;border:3px solid #fff;border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.3);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="white" style="width:14px;height:14px;"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 18.75a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h6m-9 0H3.375a1.125 1.125 0 0 1-1.125-1.125V14.25m17.25 4.5a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m3 0h1.125c.621 0 1.129-.504 1.09-1.124a17.902 17.902 0 0 0-3.213-9.193 2.056 2.056 0 0 0-1.58-.86H14.25M16.5 18.75h-2.25m0-11.177v-.958c0-.568-.422-1.048-.987-1.106a48.554 48.554 0 0 0-10.026 0 1.106 1.106 0 0 0-.987 1.106v7.635m12-6.677v6.677m0 4.5v-4.5m0 0h-12"/></svg></div>`,
+        className: '',
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
+    })
+}
+
+function criarIconeParada(tipo, feita, proxima = false) {
+    const cor = feita ? '#94a3b8' : proxima ? '#f59e0b' : tipo === 'embarque' ? '#10b981' : '#3b82f6'
+    const size = proxima && !feita ? 24 : 20
+    const borda = proxima && !feita ? '3px solid #f59e0b' : '2px solid #fff'
+    const svgPath = feita
+        ? '<path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/>'
+        : '<path stroke-linecap="round" stroke-linejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z"/><path stroke-linecap="round" stroke-linejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z"/>'
+    return L.divIcon({
+        html: `<div style="background:${cor};border:${borda};border-radius:4px;width:${size}px;height:${size}px;display:flex;align-items:center;justify-content:center;box-shadow:0 1px 4px rgba(0,0,0,.25);"><svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="white" style="width:11px;height:11px;">${svgPath}</svg></div>`,
+        className: '',
+        iconSize: [size, size],
+        iconAnchor: [size / 2, size / 2],
+    })
+}
+
+async function inicializarMapa(trajeto) {
+    await nextTick()
+    const did = trajeto.id_disponibilidade
+    if (!mapDivs[did] || mapas[did]) return
+    // Adia se o container estiver oculto (seção com display:none)
+    if (mapDivs[did].offsetHeight === 0) return
+
+    const paradas = trajeto.rota_ativa?.paradas ?? []
+    const coords = paradas
+        .filter(p => p.endereco?.latitude && p.endereco?.longitude)
+        .map(p => [p.endereco.latitude, p.endereco.longitude])
+
+    const centro = coords.length > 0 ? coords[0] : [-30.03, -51.23]
+    const mapa = L.map(mapDivs[did], { zoomControl: true, attributionControl: false })
+        .setView(centro, 14)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }).addTo(mapa)
+    mapas[did] = { mapa, marcadorVan: null, marcadoresParadas: {} }
+
+    if (coords.length > 1) {
+        mapa.fitBounds(coords, { padding: [36, 36], maxZoom: 16 })
+    } else if (coords.length === 1) {
+        mapa.setView(coords[0], 15)
+    }
+
+    atualizarMarcadoresParadas(trajeto)
+}
+
+function atualizarPosicaoMapa(trajeto, lat, lng) {
+    const did = trajeto.id_disponibilidade
+    const m = mapas[did]
+    if (!m) return
+    const latlng = [lat, lng]
+    if (m.marcadorVan) {
+        m.marcadorVan.setLatLng(latlng)
+    } else {
+        m.marcadorVan = L.marker(latlng, { icon: criarIconeVan(), zIndexOffset: 200 })
+            .addTo(m.mapa)
+            .bindPopup('<b>Minha posição</b>')
+    }
+    if (!m.mapa.getBounds().contains(latlng)) {
+        m.mapa.panTo(latlng, { animate: true, duration: 0.5 })
+    }
+}
+
+function atualizarMarcadoresParadas(trajeto) {
+    const did = trajeto.id_disponibilidade
+    const m = mapas[did]
+    if (!m || !trajeto.rota_ativa) return
+    const proximaOrdem = proximaParadaOrdem(trajeto)
+    trajeto.rota_ativa.paradas.forEach(parada => {
+        if (!parada.endereco?.latitude || !parada.endereco?.longitude) return
+        const feita = paradaCompleta(parada)
+        const proxima = parada.ordem === proximaOrdem
+        const latlng = [parada.endereco.latitude, parada.endereco.longitude]
+        if (m.marcadoresParadas[parada.id_parada]) {
+            m.marcadoresParadas[parada.id_parada]
+                .setIcon(criarIconeParada(parada.tipo, feita, proxima))
+                .setZIndexOffset(proxima ? 100 : 0)
+        } else {
+            const label = parada.tipo === 'embarque' ? 'Embarque' : 'Desembarque'
+            const nomes = parada.passageiros.map(p => p.nome).join(', ')
+            const e = parada.endereco
+            m.marcadoresParadas[parada.id_parada] = L.marker(latlng, {
+                icon: criarIconeParada(parada.tipo, feita, proxima),
+                zIndexOffset: proxima ? 100 : 0,
+            }).addTo(m.mapa)
+              .bindPopup(`<b>${label} — parada ${parada.ordem}</b><br>${nomes}<br><small>${e.logradouro}${e.numero ? ', ' + e.numero : ''} — ${e.bairro}</small>`)
+        }
+    })
+}
+
+function destruirMapa(did) {
+    if (mapas[did]) {
+        mapas[did].mapa.remove()
+        delete mapas[did]
+    }
+    delete mapDivs[did]
+}
 
 // ── Modal de confirmação de encerramento ──────────────────────────────────────
 
@@ -162,6 +289,7 @@ async function iniciarTrajeto(trajetoIdx) {
         )
         trajeto.rota_ativa = data.rota
         iniciarGPS(trajeto)
+        inicializarMapa(trajeto)
     } catch {
         trajeto.erro = 'Não foi possível iniciar o trajeto.'
     } finally {
@@ -205,6 +333,7 @@ async function executarEncerramento(trajetoIdx) {
     try {
         await axios.post(route('motorista.rotas.encerrar', trajeto.rota_ativa.id_rota))
         pararGPS(trajeto.id_disponibilidade)
+        destruirMapa(trajeto.id_disponibilidade)
         trajeto.rota_ativa = null
     } catch {
         trajeto.erro = 'Erro ao encerrar o trajeto.'
@@ -246,6 +375,7 @@ async function confirmar(trajeto, parada, passageiro, tipo) {
         const campo = tipo === 'embarque' ? 'embarque_em' : 'desembarque_em'
         passageiro[campo] = data.hora
         if (!parada.horario_real) parada.horario_real = data.hora
+        atualizarMarcadoresParadas(trajeto)
     } catch {
         errosConfirmacao.value[key] = online.value
             ? 'Não confirmou. Toque para tentar de novo.'
@@ -255,9 +385,12 @@ async function confirmar(trajeto, parada, passageiro, tipo) {
     }
 }
 
-// Inicia GPS para trajetos já ativos ao montar
+// Inicia GPS e mapa para trajetos já ativos ao montar
 listas.value.forEach((t) => {
-    if (t.rota_ativa) iniciarGPS(t)
+    if (t.rota_ativa) {
+        iniciarGPS(t)
+        inicializarMapa(t)
+    }
 })
 </script>
 
@@ -404,6 +537,18 @@ listas.value.forEach((t) => {
                         <div class="h-full bg-amber-600 transition-all duration-300 ease-out"
                             :style="{ width: (progressoTrajeto(trajeto).total ? progressoTrajeto(trajeto).concluidas / progressoTrajeto(trajeto).total * 100 : 0) + '%' }">
                         </div>
+                    </div>
+                </div>
+
+                <!-- Mapa em tempo real -->
+                <div class="border-t border-amber-100">
+                    <div :ref="el => { if (el) mapDivs[trajeto.id_disponibilidade] = el }"
+                        style="height: 260px; position: relative; z-index: 0;"></div>
+                    <div class="px-4 py-2 bg-white border-b border-amber-100 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-slate-500">
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 shrink-0"></span> Minha van</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-emerald-500 shrink-0"></span> Embarque</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-blue-500 shrink-0"></span> Desembarque</span>
+                        <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-slate-400 shrink-0"></span> Concluído</span>
                     </div>
                 </div>
 
