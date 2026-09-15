@@ -8,9 +8,11 @@ use Inertia\Response;
 
 class MotoristaPublicoController extends Controller
 {
-    public function show(int $id): Response
+    public function show(string $id): Response
     {
-        $motorista = Motorista::where('id_motorista', $id)
+        abort_if(!ctype_digit($id), 404);
+
+        $motorista = Motorista::where('id_motorista', (int) $id)
             ->where('status_aprovacao', 'aprovado')
             ->with([
                 'usuario.pessoa',
