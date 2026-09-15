@@ -17,6 +17,7 @@ use App\Http\Controllers\Motorista\DocumentosPessoaisController;
 use App\Http\Controllers\Motorista\RotaController;
 use App\Http\Controllers\Responsavel\AcompanharController;
 use App\Http\Controllers\Responsavel\DashboardController as ResponsavelDashboard;
+use App\Http\Controllers\MotoristaPublicoController;
 use App\Http\Controllers\Auth\RegisterMotoristaController;
 use App\Http\Controllers\Auth\RegisterResponsavelController;
 use App\Enums\UserRole;
@@ -51,6 +52,9 @@ Route::get('/', function () {
         'phpVersion' => PHP_VERSION,
     ]);
 })->name('home');
+
+// Perfil público do motorista — sem autenticação
+Route::get('/motorista/{id}', [MotoristaPublicoController::class, 'show'])->name('motorista.publico');
 
 //-- Rota com autenticação para dashboard de admin (controller AdminDashboard)
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function(){

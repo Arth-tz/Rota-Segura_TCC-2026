@@ -111,7 +111,7 @@ function bairrosResumo(regioes) {
 const copiado = ref(false)
 
 function copiarLink() {
-    const url = route('home')
+    const url = route('motorista.publico', { id: props.motorista?.id_motorista })
     navigator.clipboard.writeText(url).then(() => {
         copiado.value = true
         setTimeout(() => { copiado.value = false }, 2500)

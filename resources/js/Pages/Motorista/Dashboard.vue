@@ -79,7 +79,7 @@ const titulos = {
                 </div>
             </header>
 
-            <main class="flex-1 min-w-0 overflow-x-hidden px-4 md:px-8 py-6 pb-24 md:pb-8">
+            <main v-show="secaoAtiva !== 'trajetos'" class="flex-1 min-w-0 overflow-x-hidden px-4 md:px-8 py-6 pb-24 md:pb-8">
                 <SecaoInicio
                     v-if="secaoAtiva === 'inicio'"
                     :motorista="motorista"
