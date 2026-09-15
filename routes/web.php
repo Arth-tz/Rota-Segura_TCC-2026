@@ -53,8 +53,10 @@ Route::get('/', function () {
     ]);
 })->name('home');
 
-// Perfil público do motorista — sem autenticação
-Route::get('/motorista/{id}', [MotoristaPublicoController::class, 'show'])->name('motorista.publico');
+// Perfil público do motorista — sem autenticação (só IDs numéricos para não colidir com /motorista/dashboard)
+Route::get('/motorista/{id}', [MotoristaPublicoController::class, 'show'])
+    ->where('id', '[0-9]+')
+    ->name('motorista.publico');
 
 //-- Rota com autenticação para dashboard de admin (controller AdminDashboard)
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->group(function(){
