@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { computed } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { ArrowLeftIcon, CameraIcon } from '@heroicons/vue/24/outline'
@@ -124,7 +124,7 @@ const selectClass = computed(() => (err) =>
                         <input v-model="form.nome_servico" type="text" maxlength="150"
                             placeholder="Ex: Van do Tio Marquinhos"
                             :class="inputClass(form.errors.nome_servico)" />
-                        <p class="mt-1 text-xs text-slate-400">Como os responsáveis verão sua van no marketplace.</p>
+                        <p class="mt-1 text-xs text-slate-400">Como os responsáveis verão sua van na busca de motoristas.</p>
                         <p v-if="form.errors.nome_servico" class="mt-1 text-xs text-red-600">{{ form.errors.nome_servico }}</p>
                     </div>
 
@@ -196,7 +196,7 @@ const selectClass = computed(() => (err) =>
 
             <!-- ── NOTA DE APROVAÇÃO ───────────────────────────────────────── -->
             <div class="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs text-amber-800 leading-relaxed">
-                Após o cadastro, sua van passará por aprovação antes de aparecer no marketplace. Documentos como CRLV, seguro e IPVA poderão ser enviados posteriormente.
+                Após o cadastro, sua van passará por aprovação antes de aparecer na busca de motoristas. Documentos como CRLV, seguro e IPVA poderão ser enviados posteriormente.
             </div>
 
             <!-- ── AÇÕES ───────────────────────────────────────────────────── -->

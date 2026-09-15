@@ -196,7 +196,7 @@ function inicialNome(nome) {
 </script>
 
 <template>
-    <Head title="Buscar Vans — Marketplace" />
+    <Head title="Buscar Motoristas" />
     <FlashMessage />
 
     <div class="min-h-screen bg-slate-50">

@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { Link } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import CardPassageiro from '@/Components/Responsavel/Dashboard/CardPassageiro.vue'
@@ -57,7 +57,7 @@ const saudacao = computed(() => {
                             <p class="text-2xl font-bold">
                                 {{ passageiros.length === 1 ? 'Seu passageiro está' : `${passageiros.length} passageiros estão` }} sem van.
                             </p>
-                            <p class="text-sm text-blue-100 mt-1.5">Busque motoristas disponíveis no marketplace.</p>
+                            <p class="text-sm text-blue-100 mt-1.5">Busque motoristas disponíveis na busca de motoristas.</p>
                         </template>
 
                         <!-- Todos aguardando -->

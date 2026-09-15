@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import {
@@ -139,7 +139,7 @@ const showLogoutModal = ref(false)
                 <div v-if="!van.foto_url"
                     class="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-700">
                     <ExclamationCircleIcon class="w-4 h-4 text-amber-500 shrink-0" />
-                    <span>Adicione a <strong>foto frontal</strong> para aparecer no marketplace.</span>
+                    <span>Adicione a <strong>foto frontal</strong> para aparecer na busca de motoristas.</span>
                 </div>
 
                 <!-- Status docs -->
@@ -178,7 +178,7 @@ const showLogoutModal = ref(false)
                 </div>
                 <div>
                     <p class="text-sm font-semibold text-slate-700">Nenhuma van cadastrada</p>
-                    <p class="text-xs text-slate-400 mt-0.5">Cadastre sua van para aparecer no marketplace.</p>
+                    <p class="text-xs text-slate-400 mt-0.5">Cadastre sua van para aparecer na busca de motoristas.</p>
                 </div>
                 <Link :href="route('motorista.van.create')"
                     class="inline-flex items-center gap-1.5 rounded-xl bg-amber-700 hover:bg-amber-800 px-4 py-2.5 text-sm font-semibold text-white transition shadow-sm">

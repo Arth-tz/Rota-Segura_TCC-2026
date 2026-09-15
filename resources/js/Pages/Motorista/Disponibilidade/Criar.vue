@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { useForm, Head, Link } from '@inertiajs/vue3'
 import { ArrowLeftIcon, MapIcon, ClockIcon, CalendarDaysIcon, CurrencyDollarIcon, UsersIcon, HomeModernIcon, AcademicCapIcon } from '@heroicons/vue/24/outline'
 import TagInput from '@/Components/UI/TagInput.vue'
@@ -185,7 +185,7 @@ function submit() {
                     </div>
                     <div>
                         <h2 class="text-base font-semibold text-slate-800">Área de atuação</h2>
-                        <p class="text-xs text-slate-400 mt-0.5">Ajuda responsáveis a te encontrarem no marketplace</p>
+                        <p class="text-xs text-slate-400 mt-0.5">Ajuda responsáveis a te encontrarem na busca de motoristas</p>
                     </div>
                 </div>
                 <div class="px-5 py-4 space-y-4">

@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, computed } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { ArrowLeftIcon, UserIcon, IdentificationIcon, EnvelopeIcon, PhoneIcon, LockClosedIcon, ShieldCheckIcon, CameraIcon } from '@heroicons/vue/24/outline'
@@ -173,7 +173,7 @@ const statusConfig = {
                             type="tel" placeholder="(00) 00000-0000" maxlength="15"
                             class="w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition"
                             :class="form.errors.telefone ? 'border-red-300 bg-red-50' : 'border-slate-200 focus:border-amber-600 focus:ring-2 focus:ring-amber-100'" />
-                        <p class="mt-1 text-xs text-slate-400">Usado para contato pelos responsáveis no marketplace</p>
+                        <p class="mt-1 text-xs text-slate-400">Usado para contato pelos responsáveis na busca de motoristas</p>
                         <p v-if="form.errors.telefone" class="mt-1 text-xs text-red-600">{{ form.errors.telefone }}</p>
                     </div>
 

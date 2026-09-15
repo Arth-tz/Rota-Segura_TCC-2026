@@ -10,7 +10,7 @@ import { MagnifyingGlassIcon, ArrowRightIcon, FunnelIcon, ShieldCheckIcon, MapPi
         <div class="rounded-2xl bg-gradient-to-br from-blue-600 to-blue-800 p-6 text-white shadow-lg">
             <div class="flex items-center gap-2 mb-1">
                 <MagnifyingGlassIcon class="w-5 h-5 text-blue-300" />
-                <p class="text-xs uppercase tracking-widest text-blue-300 font-medium">Marketplace</p>
+                <p class="text-xs uppercase tracking-widest text-blue-300 font-medium">Busca de Motoristas</p>
             </div>
             <h3 class="text-2xl font-bold mt-1">Encontre a van ideal</h3>
             <p class="mt-2 text-sm text-blue-200 max-w-md">
@@ -18,7 +18,7 @@ import { MagnifyingGlassIcon, ArrowRightIcon, FunnelIcon, ShieldCheckIcon, MapPi
             </p>
             <Link :href="route('responsavel.marketplace')"
                 class="mt-4 inline-flex items-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-bold text-blue-700 hover:bg-blue-50 transition shadow-sm">
-                Abrir marketplace
+                Buscar motoristas
                 <ArrowRightIcon class="w-4 h-4" />
             </Link>
         </div>

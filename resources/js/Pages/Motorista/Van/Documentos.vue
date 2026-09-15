@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { reactive, computed, ref } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import {
@@ -211,7 +211,7 @@ function nomeArquivo(url) {
                     class="mx-5 mt-4 flex items-start gap-2.5 rounded-xl bg-amber-50 border border-amber-200 px-4 py-3">
                     <ExclamationCircleIcon class="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
                     <p class="text-xs text-amber-800 leading-relaxed">
-                        <strong>A foto frontal é obrigatória</strong> para que sua van apareça no marketplace.
+                        <strong>A foto frontal é obrigatória</strong> para que sua van apareça na busca de motoristas.
                         Adicione ao menos a foto <strong>Frente</strong> para que os responsáveis possam te encontrar.
                     </p>
                 </div>
@@ -258,7 +258,7 @@ function nomeArquivo(url) {
                     <ShieldCheckIcon class="w-4 h-4 text-amber-600" />
                     <h3 class="text-base font-bold text-slate-800">Documentos essenciais</h3>
                 </div>
-                <p class="text-xs text-slate-400 mt-0.5 ml-6">Obrigatórios para aprovação no marketplace</p>
+                <p class="text-xs text-slate-400 mt-0.5 ml-6">Obrigatórios para aprovação na busca de motoristas</p>
             </div>
 
             <!-- CRLV ─────────────────────────────────────────────────────────── -->

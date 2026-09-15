@@ -1,4 +1,4 @@
-<script setup>
+﻿<script setup>
 import { ref, reactive, onMounted, onUnmounted, nextTick } from 'vue'
 import { Link } from '@inertiajs/vue3'
 import axios from 'axios'
@@ -349,7 +349,7 @@ const STATUS_PASSAGEIRO = {
                 </ul>
                 <Link :href="route('responsavel.marketplace')"
                     class="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700 border border-blue-200 hover:bg-blue-50 px-3 py-1.5 rounded-lg transition">
-                    <MapPinIcon class="w-3.5 h-3.5" /> Buscar van no marketplace
+                    <MapPinIcon class="w-3.5 h-3.5" /> Buscar van na busca de motoristas
                 </Link>
             </div>
 
