@@ -46,7 +46,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
         <!-- NAV -->
         <nav class="rs-nav" :class="{ 'rs-nav--scrolled': scrollY > 30 }">
             <div class="rs-nav__inner">
-                <Link href="/rota-segura/public/" class="rs-nav__logo">
+                <Link :href="route('home')" class="rs-nav__logo">
                     <div class="rs-nav__logo-ring">
                         <img src="/images/Logo_rota-segura_branco.png" alt="Logo Rota Segura" class="rs-nav__logo-img" />
                     </div>
@@ -110,7 +110,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
                 <div class="rs-hero__media" :class="{ 'rs-hero__media--in': heroVisible }">
                     <div class="rs-img-card">
                         <div class="rs-img-card__bg"></div>
-                        <img src="/images/mapa_tempo_real.png" alt="Mapa com acompanhamento em tempo real" class="rs-img-card__img" />
+                        <img src="/images/mapa_tempo_real.svg" alt="Mapa com acompanhamento em tempo real" class="rs-img-card__img" />
                         <div class="rs-float rs-float--bottom-left">
                             <span class="rs-float__pulse"></span>
                             <span>Localização em tempo real!</span>

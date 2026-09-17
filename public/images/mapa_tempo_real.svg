@@ -1,0 +1,84 @@
+<svg viewBox="0 0 520 360" xmlns="http://www.w3.org/2000/svg" font-family="system-ui, sans-serif">
+  <!-- Fundo do card app -->
+  <rect width="520" height="360" rx="16" fill="#f8fafc"/>
+
+  <!-- Header do app -->
+  <rect width="520" height="52" rx="0" fill="#1d4ed8"/>
+  <rect width="520" height="52" rx="16" fill="#1d4ed8"/>
+  <rect x="0" y="36" width="520" height="16" fill="#1d4ed8"/>
+  <circle cx="24" cy="26" r="10" fill="white" opacity="0.2"/>
+  <rect x="40" y="18" width="120" height="8" rx="4" fill="white" opacity="0.9"/>
+  <rect x="40" y="30" width="80" height="6" rx="3" fill="white" opacity="0.5"/>
+  <rect x="460" y="16" width="44" height="20" rx="10" fill="white" opacity="0.15"/>
+
+  <!-- Área do mapa (fundo) -->
+  <rect x="0" y="52" width="520" height="308" rx="0" fill="#e8f0e0"/>
+  <rect x="0" y="300" width="520" height="60" rx="0" fill="#e8f0e0"/>
+  <rect x="0" y="340" width="520" height="20" rx="16" fill="#e8f0e0"/>
+
+  <!-- Ruas do mapa -->
+  <line x1="0" y1="120" x2="520" y2="120" stroke="#d1d5db" stroke-width="6"/>
+  <line x1="0" y1="200" x2="520" y2="200" stroke="#d1d5db" stroke-width="4"/>
+  <line x1="0" y1="270" x2="520" y2="270" stroke="#d1d5db" stroke-width="3"/>
+  <line x1="80" y1="52" x2="80" y2="360" stroke="#d1d5db" stroke-width="4"/>
+  <line x1="200" y1="52" x2="200" y2="360" stroke="#d1d5db" stroke-width="6"/>
+  <line x1="340" y1="52" x2="340" y2="360" stroke="#d1d5db" stroke-width="3"/>
+  <line x1="440" y1="52" x2="440" y2="360" stroke="#d1d5db" stroke-width="4"/>
+
+  <!-- Blocos de quadra -->
+  <rect x="85" y="57" width="110" height="58" rx="4" fill="#d5e8c8" opacity="0.6"/>
+  <rect x="205" y="57" width="130" height="58" rx="4" fill="#d5e8c8" opacity="0.6"/>
+  <rect x="345" y="57" width="90" height="58" rx="4" fill="#d5e8c8" opacity="0.5"/>
+  <rect x="85" y="125" width="110" height="70" rx="4" fill="#cfe2f3" opacity="0.5"/>
+  <rect x="205" y="125" width="130" height="70" rx="4" fill="#d5e8c8" opacity="0.6"/>
+  <rect x="345" y="125" width="90" height="70" rx="4" fill="#d5e8c8" opacity="0.5"/>
+  <rect x="85" y="205" width="110" height="60" rx="4" fill="#d5e8c8" opacity="0.6"/>
+  <rect x="205" y="205" width="130" height="60" rx="4" fill="#cfe2f3" opacity="0.5"/>
+  <rect x="5" y="125" width="70" height="70" rx="4" fill="#d5e8c8" opacity="0.6"/>
+  <rect x="5" y="205" width="70" height="60" rx="4" fill="#d5e8c8" opacity="0.5"/>
+
+  <!-- Rota destacada (linha azul) -->
+  <polyline points="80,290 80,200 200,200 200,120 340,120 340,200 440,200 440,120"
+    fill="none" stroke="#2563eb" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"
+    stroke-dasharray="0" opacity="0.85"/>
+
+  <!-- Sombra da rota -->
+  <polyline points="80,290 80,200 200,200 200,120 340,120 340,200 440,200 440,120"
+    fill="none" stroke="#93c5fd" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"
+    opacity="0.35"/>
+
+  <!-- Pin de origem (verde) -->
+  <circle cx="80" cy="290" r="10" fill="#16a34a" stroke="white" stroke-width="2.5"/>
+  <circle cx="80" cy="290" r="5" fill="white"/>
+
+  <!-- Pin de destino (vermelho) -->
+  <circle cx="440" cy="120" r="10" fill="#dc2626" stroke="white" stroke-width="2.5"/>
+  <circle cx="440" cy="120" r="5" fill="white"/>
+
+  <!-- Van animada na rota -->
+  <g transform="translate(194,194)">
+    <rect x="-14" y="-10" width="28" height="20" rx="5" fill="#1d4ed8" stroke="white" stroke-width="2"/>
+    <circle cx="-8" cy="10" r="4" fill="#1e293b"/>
+    <circle cx="8" cy="10" r="4" fill="#1e293b"/>
+    <rect x="-10" y="-8" width="8" height="6" rx="1" fill="#93c5fd" opacity="0.8"/>
+    <rect x="2" y="-8" width="8" height="6" rx="1" fill="#93c5fd" opacity="0.8"/>
+  </g>
+
+  <!-- Card de info flutuante -->
+  <rect x="12" y="62" width="160" height="54" rx="10" fill="white" filter="url(#sombra)"/>
+  <circle cx="30" cy="82" r="10" fill="#dbeafe"/>
+  <rect x="46" y="74" width="90" height="7" rx="3" fill="#1e293b"/>
+  <rect x="46" y="85" width="65" height="6" rx="3" fill="#94a3b8"/>
+  <rect x="14" y="100" width="50" height="6" rx="3" fill="#16a34a" opacity="0.7"/>
+  <circle cx="104" cy="103" r="3" fill="#16a34a"/>
+  <rect x="112" y="100" width="40" height="6" rx="3" fill="#64748b" opacity="0.7"/>
+
+  <!-- Pulse no pino origem -->
+  <circle cx="80" cy="290" r="18" fill="#16a34a" opacity="0.2"/>
+
+  <defs>
+    <filter id="sombra" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="2" stdDeviation="4" flood-color="#0f172a" flood-opacity="0.12"/>
+    </filter>
+  </defs>
+</svg>
