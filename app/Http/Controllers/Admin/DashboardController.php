@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Motorista;
+use App\Models\Passageiro;
 use App\Models\Responsavel;
 use App\Models\Van;
+use App\Models\Vinculo;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -19,10 +21,13 @@ class DashboardController extends Controller
         $motoristas = Motorista::with(['usuario.pessoa', 'van'])
             ->orderByRaw("FIELD(status_aprovacao, 'pendente', 'aprovado', 'rejeitado')")
             ->get()
-            ->map(fn($m) => [
+            ->map(function ($m) {
+                $email = $m->usuario?->email ?? '—';
+                return [
                 'id_motorista'     => $m->id_motorista,
                 'nome'             => $m->usuario?->pessoa?->nome ?? '—',
-                'email'            => $m->usuario?->email ?? '—',
+                'email'            => $email,
+                'is_teste'         => str_ends_with($email, '@teste.rotasegura'),
                 'cnh_numero'       => $m->cnh_numero,
                 'cnh_categoria'    => $m->cnh_categoria,
                 'cnh_validade'              => $m->cnh_validade,
@@ -41,12 +46,14 @@ class DashboardController extends Controller
                     'ano'     => $m->van->ano_fabricacao,
                     'status'  => $m->van->status_aprovacao,
                 ] : null,
-            ]);
+            ];});
 
-        $vans = Van::with(['motorista.usuario.pessoa'])
+        $vans = Van::with(['motorista.usuario.pessoa', 'motorista.usuario'])
             ->orderByRaw("FIELD(status_aprovacao, 'pendente', 'aprovado', 'rejeitado')")
             ->get()
-            ->map(fn($v) => [
+            ->map(function ($v) {
+                $email = $v->motorista?->usuario?->email ?? '';
+                return [
                 'id_van'                         => $v->id_van,
                 'placa'                          => $v->placa,
                 'marca'                          => $v->marca,
@@ -59,6 +66,7 @@ class DashboardController extends Controller
                 'documentacao_completa'          => $v->documentacao_completa,
                 'nome_motorista'                 => $v->motorista?->usuario?->pessoa?->nome ?? '—',
                 'id_motorista'                   => $v->id_motorista,
+                'is_teste'                       => str_ends_with($email, '@teste.rotasegura'),
                 // fotos
                 'foto_url'                       => $v->foto_url,
                 'foto_verso_url'                 => $v->foto_verso_url,
@@ -72,7 +80,27 @@ class DashboardController extends Controller
                 'seguro_validade'                => $v->seguro_validade?->format('d/m/Y'),
                 'autorizacao_municipal_url'      => $v->autorizacao_municipal_url,
                 'autorizacao_municipal_validade' => $v->autorizacao_municipal_validade?->format('d/m/Y'),
-            ]);
+            ];});
+
+        $responsaveis = Responsavel::with(['usuario.pessoa', 'passageiros.pessoa'])
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($r) {
+                $email = $r->usuario?->email ?? '—';
+                return [
+                    'id_responsavel'   => $r->id_responsavel,
+                    'nome'             => $r->usuario?->pessoa?->nome ?? '—',
+                    'email'            => $email,
+                    'is_teste'         => str_ends_with($email, '@teste.rotasegura'),
+                    'tipo_responsavel' => $r->tipo_responsavel,
+                    'created_at'       => $r->created_at?->format('d/m/Y'),
+                    'passageiros'      => $r->passageiros->map(fn ($p) => [
+                        'id_passageiro'  => $p->id_passageiro,
+                        'nome'           => $p->pessoa?->nome ?? '—',
+                        'ativo'          => (bool) $p->ativo,
+                    ])->values()->all(),
+                ];
+            });
 
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
@@ -82,9 +110,12 @@ class DashboardController extends Controller
                 'vans_total'          => Van::count(),
                 'vans_pendentes'      => Van::where('status_aprovacao', 'pendente')->count(),
                 'responsaveis_total'  => Responsavel::count(),
+                'passageiros_total'   => Passageiro::count(),
+                'vinculos_ativos'     => Vinculo::where('status', 'ativo')->count(),
             ],
-            'motoristas' => $motoristas,
-            'vans'       => $vans,
+            'motoristas'  => $motoristas,
+            'vans'        => $vans,
+            'responsaveis'=> $responsaveis,
         ]);
     }
 

@@ -1,29 +1,36 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import FlashMessage from '@/Components/UI/FlashMessage.vue'
 import {
     UserIcon, TruckIcon, UsersIcon,
     CheckCircleIcon, XCircleIcon, ClockIcon,
     ShieldCheckIcon, DocumentTextIcon, ArrowTopRightOnSquareIcon, PhotoIcon,
+    BeakerIcon, ChevronDownIcon, ChevronUpIcon,
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
-    stats:      { type: Object, required: true },
-    motoristas: { type: Array,  default: () => [] },
-    vans:       { type: Array,  default: () => [] },
+    stats:        { type: Object, required: true },
+    motoristas:   { type: Array,  default: () => [] },
+    vans:         { type: Array,  default: () => [] },
+    responsaveis: { type: Array,  default: () => [] },
 })
 
 const secao = ref('motoristas')
 
-// ─── MODAIS ───────────────────────────────────────────────────────────────────
-const modalRejeitar    = ref(null) // { tipo: 'motorista'|'van', id, nome }
-const motivoRejeicao   = ref('')
-const modalDocumentos  = ref(null) // van object
-
-function abrirDocumentos(van) {
-    modalDocumentos.value = van
+// ─── RESPONSÁVEIS: expandir passageiros ───────────────────────────────────────
+const expandidos = ref(new Set())
+function toggleExpandir(id) {
+    if (expandidos.value.has(id)) expandidos.value.delete(id)
+    else expandidos.value.add(id)
 }
+
+// ─── MODAIS ───────────────────────────────────────────────────────────────────
+const modalRejeitar    = ref(null)
+const motivoRejeicao   = ref('')
+const modalDocumentos  = ref(null)
+
+function abrirDocumentos(van) { modalDocumentos.value = van }
 
 function aprovarEFechar(tipo, id) {
     aprovar(tipo, id)
@@ -64,6 +71,14 @@ const statusConfig = {
     pendente:  { label: 'Pendente',  classes: 'bg-amber-50 text-amber-700 border-amber-200' },
     rejeitado: { label: 'Rejeitado', classes: 'bg-red-50 text-red-600 border-red-200' },
 }
+
+const TIPO_RESPONSAVEL = { pai: 'Pai', mae: 'Mãe', avo: 'Avô/Avó', responsavel_legal: 'Resp. Legal' }
+
+const tabs = computed(() => [
+    { key: 'motoristas',   label: 'Motoristas',   badge: props.stats.motoristas_pendentes },
+    { key: 'vans',         label: 'Vans',         badge: props.stats.vans_pendentes },
+    { key: 'responsaveis', label: 'Responsáveis', badge: 0 },
+])
 </script>
 
 <template>
@@ -94,30 +109,38 @@ const statusConfig = {
         <div class="max-w-6xl mx-auto w-full px-4 py-6 space-y-6">
 
             <!-- Stats -->
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                <div class="bg-white rounded-2xl border border-slate-200 px-4 py-4 shadow-sm">
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+                <div class="bg-white rounded-2xl border border-slate-200 px-4 py-4 shadow-sm col-span-1">
                     <p class="text-xs text-slate-400 uppercase tracking-wide">Motoristas</p>
                     <p class="text-2xl font-bold text-slate-900 mt-1">{{ stats.motoristas_total }}</p>
                 </div>
-                <div class="bg-white rounded-2xl border border-amber-200 px-4 py-4 shadow-sm">
+                <div class="bg-white rounded-2xl border border-amber-200 px-4 py-4 shadow-sm col-span-1">
                     <p class="text-xs text-amber-500 uppercase tracking-wide">Pendentes</p>
                     <p class="text-2xl font-bold text-amber-600 mt-1">{{ stats.motoristas_pendentes }}</p>
                 </div>
-                <div class="bg-white rounded-2xl border border-emerald-200 px-4 py-4 shadow-sm">
+                <div class="bg-white rounded-2xl border border-emerald-200 px-4 py-4 shadow-sm col-span-1">
                     <p class="text-xs text-emerald-500 uppercase tracking-wide">Aprovados</p>
                     <p class="text-2xl font-bold text-emerald-600 mt-1">{{ stats.motoristas_aprovados }}</p>
                 </div>
-                <div class="bg-white rounded-2xl border border-slate-200 px-4 py-4 shadow-sm">
+                <div class="bg-white rounded-2xl border border-slate-200 px-4 py-4 shadow-sm col-span-1">
                     <p class="text-xs text-slate-400 uppercase tracking-wide">Vans</p>
                     <p class="text-2xl font-bold text-slate-900 mt-1">{{ stats.vans_total }}</p>
                 </div>
-                <div class="bg-white rounded-2xl border border-amber-200 px-4 py-4 shadow-sm">
+                <div class="bg-white rounded-2xl border border-amber-200 px-4 py-4 shadow-sm col-span-1">
                     <p class="text-xs text-amber-500 uppercase tracking-wide">Vans pend.</p>
                     <p class="text-2xl font-bold text-amber-600 mt-1">{{ stats.vans_pendentes }}</p>
                 </div>
-                <div class="bg-white rounded-2xl border border-slate-200 px-4 py-4 shadow-sm">
+                <div class="bg-white rounded-2xl border border-slate-200 px-4 py-4 shadow-sm col-span-1">
                     <p class="text-xs text-slate-400 uppercase tracking-wide">Responsáveis</p>
                     <p class="text-2xl font-bold text-slate-900 mt-1">{{ stats.responsaveis_total }}</p>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-200 px-4 py-4 shadow-sm col-span-1">
+                    <p class="text-xs text-slate-400 uppercase tracking-wide">Passageiros</p>
+                    <p class="text-2xl font-bold text-slate-900 mt-1">{{ stats.passageiros_total }}</p>
+                </div>
+                <div class="bg-white rounded-2xl border border-blue-200 px-4 py-4 shadow-sm col-span-1">
+                    <p class="text-xs text-blue-500 uppercase tracking-wide">Vínculos ativos</p>
+                    <p class="text-2xl font-bold text-blue-700 mt-1">{{ stats.vinculos_ativos }}</p>
                 </div>
             </div>
 
@@ -138,7 +161,7 @@ const statusConfig = {
             <!-- Tabs -->
             <div class="flex gap-1 bg-white border border-slate-200 rounded-xl p-1 w-fit shadow-sm">
                 <button
-                    v-for="tab in [{ key:'motoristas', label:'Motoristas' }, { key:'vans', label:'Vans' }]"
+                    v-for="tab in tabs"
                     :key="tab.key"
                     @click="secao = tab.key"
                     class="px-5 py-2 rounded-lg text-sm font-semibold transition-all"
@@ -147,13 +170,9 @@ const statusConfig = {
                         : 'text-slate-500 hover:text-slate-700'"
                 >
                     {{ tab.label }}
-                    <span v-if="tab.key === 'motoristas' && stats.motoristas_pendentes > 0"
+                    <span v-if="tab.badge > 0"
                         class="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-400 text-white text-[10px] font-bold">
-                        {{ stats.motoristas_pendentes }}
-                    </span>
-                    <span v-if="tab.key === 'vans' && stats.vans_pendentes > 0"
-                        class="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-amber-400 text-white text-[10px] font-bold">
-                        {{ stats.vans_pendentes }}
+                        {{ tab.badge }}
                     </span>
                 </button>
             </div>
@@ -169,25 +188,28 @@ const statusConfig = {
                     :class="m.status_aprovacao === 'pendente' ? 'border-amber-200' : 'border-slate-200'">
 
                     <div class="flex items-center justify-between gap-4 px-5 py-4">
-                        <!-- Avatar + dados -->
                         <div class="flex items-center gap-4 min-w-0">
                             <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center shrink-0">
                                 <UserIcon class="w-5 h-5 text-blue-500" />
                             </div>
                             <div class="min-w-0">
-                                <p class="font-semibold text-slate-900 truncate">{{ m.nome }}</p>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <p class="font-semibold text-slate-900 truncate">{{ m.nome }}</p>
+                                    <span v-if="m.is_teste"
+                                        class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 border border-violet-200 shrink-0">
+                                        <BeakerIcon class="w-3 h-3" /> Usuário de teste
+                                    </span>
+                                </div>
                                 <p class="text-xs text-slate-400 truncate">{{ m.email }}</p>
                             </div>
                         </div>
 
-                        <!-- Status badge -->
                         <span class="text-xs px-2.5 py-1 rounded-full border font-semibold shrink-0"
                             :class="statusConfig[m.status_aprovacao]?.classes">
                             {{ statusConfig[m.status_aprovacao]?.label }}
                         </span>
                     </div>
 
-                    <!-- Detalhes CNH -->
                     <div class="px-5 pb-4 grid grid-cols-2 sm:grid-cols-3 gap-3 text-xs text-slate-500">
                         <div>
                             <p class="uppercase tracking-wide text-slate-400 mb-0.5">CNH</p>
@@ -241,13 +263,11 @@ const statusConfig = {
                         </div>
                     </div>
 
-                    <!-- Motivo rejeição -->
                     <div v-if="m.status_aprovacao === 'rejeitado' && m.motivo_rejeicao"
                         class="mx-5 mb-4 px-4 py-2.5 rounded-xl bg-red-50 border border-red-100 text-xs text-red-600">
                         <span class="font-semibold">Motivo:</span> {{ m.motivo_rejeicao }}
                     </div>
 
-                    <!-- Ações -->
                     <div v-if="m.status_aprovacao === 'pendente'"
                         class="flex gap-2 px-5 pb-4">
                         <button @click="aprovar('motorista', m.id_motorista)"
@@ -270,7 +290,7 @@ const statusConfig = {
             </div>
 
             <!-- ── VANS ──────────────────────────────────────────────────── -->
-            <div v-else class="space-y-3">
+            <div v-else-if="secao === 'vans'" class="space-y-3">
                 <div v-if="!vans.length" class="bg-white rounded-2xl border border-dashed border-slate-200 py-14 text-center text-slate-400 text-sm">
                     Nenhuma van cadastrada.
                 </div>
@@ -285,8 +305,14 @@ const statusConfig = {
                                 <TruckIcon class="w-5 h-5 text-blue-500" />
                             </div>
                             <div class="min-w-0">
-                                <p class="font-semibold text-slate-900">{{ v.placa }}</p>
-                                <p class="text-xs text-slate-400">{{ v.marca }} {{ v.modelo }} · {{ v.ano_fabricacao }}</p>
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <p class="font-semibold text-slate-900">{{ v.placa }}</p>
+                                    <span v-if="v.is_teste"
+                                        class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 border border-violet-200 shrink-0">
+                                        <BeakerIcon class="w-3 h-3" /> Teste
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-400">{{ v.marca }} {{ v.modelo }} · {{ v.ano_fabricacao }} · {{ v.nome_motorista }}</p>
                             </div>
                         </div>
                         <span class="text-xs px-2.5 py-1 rounded-full border font-semibold shrink-0"
@@ -296,10 +322,6 @@ const statusConfig = {
                     </div>
 
                     <div class="px-5 pb-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs text-slate-500">
-                        <div>
-                            <p class="uppercase tracking-wide text-slate-400 mb-0.5">Motorista</p>
-                            <p class="font-medium text-slate-700">{{ v.nome_motorista }}</p>
-                        </div>
                         <div>
                             <p class="uppercase tracking-wide text-slate-400 mb-0.5">Cor</p>
                             <p class="font-medium text-slate-700">{{ v.cor }}</p>
@@ -346,6 +368,66 @@ const statusConfig = {
                 </div>
             </div>
 
+            <!-- ── RESPONSÁVEIS ────────────────────────────────────────── -->
+            <div v-else class="space-y-3">
+                <div v-if="!responsaveis.length" class="bg-white rounded-2xl border border-dashed border-slate-200 py-14 text-center text-slate-400 text-sm">
+                    Nenhum responsável cadastrado.
+                </div>
+
+                <div v-for="r in responsaveis" :key="r.id_responsavel"
+                    class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+
+                    <!-- Linha principal -->
+                    <div class="flex items-center justify-between gap-4 px-5 py-4">
+                        <div class="flex items-center gap-4 min-w-0">
+                            <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0">
+                                <UsersIcon class="w-5 h-5 text-indigo-500" />
+                            </div>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <p class="font-semibold text-slate-900 truncate">{{ r.nome }}</p>
+                                    <span v-if="r.is_teste"
+                                        class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 border border-violet-200 shrink-0">
+                                        <BeakerIcon class="w-3 h-3" /> Usuário de teste
+                                    </span>
+                                </div>
+                                <p class="text-xs text-slate-400 truncate">{{ r.email }}</p>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 shrink-0">
+                            <span class="text-xs px-2.5 py-1 rounded-full border border-slate-200 bg-slate-50 text-slate-600 font-medium hidden sm:inline-flex">
+                                {{ TIPO_RESPONSAVEL[r.tipo_responsavel] ?? r.tipo_responsavel }}
+                            </span>
+                            <span class="text-xs text-slate-400">Desde {{ r.created_at }}</span>
+                            <button v-if="r.passageiros.length"
+                                @click="toggleExpandir(r.id_responsavel)"
+                                class="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-700 transition px-2 py-1 rounded-lg hover:bg-blue-50">
+                                {{ r.passageiros.length }}
+                                {{ r.passageiros.length === 1 ? 'passageiro' : 'passageiros' }}
+                                <ChevronDownIcon v-if="!expandidos.has(r.id_responsavel)" class="w-3.5 h-3.5" />
+                                <ChevronUpIcon v-else class="w-3.5 h-3.5" />
+                            </button>
+                            <span v-else class="text-xs text-slate-400 italic">Sem passageiros</span>
+                        </div>
+                    </div>
+
+                    <!-- Lista de passageiros (expandível) -->
+                    <div v-if="expandidos.has(r.id_responsavel) && r.passageiros.length"
+                        class="px-5 pb-4 border-t border-slate-100 pt-3 space-y-2">
+                        <p class="text-[10px] text-slate-400 uppercase tracking-wide font-semibold mb-2">Passageiros</p>
+                        <div v-for="p in r.passageiros" :key="p.id_passageiro"
+                            class="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-50 border border-slate-100 text-sm">
+                            <span class="font-medium text-slate-700">{{ p.nome }}</span>
+                            <span class="text-xs px-2 py-0.5 rounded-full"
+                                :class="p.ativo ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-slate-100 text-slate-400'">
+                                {{ p.ativo ? 'Ativo' : 'Inativo' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -358,10 +440,15 @@ const statusConfig = {
                 <Transition name="pop">
                     <div v-if="modalDocumentos" class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
 
-                        <!-- Header -->
                         <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
                             <div>
-                                <h3 class="text-base font-bold text-slate-900">{{ modalDocumentos.placa }}</h3>
+                                <div class="flex items-center gap-2">
+                                    <h3 class="text-base font-bold text-slate-900">{{ modalDocumentos.placa }}</h3>
+                                    <span v-if="modalDocumentos.is_teste"
+                                        class="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-violet-100 text-violet-700 border border-violet-200">
+                                        <BeakerIcon class="w-3 h-3" /> Teste
+                                    </span>
+                                </div>
                                 <p class="text-xs text-slate-400 mt-0.5">
                                     {{ modalDocumentos.marca }} {{ modalDocumentos.modelo }} · {{ modalDocumentos.ano_fabricacao }} · {{ modalDocumentos.nome_motorista }}
                                 </p>
@@ -372,8 +459,6 @@ const statusConfig = {
                         </div>
 
                         <div class="px-6 py-5 space-y-6">
-
-                            <!-- Fotos -->
                             <div>
                                 <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Fotos da van</p>
                                 <div class="grid grid-cols-5 gap-2">
@@ -397,7 +482,6 @@ const statusConfig = {
                                 </div>
                             </div>
 
-                            <!-- Documentos -->
                             <div>
                                 <p class="text-xs font-semibold text-slate-400 uppercase tracking-wide mb-3">Documentos</p>
                                 <div class="space-y-2">
@@ -426,7 +510,6 @@ const statusConfig = {
                             </div>
                         </div>
 
-                        <!-- Footer com ações -->
                         <div class="flex items-center gap-2 px-6 py-4 border-t border-slate-100 flex-wrap">
                             <template v-if="modalDocumentos.status_aprovacao === 'pendente'">
                                 <button @click="aprovarEFechar('van', modalDocumentos.id_van)"

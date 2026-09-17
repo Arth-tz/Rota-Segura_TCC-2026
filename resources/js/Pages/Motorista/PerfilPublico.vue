@@ -1,7 +1,7 @@
 <script setup>
 import { computed } from 'vue'
 import { Head, Link } from '@inertiajs/vue3'
-import { SunIcon, MoonIcon, ClockIcon, MapPinIcon, AcademicCapIcon, UserGroupIcon } from '@heroicons/vue/24/outline'
+import { SunIcon, MoonIcon, ClockIcon, MapPinIcon, AcademicCapIcon, UserGroupIcon, BeakerIcon } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
     motorista: { type: Object, required: true },
@@ -38,6 +38,13 @@ const urlBusca = computed(() =>
     <Head :title="`${van.nome_servico} — ${motorista.nome}`" />
 
     <div class="min-h-screen bg-slate-100">
+
+        <!-- Banner usuário de teste -->
+        <div v-if="motorista.is_teste"
+            class="bg-violet-600 text-white text-center text-xs font-semibold py-2 px-4 flex items-center justify-center gap-2">
+            <BeakerIcon class="w-4 h-4 shrink-0" />
+            Este é um perfil de demonstração criado para testes. Não representa um serviço real.
+        </div>
 
         <!-- Header azul com dados principais -->
         <div class="bg-gradient-to-b from-blue-700 to-blue-800 text-white">

@@ -29,6 +29,7 @@ import {
     AcademicCapIcon,
     ChevronDownIcon,
     ArrowTopRightOnSquareIcon,
+    BeakerIcon,
 } from '@heroicons/vue/24/outline'
 import FlashMessage from '@/Components/UI/FlashMessage.vue'
 
@@ -391,9 +392,15 @@ function inicialNome(nome) {
                             </div>
                         </div>
                         <div class="min-w-0 flex-1">
-                            <p class="font-bold text-slate-900 text-sm truncate">
-                                {{ disp.van.nome_servico || disp.motorista.nome || '—' }}
-                            </p>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <p class="font-bold text-slate-900 text-sm truncate">
+                                    {{ disp.van.nome_servico || disp.motorista.nome || '—' }}
+                                </p>
+                                <span v-if="disp.motorista.is_teste"
+                                    class="inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-violet-100 text-violet-700 border border-violet-200 shrink-0">
+                                    <BeakerIcon class="w-2.5 h-2.5" /> Teste
+                                </span>
+                            </div>
                             <p class="text-xs text-slate-400 truncate">
                                 <template v-if="disp.van.nome_servico">{{ disp.motorista.nome }} · </template>{{ disp.van.marca }} {{ disp.van.modelo }}
                             </p>

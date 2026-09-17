@@ -87,7 +87,7 @@ class MarketplaceController extends Controller
                 'id_disponibilidade' => $disp->id_disponibilidade,
                 'nome'               => $disp->nome,
                 'turno'              => $disp->turno,
-                'preco_mensal'       => (float) $disp->preco_mensal,
+                'preco_mensal'       => $disp->preco_mensal !== null ? (float) $disp->preco_mensal : null,
                 'capacidade_total'   => $disp->capacidade_total,
                 'vagas_disponiveis'  => max(0, $disp->capacidade_total - $disp->vagas_ocupadas),
                 'regioes_atendidas'  => $disp->regioes_atendidas ?? [],
@@ -124,10 +124,12 @@ class MarketplaceController extends Controller
                     'autorizacao_municipal_validade' => $disp->van?->autorizacao_municipal_validade?->format('d/m/Y'),
                 ],
                 'motorista' => [
+                    'id_motorista'  => $disp->van?->motorista?->id_motorista,
                     'nome'          => $pessoa?->nome,
                     'telefone'      => $pessoa?->telefone,
                     'foto_url'      => $pessoa?->foto_url,
                     'cnh_categoria' => $disp->van?->motorista?->cnh_categoria,
+                    'is_teste'      => str_ends_with($disp->van?->motorista?->usuario?->email ?? '', '@teste.rotasegura'),
                 ],
             ];
         });
