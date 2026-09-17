@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Models\Motorista;
 use App\Models\Passageiro;
 use App\Models\Responsavel;
-use App\Models\Rota;
 use App\Models\Solicitacao;
 use App\Models\Van;
 use App\Models\Vinculo;
@@ -123,24 +122,6 @@ class DashboardController extends Controller
                 'data_fim'      => $v->data_fim?->format('d/m/Y'),
             ]);
 
-        $rotas = Rota::with(['van.motorista.usuario.pessoa', 'disponibilidade'])
-            ->orderBy('data', 'desc')
-            ->orderBy('horario_inicio_real', 'desc')
-            ->limit(100)
-            ->get()
-            ->map(fn ($r) => [
-                'id_rota'       => $r->id_rota,
-                'data'          => $r->data?->format('d/m/Y'),
-                'status'        => $r->status,
-                'turno'         => $r->disponibilidade?->turno,
-                'disponibilidade'=> $r->disponibilidade?->nome ?? '—',
-                'motorista'     => $r->van?->motorista?->usuario?->pessoa?->nome ?? '—',
-                'van'           => $r->van?->nome_servico ?? '—',
-                'inicio_real'   => $r->horario_inicio_real?->setTimezone('America/Sao_Paulo')->format('H:i'),
-                'fim_real'      => $r->horario_fim_real?->setTimezone('America/Sao_Paulo')->format('H:i'),
-                'distancia_km'  => $r->distancia_km ? number_format((float) $r->distancia_km, 1, ',', '.') : null,
-            ]);
-
         $solicitacoes = Solicitacao::with(['responsavel.usuario.pessoa', 'passageiro.pessoa', 'disponibilidades.van.motorista.usuario.pessoa'])
             ->orderByRaw("FIELD(status, 'pendente', 'aceita', 'rejeitada', 'cancelada')")
             ->orderBy('created_at', 'desc')
@@ -169,15 +150,12 @@ class DashboardController extends Controller
                 'responsaveis_total'    => Responsavel::count(),
                 'passageiros_total'     => Passageiro::count(),
                 'vinculos_ativos'       => Vinculo::where('status', 'ativo')->count(),
-                'rotas_total'           => Rota::count(),
-                'rotas_em_andamento'    => Rota::where('status', 'em_andamento')->count(),
                 'solicitacoes_pendentes'=> Solicitacao::where('status', 'pendente')->count(),
             ],
             'motoristas'   => $motoristas,
             'vans'         => $vans,
             'responsaveis' => $responsaveis,
             'vinculos'     => $vinculos,
-            'rotas'        => $rotas,
             'solicitacoes' => $solicitacoes,
         ]);
     }

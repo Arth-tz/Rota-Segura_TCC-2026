@@ -7,7 +7,7 @@ import {
     CheckCircleIcon, XCircleIcon, ClockIcon,
     ShieldCheckIcon, DocumentTextIcon, ArrowTopRightOnSquareIcon, PhotoIcon,
     BeakerIcon, ChevronDownIcon, ChevronUpIcon,
-    LinkIcon, MapIcon, InboxIcon,
+    LinkIcon, InboxIcon,
 } from '@heroicons/vue/24/outline'
 
 const props = defineProps({
@@ -16,7 +16,6 @@ const props = defineProps({
     vans:         { type: Array,  default: () => [] },
     responsaveis: { type: Array,  default: () => [] },
     vinculos:     { type: Array,  default: () => [] },
-    rotas:        { type: Array,  default: () => [] },
     solicitacoes: { type: Array,  default: () => [] },
 })
 
@@ -76,7 +75,7 @@ const statusConfig = {
     rejeitado: { label: 'Rejeitado', classes: 'bg-red-50 text-red-600 border-red-200' },
 }
 
-const TIPO_RESPONSAVEL = { pai: 'Pai', mae: 'Mãe', avo: 'Avô/Avó', responsavel_legal: 'Resp. Legal' }
+const TIPO_RESPONSAVEL = { pai: 'Pai', mae: 'Mãe', avo: 'Avô/Avó', responsavel_legal: 'Resp. Legal', representante_legal: 'Rep. Legal' }
 
 const TURNOS = { manha: 'Manhã', tarde: 'Tarde', integral: 'Integral' }
 
@@ -86,12 +85,6 @@ const statusVinculo = {
     cancelado: { label: 'Cancelado', classes: 'bg-red-50 text-red-500 border-red-100' },
 }
 
-const statusRota = {
-    em_andamento: { label: 'Em andamento', classes: 'bg-blue-50 text-blue-700 border-blue-200' },
-    concluida:    { label: 'Concluída',    classes: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
-    agendada:     { label: 'Agendada',     classes: 'bg-amber-50 text-amber-700 border-amber-200' },
-    cancelada:    { label: 'Cancelada',    classes: 'bg-red-50 text-red-500 border-red-100' },
-}
 
 const statusSolicitacao = {
     pendente:  { label: 'Pendente',  classes: 'bg-amber-50 text-amber-700 border-amber-200' },
@@ -105,7 +98,6 @@ const tabs = computed(() => [
     { key: 'vans',         label: 'Vans',         badge: props.stats.vans_pendentes },
     { key: 'responsaveis', label: 'Responsáveis', badge: 0 },
     { key: 'vinculos',     label: 'Vínculos',     badge: 0 },
-    { key: 'rotas',        label: 'Rotas',        badge: props.stats.rotas_em_andamento },
     { key: 'solicitacoes', label: 'Solicitações', badge: props.stats.solicitacoes_pendentes },
 ])
 </script>
@@ -138,7 +130,7 @@ const tabs = computed(() => [
         <div class="max-w-6xl mx-auto w-full px-4 py-6 space-y-6">
 
             <!-- Stats -->
-            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-11 gap-3">
+            <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-9 gap-3">
                 <div class="bg-white rounded-2xl border border-slate-200 px-4 py-4 shadow-sm col-span-1">
                     <p class="text-xs text-slate-400 uppercase tracking-wide">Motoristas</p>
                     <p class="text-2xl font-bold text-slate-900 mt-1">{{ stats.motoristas_total }}</p>
@@ -170,14 +162,6 @@ const tabs = computed(() => [
                 <div class="bg-white rounded-2xl border border-blue-200 px-4 py-4 shadow-sm col-span-1">
                     <p class="text-xs text-blue-500 uppercase tracking-wide">Vínculos ativos</p>
                     <p class="text-2xl font-bold text-blue-700 mt-1">{{ stats.vinculos_ativos }}</p>
-                </div>
-                <div class="bg-white rounded-2xl border border-slate-200 px-4 py-4 shadow-sm col-span-1">
-                    <p class="text-xs text-slate-400 uppercase tracking-wide">Rotas</p>
-                    <p class="text-2xl font-bold text-slate-900 mt-1">{{ stats.rotas_total }}</p>
-                </div>
-                <div class="bg-white rounded-2xl border border-blue-200 px-4 py-4 shadow-sm col-span-1">
-                    <p class="text-xs text-blue-500 uppercase tracking-wide">Em andamento</p>
-                    <p class="text-2xl font-bold text-blue-700 mt-1">{{ stats.rotas_em_andamento }}</p>
                 </div>
                 <div class="bg-white rounded-2xl border border-amber-200 px-4 py-4 shadow-sm col-span-1">
                     <p class="text-xs text-amber-500 uppercase tracking-wide">Solic. pend.</p>
@@ -503,48 +487,6 @@ const tabs = computed(() => [
                         </span>
                         <p v-if="v.preco_total" class="text-sm font-bold text-slate-700">R$ {{ v.preco_total }}<span class="text-xs font-normal text-slate-400">/mês</span></p>
                         <p class="text-xs text-slate-400">Desde {{ v.data_inicio }}</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- ── ROTAS ──────────────────────────────────────────────── -->
-            <div v-else-if="secao === 'rotas'" class="space-y-3">
-                <div v-if="!rotas.length" class="bg-white rounded-2xl border border-dashed border-slate-200 py-14 text-center text-slate-400 text-sm">
-                    Nenhuma rota registrada.
-                </div>
-
-                <div v-for="r in rotas" :key="r.id_rota"
-                    class="bg-white rounded-2xl border border-slate-200 shadow-sm px-5 py-4 flex items-start justify-between gap-4 flex-wrap">
-
-                    <div class="flex items-start gap-4 min-w-0">
-                        <div class="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center shrink-0 mt-0.5">
-                            <MapIcon class="w-5 h-5 text-indigo-500" />
-                        </div>
-                        <div class="min-w-0 space-y-1">
-                            <div class="flex items-center gap-2 flex-wrap">
-                                <p class="font-semibold text-slate-900">{{ r.disponibilidade }}</p>
-                                <span class="text-[10px] font-medium px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">
-                                    {{ TURNOS[r.turno] ?? r.turno }}
-                                </span>
-                            </div>
-                            <p class="text-xs text-slate-500">
-                                {{ r.van }} · <span class="text-slate-400">{{ r.motorista }}</span>
-                            </p>
-                            <p v-if="r.inicio_real || r.fim_real" class="text-xs text-slate-400">
-                                <template v-if="r.inicio_real">{{ r.inicio_real }}</template>
-                                <template v-if="r.inicio_real && r.fim_real"> → </template>
-                                <template v-if="r.fim_real">{{ r.fim_real }}</template>
-                                <template v-if="r.distancia_km"> · {{ r.distancia_km }} km</template>
-                            </p>
-                        </div>
-                    </div>
-
-                    <div class="flex flex-col items-end gap-2 shrink-0">
-                        <span class="text-xs px-2.5 py-1 rounded-full border font-semibold"
-                            :class="statusRota[r.status]?.classes ?? 'bg-slate-100 text-slate-500'">
-                            {{ statusRota[r.status]?.label ?? r.status }}
-                        </span>
-                        <p class="text-xs text-slate-400">{{ r.data }}</p>
                     </div>
                 </div>
             </div>

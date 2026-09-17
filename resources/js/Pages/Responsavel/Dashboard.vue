@@ -76,7 +76,7 @@ const titulos = {
             </header>
 
             <!-- Seções -->
-            <main class="flex-1 min-w-0 overflow-x-hidden px-4 md:px-8 py-6 pb-24 md:pb-8">
+            <main v-show="secaoAtiva !== 'acompanhar'" class="flex-1 min-w-0 overflow-x-hidden px-4 md:px-8 py-6 pb-24 md:pb-8">
                 <SecaoInicio
                     v-if="secaoAtiva === 'inicio'"
                     :passageiros="passageiros"
