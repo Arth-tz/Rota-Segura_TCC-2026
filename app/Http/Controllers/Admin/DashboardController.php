@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Models\Motorista;
 use App\Models\Passageiro;
 use App\Models\Responsavel;
+use App\Models\Rota;
+use App\Models\Solicitacao;
 use App\Models\Van;
 use App\Models\Vinculo;
 use Illuminate\Http\RedirectResponse;
@@ -102,20 +104,81 @@ class DashboardController extends Controller
                 ];
             });
 
+        $vinculos = Vinculo::with(['passageiro.pessoa', 'van.motorista.usuario.pessoa', 'disponibilidades'])
+            ->orderByRaw("FIELD(status, 'ativo', 'inativo', 'cancelado')")
+            ->orderBy('data_inicio', 'desc')
+            ->get()
+            ->map(fn ($v) => [
+                'id_vinculo'    => $v->id_vinculo,
+                'status'        => $v->status,
+                'passageiro'    => $v->passageiro?->pessoa?->nome ?? '—',
+                'motorista'     => $v->van?->motorista?->usuario?->pessoa?->nome ?? '—',
+                'van'           => $v->van?->nome_servico ?? '—',
+                'disponibilidades' => $v->disponibilidades->map(fn ($d) => [
+                    'nome'  => $d->nome,
+                    'turno' => $d->turno,
+                ])->values()->all(),
+                'preco_total'   => $v->preco_total ? number_format((float) $v->preco_total, 2, ',', '.') : null,
+                'data_inicio'   => $v->data_inicio?->format('d/m/Y'),
+                'data_fim'      => $v->data_fim?->format('d/m/Y'),
+            ]);
+
+        $rotas = Rota::with(['van.motorista.usuario.pessoa', 'disponibilidade'])
+            ->orderBy('data', 'desc')
+            ->orderBy('horario_inicio_real', 'desc')
+            ->limit(100)
+            ->get()
+            ->map(fn ($r) => [
+                'id_rota'       => $r->id_rota,
+                'data'          => $r->data?->format('d/m/Y'),
+                'status'        => $r->status,
+                'turno'         => $r->disponibilidade?->turno,
+                'disponibilidade'=> $r->disponibilidade?->nome ?? '—',
+                'motorista'     => $r->van?->motorista?->usuario?->pessoa?->nome ?? '—',
+                'van'           => $r->van?->nome_servico ?? '—',
+                'inicio_real'   => $r->horario_inicio_real?->setTimezone('America/Sao_Paulo')->format('H:i'),
+                'fim_real'      => $r->horario_fim_real?->setTimezone('America/Sao_Paulo')->format('H:i'),
+                'distancia_km'  => $r->distancia_km ? number_format((float) $r->distancia_km, 1, ',', '.') : null,
+            ]);
+
+        $solicitacoes = Solicitacao::with(['responsavel.usuario.pessoa', 'passageiro.pessoa', 'disponibilidades.van.motorista.usuario.pessoa'])
+            ->orderByRaw("FIELD(status, 'pendente', 'aceita', 'rejeitada', 'cancelada')")
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(fn ($s) => [
+                'id_solicitacao' => $s->id_solicitacao,
+                'status'         => $s->status,
+                'responsavel'    => $s->responsavel?->usuario?->pessoa?->nome ?? '—',
+                'passageiro'     => $s->passageiro?->pessoa?->nome ?? '—',
+                'disponibilidades' => $s->disponibilidades->map(fn ($d) => [
+                    'nome'      => $d->nome,
+                    'turno'     => $d->turno,
+                    'motorista' => $d->van?->motorista?->usuario?->pessoa?->nome ?? '—',
+                    'van'       => $d->van?->nome_servico ?? '—',
+                ])->values()->all(),
+                'created_at' => $s->created_at?->format('d/m/Y'),
+            ]);
+
         return Inertia::render('Admin/Dashboard', [
             'stats' => [
-                'motoristas_total'    => Motorista::count(),
-                'motoristas_pendentes'=> Motorista::where('status_aprovacao', 'pendente')->count(),
-                'motoristas_aprovados'=> Motorista::where('status_aprovacao', 'aprovado')->count(),
-                'vans_total'          => Van::count(),
-                'vans_pendentes'      => Van::where('status_aprovacao', 'pendente')->count(),
-                'responsaveis_total'  => Responsavel::count(),
-                'passageiros_total'   => Passageiro::count(),
-                'vinculos_ativos'     => Vinculo::where('status', 'ativo')->count(),
+                'motoristas_total'      => Motorista::count(),
+                'motoristas_pendentes'  => Motorista::where('status_aprovacao', 'pendente')->count(),
+                'motoristas_aprovados'  => Motorista::where('status_aprovacao', 'aprovado')->count(),
+                'vans_total'            => Van::count(),
+                'vans_pendentes'        => Van::where('status_aprovacao', 'pendente')->count(),
+                'responsaveis_total'    => Responsavel::count(),
+                'passageiros_total'     => Passageiro::count(),
+                'vinculos_ativos'       => Vinculo::where('status', 'ativo')->count(),
+                'rotas_total'           => Rota::count(),
+                'rotas_em_andamento'    => Rota::where('status', 'em_andamento')->count(),
+                'solicitacoes_pendentes'=> Solicitacao::where('status', 'pendente')->count(),
             ],
-            'motoristas'  => $motoristas,
-            'vans'        => $vans,
-            'responsaveis'=> $responsaveis,
+            'motoristas'   => $motoristas,
+            'vans'         => $vans,
+            'responsaveis' => $responsaveis,
+            'vinculos'     => $vinculos,
+            'rotas'        => $rotas,
+            'solicitacoes' => $solicitacoes,
         ]);
     }
 
