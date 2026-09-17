@@ -20,6 +20,7 @@ use App\Http\Controllers\Responsavel\DashboardController as ResponsavelDashboard
 use App\Http\Controllers\MotoristaPublicoController;
 use App\Http\Controllers\Auth\RegisterMotoristaController;
 use App\Http\Controllers\Auth\RegisterResponsavelController;
+use App\Http\Controllers\TourController;
 use App\Enums\UserRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -182,5 +183,7 @@ Route::middleware('guest')->group(function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');*/
 
+
+Route::middleware('auth')->post('/tour/concluir', [TourController::class, 'concluir'])->name('tour.concluir');
 
 require __DIR__.'/auth.php';

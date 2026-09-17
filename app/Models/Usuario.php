@@ -27,6 +27,7 @@ class Usuario extends Authenticatable implements MustVerifyEmail
         'ultimo_login',
         'tentativas_falhas',
         'bloqueado_ate',
+        'tour_visto',
     ];
 
     protected $hidden = [
@@ -36,6 +37,7 @@ class Usuario extends Authenticatable implements MustVerifyEmail
 
     protected $casts = [
         'ativo'              => 'boolean',
+        'tour_visto'         => 'boolean',
         'ultimo_login'       => 'datetime',
         'bloqueado_ate'      => 'datetime',
         'email_verified_at'  => 'datetime',

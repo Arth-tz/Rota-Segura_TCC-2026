@@ -1,6 +1,6 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { Head } from '@inertiajs/vue3'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { Head, usePage } from '@inertiajs/vue3'
 
 import Sidebar            from '@/Components/Motorista/Layout/Sidebar.vue'
 import BottomNav          from '@/Components/Motorista/Layout/BottomNav.vue'
@@ -10,6 +10,10 @@ import SecaoPassageiros   from '@/Components/Motorista/Dashboard/SecaoPassageiro
 import SecaoTrajetos      from '@/Components/Motorista/Dashboard/SecaoTrajetos.vue'
 import SecaoPerfil        from '@/Components/Motorista/Dashboard/SecaoPerfil.vue'
 import FlashMessage       from '@/Components/UI/FlashMessage.vue'
+import TourOverlay        from '@/Components/UI/TourOverlay.vue'
+import {
+    HomeIcon, InboxIcon, UsersIcon, MapIcon, UserCircleIcon, MapPinIcon,
+} from '@heroicons/vue/24/outline'
 
 const props = defineProps({
     motorista:             { type: Object, default: null },
@@ -24,6 +28,59 @@ const props = defineProps({
 
 onMounted(() => { document.body.style.backgroundColor = '#92400e' })
 onUnmounted(() => { document.body.style.backgroundColor = '' })
+
+const page = usePage()
+const tourVisto = computed(() => page.props.auth?.user?.tour_visto ?? true)
+
+const tourPassos = [
+    {
+        titulo: 'Bem-vindo, motorista!',
+        corpo: 'Vamos te guiar pelos primeiros passos para começar a trabalhar pelo Rota Segura.',
+        icone: HomeIcon,
+        iconeBg: 'bg-amber-50',
+        iconeColor: 'text-amber-600',
+    },
+    {
+        secao: 'inicio',
+        titulo: 'Seu painel inicial',
+        corpo: 'Aqui você acompanha o status da sua aprovação, quantos passageiros ativos tem e um resumo geral da semana.',
+        icone: HomeIcon,
+        iconeBg: 'bg-amber-50',
+        iconeColor: 'text-amber-600',
+    },
+    {
+        secao: 'solicitacoes',
+        titulo: 'Solicitações de famílias',
+        corpo: 'Quando uma família quiser contratar seus serviços, o pedido aparece aqui. Você aceita ou recusa com um clique.',
+        icone: InboxIcon,
+        iconeBg: 'bg-blue-50',
+        iconeColor: 'text-blue-600',
+    },
+    {
+        secao: 'passageiros',
+        titulo: 'Passageiros e Trajetos',
+        corpo: 'Veja os passageiros ativos e gerencie seus trajetos cadastrados. Cada trajeto define os dias e horários de transporte.',
+        icone: UsersIcon,
+        iconeBg: 'bg-emerald-50',
+        iconeColor: 'text-emerald-600',
+    },
+    {
+        secao: 'trajetos',
+        titulo: 'Compartilhar Localização GPS',
+        corpo: 'Durante as viagens, inicie o trajeto aqui. As famílias acompanham sua localização em tempo real, o que gera mais confiança e segurança.',
+        icone: MapPinIcon,
+        iconeBg: 'bg-rose-50',
+        iconeColor: 'text-rose-600',
+    },
+    {
+        secao: 'perfil',
+        titulo: 'Perfil e Documentos',
+        corpo: 'Mantenha seu perfil atualizado e envie sua documentação para ser aprovado. Sem aprovação, você não aparece nas buscas das famílias.',
+        icone: UserCircleIcon,
+        iconeBg: 'bg-slate-100',
+        iconeColor: 'text-slate-500',
+    },
+]
 
 const secaoAtiva = ref('inicio')
 
@@ -119,4 +176,10 @@ const titulos = {
 
         <BottomNav :secaoAtiva="secaoAtiva" :solicitacoesPendentes="solicitacoesPendentes" @mudar="secaoAtiva = $event" />
     </div>
+
+    <TourOverlay
+        v-if="!tourVisto"
+        :passos="tourPassos"
+        @ir-para="secaoAtiva = $event"
+    />
 </template>

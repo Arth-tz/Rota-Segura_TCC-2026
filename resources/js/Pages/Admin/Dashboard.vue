@@ -202,7 +202,8 @@ const tabs = computed(() => [
             </div>
 
             <!-- Tabs -->
-            <div class="flex gap-1 bg-white border border-slate-200 rounded-xl p-1 w-fit shadow-sm">
+            <div class="overflow-x-auto -mx-4 px-4 sm:mx-0 sm:px-0 pb-0.5">
+            <div class="flex gap-1 bg-white border border-slate-200 rounded-xl p-1 w-fit shadow-sm min-w-max">
                 <button
                     v-for="tab in tabs"
                     :key="tab.key"
@@ -218,6 +219,7 @@ const tabs = computed(() => [
                         {{ tab.badge }}
                     </span>
                 </button>
+            </div>
             </div>
 
             <!-- ── MOTORISTAS ──────────────────────────────────────────────── -->

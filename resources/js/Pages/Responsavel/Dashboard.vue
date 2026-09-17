@@ -11,6 +11,10 @@ import SecaoPassageiros from '@/Components/Responsavel/Dashboard/SecaoPassageiro
 import SecaoBuscar      from '@/Components/Responsavel/Dashboard/SecaoBuscar.vue'
 import SecaoPerfil      from '@/Components/Responsavel/Dashboard/SecaoPerfil.vue'
 import SecaoAcompanhar  from '@/Components/Responsavel/Dashboard/SecaoAcompanhar.vue'
+import TourOverlay      from '@/Components/UI/TourOverlay.vue'
+import {
+    HomeIcon, UsersIcon, MagnifyingGlassIcon, MapPinIcon, UserCircleIcon,
+} from '@heroicons/vue/24/outline'
 
 const props = defineProps({
     passageiros: {
@@ -21,6 +25,49 @@ const props = defineProps({
 
 const page    = usePage()
 const usuario = computed(() => page.props.auth?.user ?? null)
+const tourVisto = computed(() => page.props.auth?.user?.tour_visto ?? true)
+
+const tourPassos = [
+    {
+        titulo: 'Bem-vindo ao Rota Segura!',
+        corpo: 'Vamos te mostrar como tudo funciona. São só 4 passos rápidos.',
+        icone: HomeIcon,
+        iconeBg: 'bg-blue-50',
+        iconeColor: 'text-blue-600',
+    },
+    {
+        secao: 'passageiros',
+        titulo: 'Meus Passageiros',
+        corpo: 'Cadastre aqui quem vai usar o transporte. Você pode adicionar foto e informações para ajudar o motorista.',
+        icone: UsersIcon,
+        iconeBg: 'bg-indigo-50',
+        iconeColor: 'text-indigo-600',
+    },
+    {
+        secao: 'buscar',
+        titulo: 'Buscar Vans',
+        corpo: 'Encontre motoristas da sua região, compare preços e horários, e envie uma solicitação de vaga.',
+        icone: MagnifyingGlassIcon,
+        iconeBg: 'bg-emerald-50',
+        iconeColor: 'text-emerald-600',
+    },
+    {
+        secao: 'acompanhar',
+        titulo: 'Acompanhar em Tempo Real',
+        corpo: 'Durante as viagens, veja a localização do motorista em tempo real. Saiba sempre onde seu filho está.',
+        icone: MapPinIcon,
+        iconeBg: 'bg-amber-50',
+        iconeColor: 'text-amber-600',
+    },
+    {
+        secao: 'perfil',
+        titulo: 'Tudo pronto!',
+        corpo: 'Mantenha seu perfil atualizado. Acesse as seções pelo menu sempre que precisar. Bom começo!',
+        icone: UserCircleIcon,
+        iconeBg: 'bg-slate-100',
+        iconeColor: 'text-slate-500',
+    },
+]
 
 onMounted(() => { document.body.style.backgroundColor = '#1e40af' })
 onUnmounted(() => { document.body.style.backgroundColor = '' })
@@ -108,4 +155,10 @@ const titulos = {
             @mudar="secaoAtiva = $event"
         />
     </div>
+
+    <TourOverlay
+        v-if="!tourVisto"
+        :passos="tourPassos"
+        @ir-para="secaoAtiva = $event"
+    />
 </template>

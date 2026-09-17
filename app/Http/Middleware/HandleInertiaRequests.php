@@ -40,6 +40,7 @@ class HandleInertiaRequests extends Middleware
                     'nome'       => $request->user()->pessoa?->nome,
                     'foto_url'   => $request->user()->pessoa?->foto_url,
                     'telefone'   => $request->user()->pessoa?->telefone,
+                    'tour_visto' => (bool) $request->user()->tour_visto,
                 ] : null,
             ],
             'flash' => [
