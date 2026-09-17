@@ -66,6 +66,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::post('/motoristas/{id}/rejeitar', [AdminDashboard::class, 'rejeitarMotorista'])->name('motoristas.rejeitar');
     Route::post('/vans/{id}/aprovar',        [AdminDashboard::class, 'aprovarVan'])->name('vans.aprovar');
     Route::post('/vans/{id}/rejeitar',       [AdminDashboard::class, 'rejeitarVan'])->name('vans.rejeitar');
+
+    Route::post('/solicitacoes/{id}/aceitar', [AdminDashboard::class, 'aceitarSolicitacao'])->name('solicitacoes.aceitar');
+    Route::post('/solicitacoes/{id}/recusar', [AdminDashboard::class, 'recusarSolicitacao'])->name('solicitacoes.recusar');
 });
 
 //-- Rota com autenticação para dashboard de reponsavel (controller ResponsavelDashboard)

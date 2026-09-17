@@ -9,6 +9,7 @@ use App\Models\Responsavel;
 use App\Models\Solicitacao;
 use App\Models\Van;
 use App\Models\Vinculo;
+use App\Models\Disponibilidade;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -123,12 +124,13 @@ class DashboardController extends Controller
             ]);
 
         $solicitacoes = Solicitacao::with(['responsavel.usuario.pessoa', 'passageiro.pessoa', 'disponibilidades.van.motorista.usuario.pessoa'])
-            ->orderByRaw("FIELD(status, 'pendente', 'aceita', 'rejeitada', 'cancelada')")
+            ->orderByRaw("FIELD(status, 'pendente', 'aceita', 'recusada', 'cancelada')")
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(fn ($s) => [
                 'id_solicitacao' => $s->id_solicitacao,
                 'status'         => $s->status,
+                'tipo'           => $s->tipo,
                 'responsavel'    => $s->responsavel?->usuario?->pessoa?->nome ?? '—',
                 'passageiro'     => $s->passageiro?->pessoa?->nome ?? '—',
                 'disponibilidades' => $s->disponibilidades->map(fn ($d) => [
@@ -214,5 +216,71 @@ class DashboardController extends Controller
         ]);
 
         return back()->with('sucesso', 'Van rejeitada.');
+    }
+
+    public function aceitarSolicitacao(int $id): RedirectResponse
+    {
+        $solicitacao = Solicitacao::where('status', 'pendente')
+            ->with('disponibilidades')
+            ->findOrFail($id);
+
+        DB::transaction(function () use ($solicitacao) {
+            $solicitacao->update([
+                'status'        => 'aceita',
+                'data_resposta' => now(),
+            ]);
+
+            if ($solicitacao->tipo === 'alteracao') {
+                foreach ($solicitacao->disponibilidades as $disp) {
+                    DB::table('vinculo_disponibilidade')
+                        ->where('id_vinculo', $solicitacao->id_vinculo_alterado)
+                        ->where('id_disponibilidade', $disp->id_disponibilidade)
+                        ->update(['dias_contratados' => $disp->pivot->dias_contratados]);
+                }
+                return;
+            }
+
+            $preco_total = $solicitacao->disponibilidades->sum(
+                fn ($d) => (float) $d->pivot->preco_mensal
+            );
+
+            $vinculo = Vinculo::create([
+                'id_van'         => $solicitacao->id_van,
+                'id_passageiro'  => $solicitacao->id_passageiro,
+                'id_solicitacao' => $solicitacao->id_solicitacao,
+                'preco_total'    => $preco_total,
+                'status'         => 'ativo',
+                'data_inicio'    => now()->toDateString(),
+            ]);
+
+            foreach ($solicitacao->disponibilidades as $disp) {
+                $proximaOrdem = DB::table('vinculo_disponibilidade')
+                    ->where('id_disponibilidade', $disp->id_disponibilidade)
+                    ->max('ordem') + 1;
+
+                $vinculo->disponibilidades()->attach($disp->id_disponibilidade, [
+                    'preco_mensal'     => $disp->pivot->preco_mensal,
+                    'dias_contratados' => $disp->pivot->dias_contratados,
+                    'ordem'            => $proximaOrdem,
+                ]);
+            }
+        });
+
+        return back()->with('sucesso', 'Solicitação aceita! Vínculo criado.');
+    }
+
+    public function recusarSolicitacao(Request $request, int $id): RedirectResponse
+    {
+        $request->validate(['motivo' => 'nullable|string|max:500']);
+
+        $solicitacao = Solicitacao::where('status', 'pendente')->findOrFail($id);
+
+        $solicitacao->update([
+            'status'        => 'recusada',
+            'data_resposta' => now(),
+            'motivo_recusa' => $request->motivo,
+        ]);
+
+        return back()->with('sucesso', 'Solicitação recusada.');
     }
 }
