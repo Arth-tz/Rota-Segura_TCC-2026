@@ -19,7 +19,6 @@ class ParadaPassageiro extends Pivot
         'embarque_em',
         'desembarque_em',
         'marcado_por',
-        'metodo_confirmacao',
     ];
 
     public function parada()

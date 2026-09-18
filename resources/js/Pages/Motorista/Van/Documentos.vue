@@ -13,7 +13,6 @@ import {
     LockClosedIcon,
     PaperClipIcon,
     ArrowTopRightOnSquareIcon,
-    WrenchScrewdriverIcon,
 } from '@heroicons/vue/24/outline'
 import FlashMessage from '@/Components/UI/FlashMessage.vue'
 
@@ -87,16 +86,6 @@ const docForms = reactive({
         prefixo: props.van.prefixo_municipal ?? '',
         processing: false, errors: {},
     },
-    ipva: {
-        arquivo: null, arquivoNome: null,
-        validade: props.van.ipva_comprovante_data ?? '',
-        processing: false, errors: {},
-    },
-    inspecao: {
-        ultima:  props.van.data_ultima_inspecao ?? '',
-        proxima: props.van.proxima_inspecao_prevista ?? '',
-        processing: false, errors: {},
-    },
 })
 
 const docInputRefs = {}
@@ -124,19 +113,6 @@ function submitDoc(tipo) {
         preserveScroll: true,
         onSuccess: () => { f.arquivo = null; f.arquivoNome = null; f.errors = {} },
         onError: (errors) => { f.errors = errors },
-        onFinish: () => { f.processing = false },
-    })
-}
-
-function salvarInspecao() {
-    const f = docForms.inspecao
-    f.processing = true
-    router.post(route('motorista.van.inspecao'), {
-        data_ultima_inspecao:      f.ultima  || null,
-        proxima_inspecao_prevista: f.proxima || null,
-    }, {
-        preserveScroll: true,
-        onError:  (errors) => { f.errors = errors },
         onFinish: () => { f.processing = false },
     })
 }
@@ -328,69 +304,6 @@ function nomeArquivo(url) {
                         :input-ref="el => setDocRef(el, 'autorizacao_municipal')" />
                 </template>
             </DocCard>
-
-            <!-- SEÇÃO: DOCUMENTOS COMPLEMENTARES ────────────────────────────── -->
-            <div class="flex items-center gap-2 mt-2">
-                <DocumentTextIcon class="w-4 h-4 text-slate-400" />
-                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide">Complementares</h3>
-                <span class="text-xs text-slate-400">(opcionais mas recomendados)</span>
-            </div>
-
-            <!-- IPVA ─────────────────────────────────────────────────────────── -->
-            <DocCard
-                titulo="Comprovante de IPVA"
-                descricao="Comprovante de pagamento do IPVA do exercício atual"
-                :status="docStatus(van.ipva_comprovante_url, null)"
-                :url-atual="van.ipva_comprovante_url"
-            >
-                <template #form>
-                    <FormDocumento tipo="ipva" label-validade="Data de pagamento"
-                        :form="docForms.ipva"
-                        @file-change="e => onDocFileChange(e, 'ipva')"
-                        @trigger="triggerDoc('ipva')"
-                        @submit="submitDoc('ipva')"
-                        :input-ref="el => setDocRef(el, 'ipva')" />
-                </template>
-            </DocCard>
-
-            <!-- Inspeção ─────────────────────────────────────────────────────── -->
-            <section class="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-xl bg-slate-100 flex items-center justify-center shrink-0">
-                            <WrenchScrewdriverIcon class="w-4 h-4 text-slate-500" />
-                        </div>
-                        <div>
-                            <p class="text-sm font-bold text-slate-800">Vistoria / Inspeção</p>
-                            <p class="text-xs text-slate-500">Vistoria semestral e/ou pelo INMETRO (Canoas)</p>
-                        </div>
-                    </div>
-                    <StatusChip :status="van.data_ultima_inspecao ? 'enviado' : 'pendente'" />
-                </div>
-
-                <div class="px-5 py-4 space-y-3">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Última inspeção</label>
-                            <input v-model="docForms.inspecao.ultima" type="date"
-                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100" />
-                        </div>
-                        <div>
-                            <label class="block text-xs font-semibold text-slate-700 mb-1.5">Próxima prevista</label>
-                            <input v-model="docForms.inspecao.proxima" type="date"
-                                class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none transition focus:border-amber-600 focus:ring-2 focus:ring-amber-100" />
-                        </div>
-                    </div>
-                    <div class="flex justify-end">
-                        <button @click="salvarInspecao" :disabled="docForms.inspecao.processing"
-                            class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-amber-700 hover:bg-amber-800 disabled:opacity-60 text-white text-xs font-bold transition">
-                            <span v-if="docForms.inspecao.processing"
-                                class="w-3.5 h-3.5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                            {{ docForms.inspecao.processing ? 'Salvando…' : 'Salvar datas' }}
-                        </button>
-                    </div>
-                </div>
-            </section>
 
             <!-- LINK PARA EDITAR DADOS ──────────────────────────────────────── -->
             <div class="text-center pt-2">

@@ -112,9 +112,8 @@ class RotaController extends Controller
 
         $campo = $dados['tipo'] === 'embarque' ? 'embarque_em' : 'desembarque_em';
         $pp->update([
-            $campo               => now(),
-            'marcado_por'        => 'motorista',
-            'metodo_confirmacao' => 'manual',
+            $campo        => now(),
+            'marcado_por' => 'motorista',
         ]);
 
         if (!$parada->horario_real) {

@@ -20,7 +20,6 @@ class Motorista extends Model
         'cnh_foto_url',
         'certidao_antecedentes_url',
         'curso_transporte_url',
-        'renach_url',
         'status_aprovacao',
         'motivo_rejeicao',
         'data_avaliacao_documento',

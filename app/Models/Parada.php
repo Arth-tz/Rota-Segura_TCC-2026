@@ -41,7 +41,7 @@ class Parada extends Model
             'parada_passageiro',
             'id_parada',
             'id_passageiro'
-        )->withPivot('embarque_em', 'desembarque_em', 'marcado_por', 'metodo_confirmacao')
+        )->withPivot('embarque_em', 'desembarque_em', 'marcado_por')
          ->withTimestamps();
     }
 }

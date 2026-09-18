@@ -25,7 +25,6 @@ export interface Responsavel {
     id_usuario?: number;
     tipo_responsavel: string;
     telefone_emergencia?: string;
-    data_responsavel_ate?: string;
     usuario?: Usuario;
 }
 

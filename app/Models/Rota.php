@@ -21,8 +21,6 @@ class Rota extends Model
         'horario_inicio_real',
         'horario_fim_previsto',
         'horario_fim_real',
-        'distancia_km',
-        'tempo_decorrido_minutos',
         'observacoes',
     ];
 
@@ -32,7 +30,6 @@ class Rota extends Model
         'horario_inicio_real'     => 'datetime',
         'horario_fim_previsto'    => 'datetime',
         'horario_fim_real'        => 'datetime',
-        'distancia_km'            => 'decimal:2',
     ];
 
     public function van()

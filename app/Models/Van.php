@@ -22,7 +22,6 @@ class Van extends Model
         'cor',
         'capacidade_passageiros',
         'status_aprovacao',
-        'status_operacional',
         'motivo_rejeicao',
         'id_usuario_avaliador',
         'data_avaliacao',
@@ -38,20 +37,13 @@ class Van extends Model
         'autorizacao_municipal_url',
         'autorizacao_municipal_validade',
         'prefixo_municipal',
-        'ipva_comprovante_url',
-        'ipva_comprovante_data',
         'documentacao_completa',
-        'data_ultima_inspecao',
-        'proxima_inspecao_prevista',
     ];
 
     protected $casts = [
         'crlv_validade'                  => 'date',
         'seguro_validade'                => 'date',
         'autorizacao_municipal_validade' => 'date',
-        'ipva_comprovante_data'          => 'date',
-        'data_ultima_inspecao'           => 'date',
-        'proxima_inspecao_prevista'      => 'date',
         'data_avaliacao'                 => 'datetime',
         'documentacao_completa'          => 'boolean',
     ];

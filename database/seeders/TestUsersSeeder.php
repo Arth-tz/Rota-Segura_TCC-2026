@@ -165,7 +165,6 @@ class TestUsersSeeder extends Seeder
                 $van = Van::create(array_merge($dados['van'], [
                     'id_motorista'       => $motorista->id_motorista,
                     'status_aprovacao'   => 'aprovado',
-                    'status_operacional' => 'ativa',
                     'data_avaliacao'     => now(),
                 ]));
 

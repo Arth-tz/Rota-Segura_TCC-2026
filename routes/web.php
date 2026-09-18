@@ -21,10 +21,14 @@ use App\Http\Controllers\MotoristaPublicoController;
 use App\Http\Controllers\Auth\RegisterMotoristaController;
 use App\Http\Controllers\Auth\RegisterResponsavelController;
 use App\Http\Controllers\TourController;
+use App\Http\Controllers\PlacesController;
 use App\Enums\UserRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+
+Route::get('/geo/autocomplete', [PlacesController::class, 'autocomplete'])->name('places.autocomplete');
+Route::get('/geo/details', [PlacesController::class, 'details'])->name('places.details');
 
 Route::get('/', function () {
     $usuario = auth()->user()?->loadMissing('responsavel');
@@ -132,9 +136,8 @@ Route::middleware(['auth', 'role:motorista'/*, 'verified' //isso aqui faria vali
     Route::put('/van',            [VanController::class, 'update'])->name('van.update');
     Route::get('/van/documentos', [VanController::class, 'documentos'])->name('van.documentos');
     Route::post('/van/documentos/{tipo}', [VanController::class, 'uploadDocumento'])
-        ->where('tipo', 'crlv|seguro|autorizacao_municipal|ipva')
+        ->where('tipo', 'crlv|seguro|autorizacao_municipal')
         ->name('van.documento.upload');
-    Route::post('/van/inspecao',  [VanController::class, 'updateInspecao'])->name('van.inspecao');
     Route::post('/van/foto',              [VanController::class, 'uploadFoto'])->name('van.foto');
     Route::post('/van/foto/verso',        [VanController::class, 'uploadFotoVerso'])->name('van.foto.verso');
     Route::post('/van/foto/interior',     [VanController::class, 'uploadFotoInterior'])->name('van.foto.interior');

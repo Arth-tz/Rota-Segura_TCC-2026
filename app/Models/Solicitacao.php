@@ -25,14 +25,11 @@ class Solicitacao extends Model
         'motivo_recusa',
         'data_solicitacao',
         'data_resposta',
-        'cancelado_em',
-        'cancelado_por',
     ];
 
     protected $casts = [
         'data_solicitacao' => 'datetime',
         'data_resposta'    => 'datetime',
-        'cancelado_em'     => 'datetime',
     ];
 
     public function van()

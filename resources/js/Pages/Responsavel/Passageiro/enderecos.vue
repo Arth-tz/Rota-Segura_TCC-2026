@@ -5,18 +5,14 @@ import { MapPinIcon, LightBulbIcon, CameraIcon } from '@heroicons/vue/24/outline
 
 // ─── FORM ────────────────────────────────────────────────────────────────────
 const form = useForm({
-    // Origem — de onde o passageiro sai
     embarque_logradouro:  '', embarque_numero: '', embarque_complemento: '',
     embarque_bairro:      '', embarque_cidade: '', embarque_estado: '',
     embarque_cep:         '', embarque_latitude: '', embarque_longitude: '',
 
-    // Destino — para onde o passageiro vai
-    desembarque_nome:        '',
     desembarque_logradouro:  '', desembarque_numero: '', desembarque_complemento: '',
     desembarque_bairro:      '', desembarque_cidade: '', desembarque_estado: '',
     desembarque_cep:         '', desembarque_latitude: '', desembarque_longitude: '',
 
-    // Foto
     foto: null,
 })
 
@@ -31,71 +27,68 @@ function handleFoto(e) {
     form.foto = file
 }
 
-// ─── AUTOCOMPLETE NOMINATIM ──────────────────────────────────────────────────
+// ─── CEP (ViaCEP) ─────────────────────────────────────────────────────────────
+const cepLoadings = ref({})
+const cepErros    = ref({})
+
+async function buscarCep(prefixo, event) {
+    const raw = event.target.value.replace(/\D/g, '')
+    let v = raw.slice(0, 8)
+    if (v.length > 5) v = v.replace(/^(\d{5})(\d+)$/, '$1-$2')
+    form[`${prefixo}_cep`] = v
+
+    if (raw.length !== 8) { cepErros.value[prefixo] = ''; return }
+
+    cepLoadings.value[prefixo] = true
+    cepErros.value[prefixo] = ''
+    try {
+        const res  = await fetch(`https://viacep.com.br/ws/${raw}/json/`)
+        const data = await res.json()
+        if (data.erro) { cepErros.value[prefixo] = 'CEP não encontrado.'; return }
+        form[`${prefixo}_logradouro`] = data.logradouro || ''
+        form[`${prefixo}_bairro`]     = data.bairro     || ''
+        form[`${prefixo}_cidade`]     = data.localidade  || ''
+        form[`${prefixo}_estado`]     = data.uf          || ''
+    } catch { cepErros.value[prefixo] = 'Erro ao buscar CEP.' }
+    finally  { cepLoadings.value[prefixo] = false }
+}
+
+// ─── GOOGLE PLACES AUTOCOMPLETE ──────────────────────────────────────────────
 const sugestoes = ref({})
 const loadings  = ref({})
 let timers = {}
 
-const estadosUF = {
-    'Acre':'AC','Alagoas':'AL','Amapá':'AP','Amazonas':'AM','Bahia':'BA',
-    'Ceará':'CE','Distrito Federal':'DF','Espírito Santo':'ES','Goiás':'GO',
-    'Maranhão':'MA','Mato Grosso':'MT','Mato Grosso do Sul':'MS','Minas Gerais':'MG',
-    'Pará':'PA','Paraíba':'PB','Paraná':'PR','Pernambuco':'PE','Piauí':'PI',
-    'Rio de Janeiro':'RJ','Rio Grande do Norte':'RN','Rio Grande do Sul':'RS',
-    'Rondônia':'RO','Roraima':'RR','Santa Catarina':'SC','São Paulo':'SP',
-    'Sergipe':'SE','Tocantins':'TO',
-}
-
-async function geocodificar(addr) {
-    if (addr.latitude && addr.longitude) return addr
-    const q = [addr.logradouro, addr.numero, addr.bairro, addr.cidade, addr.estado]
-        .filter(Boolean).join(', ')
-    if (!q) return addr
-    try {
-        const res = await fetch(
-            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=br`,
-            { headers: { 'Accept-Language': 'pt-BR' } }
-        )
-        const data = await res.json()
-        if (data[0]) return { ...addr, latitude: data[0].lat, longitude: data[0].lon }
-    } catch {}
-    return addr
-}
-
 async function buscarEndereco(prefixo, query) {
-    if (!query || query.length < 4) { sugestoes.value[prefixo] = []; return }
+    if (!query || query.length < 3) { sugestoes.value[prefixo] = []; return }
     loadings.value[prefixo] = true
     clearTimeout(timers[prefixo])
     timers[prefixo] = setTimeout(async () => {
         try {
-            const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&countrycodes=br`
-            const res = await fetch(url, { headers: { 'Accept-Language': 'pt-BR' } })
+            const res = await fetch(route('places.autocomplete', { q: query }))
             sugestoes.value[prefixo] = await res.json()
         } catch { sugestoes.value[prefixo] = [] }
         finally { loadings.value[prefixo] = false }
-    }, 500)
+    }, 350)
 }
 
 function selecionarSugestao(prefixo, item) {
-    const addr = item.address || {}
-    form[`${prefixo}_logradouro`] = addr.road || addr.pedestrian || addr.footway || ''
-    form[`${prefixo}_bairro`]     = addr.suburb || addr.neighbourhood || addr.city_district || ''
-    form[`${prefixo}_cidade`]     = addr.city || addr.town || addr.village || ''
-    form[`${prefixo}_estado`]     = addr.state_code || estadosUF[addr.state] || ''
-    form[`${prefixo}_cep`]        = (addr.postcode || '').replace('-', '')
-    form[`${prefixo}_latitude`]   = item.lat || ''
-    form[`${prefixo}_longitude`]  = item.lon || ''
     sugestoes.value[prefixo] = []
+    form[`${prefixo}_logradouro`] = item.logradouro || ''
+    form[`${prefixo}_numero`]     = item.numero     || ''
+    form[`${prefixo}_bairro`]     = item.bairro     || ''
+    form[`${prefixo}_cidade`]     = item.cidade     || ''
+    form[`${prefixo}_estado`]     = item.estado     || ''
+    form[`${prefixo}_cep`]        = item.cep        || ''
+    form[`${prefixo}_latitude`]   = item.latitude   || ''
+    form[`${prefixo}_longitude`]  = item.longitude  || ''
 }
 
 function fecharSugestoes(prefixo) {
     setTimeout(() => { sugestoes.value[prefixo] = [] }, 200)
 }
 
-function maskCep(field, event) {
-    let v = event.target.value.replace(/\D/g, '').slice(0, 8)
-    if (v.length > 5) v = v.replace(/^(\d{5})(\d+)$/, '$1-$2')
-    form[field] = v
+async function geocodificar(addr) {
+    return addr
 }
 
 async function submit() {
@@ -238,13 +231,14 @@ const addrInput = (ring = 'emerald') =>
                             </div>
                         </div>
 
-                        <div class="p-6 space-y-4">
+                        <div class="p-6 space-y-3">
+                            <!-- Autocomplete Google -->
                             <div class="relative">
-                                <input type="text" placeholder="Buscar endereço…"
-                                    class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm placeholder-slate-400 outline-none transition focus:ring-2 focus:ring-emerald-400 focus:border-transparent"
+                                <input type="text" placeholder="Buscar por nome, endereço ou CEP…"
+                                    class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm placeholder-slate-400 outline-none transition focus:ring-2 focus:ring-emerald-400 focus:border-transparent pr-10"
                                     @input="buscarEndereco('embarque', $event.target.value)"
                                     @blur="fecharSugestoes('embarque')" />
-                                <div v-if="loadings['embarque']" class="absolute right-3 top-3.5">
+                                <div v-if="loadings['embarque']" class="absolute right-3 top-3">
                                     <svg class="animate-spin h-4 w-4 text-emerald-500" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
@@ -255,29 +249,27 @@ const addrInput = (ring = 'emerald') =>
                                     <li v-for="s in sugestoes['embarque']" :key="s.place_id"
                                         @mousedown="selecionarSugestao('embarque', s)"
                                         class="px-4 py-3 text-sm text-slate-800 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 flex items-center gap-2">
-                                        <MapPinIcon class="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                                        <span class="truncate">{{ s.display_name }}</span>
+                                        <MapPinIcon class="w-3.5 h-3.5 text-emerald-500 shrink-0" />
+                                        <span class="truncate">{{ s.description }}</span>
                                     </li>
                                 </ul>
                             </div>
 
-                            <div class="space-y-2">
-                                <div class="grid grid-cols-[1fr_5rem] gap-2">
-                                    <input v-model="form.embarque_logradouro" placeholder="Logradouro" required
-                                        :class="[addrInput('emerald'), form.errors.embarque_logradouro ? 'border-red-400' : '']" />
-                                    <input v-model="form.embarque_numero" placeholder="Nº" :class="addrInput('emerald')" />
-                                </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <input v-model="form.embarque_complemento" placeholder="Complemento" :class="addrInput('emerald')" />
-                                    <input v-model="form.embarque_bairro" placeholder="Bairro" required :class="addrInput('emerald')" />
-                                </div>
-                                <div class="grid grid-cols-[1fr_3.5rem_1fr] gap-2">
-                                    <input v-model="form.embarque_cidade" placeholder="Cidade" required :class="addrInput('emerald')" />
-                                    <input v-model="form.embarque_estado" placeholder="UF" maxlength="2" required
-                                        :class="addrInput('emerald') + ' uppercase'" />
-                                    <input :value="form.embarque_cep" @input="maskCep('embarque_cep', $event)"
-                                        placeholder="CEP" required :class="addrInput('emerald')" />
-                                </div>
+                            <div class="grid grid-cols-[1fr_5rem] gap-2">
+                                <input v-model="form.embarque_logradouro" placeholder="Logradouro" required
+                                    :class="[addrInput('emerald'), 'min-w-0', form.errors.embarque_logradouro ? 'border-red-400' : '']" />
+                                <input v-model="form.embarque_numero" placeholder="Nº" :class="[addrInput('emerald'), 'min-w-0']" />
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input v-model="form.embarque_complemento" placeholder="Complemento" :class="[addrInput('emerald'), 'min-w-0']" />
+                                <input v-model="form.embarque_bairro" placeholder="Bairro" required :class="[addrInput('emerald'), 'min-w-0']" />
+                            </div>
+                            <div class="grid grid-cols-[1fr_3rem_6rem] gap-2">
+                                <input v-model="form.embarque_cidade" placeholder="Cidade" required :class="[addrInput('emerald'), 'min-w-0']" />
+                                <input v-model="form.embarque_estado" placeholder="UF" maxlength="2" required
+                                    :class="[addrInput('emerald'), 'min-w-0 uppercase text-center px-1']" />
+                                <input :value="form.embarque_cep" @input="buscarCep('embarque', $event)"
+                                    placeholder="CEP" inputmode="numeric" :class="[addrInput('emerald'), 'min-w-0']" />
                             </div>
                         </div>
                     </div>
@@ -301,16 +293,14 @@ const addrInput = (ring = 'emerald') =>
                             </div>
                         </div>
 
-                        <div class="p-6 space-y-4">
-                            <input v-model="form.desembarque_nome" placeholder="Nome do local (ex: Escola Municipal ABC)"
-                                :class="addrInput('red') + ' w-full'" />
-
+                        <div class="p-6 space-y-3">
+                            <!-- Autocomplete Google -->
                             <div class="relative">
-                                <input type="text" placeholder="Buscar endereço do destino…"
-                                    class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50 text-sm placeholder-slate-400 outline-none transition focus:ring-2 focus:ring-red-300 focus:border-transparent"
+                                <input type="text" placeholder="Buscar por nome, endereço ou CEP…"
+                                    class="w-full px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm placeholder-slate-400 outline-none transition focus:ring-2 focus:ring-red-300 focus:border-transparent pr-10"
                                     @input="buscarEndereco('desembarque', $event.target.value)"
                                     @blur="fecharSugestoes('desembarque')" />
-                                <div v-if="loadings['desembarque']" class="absolute right-3 top-3.5">
+                                <div v-if="loadings['desembarque']" class="absolute right-3 top-3">
                                     <svg class="animate-spin h-4 w-4 text-red-400" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
@@ -321,29 +311,27 @@ const addrInput = (ring = 'emerald') =>
                                     <li v-for="s in sugestoes['desembarque']" :key="s.place_id"
                                         @mousedown="selecionarSugestao('desembarque', s)"
                                         class="px-4 py-3 text-sm text-slate-800 hover:bg-slate-50 cursor-pointer border-b border-slate-100 last:border-0 flex items-center gap-2">
-                                        <MapPinIcon class="w-3.5 h-3.5 text-blue-400 shrink-0" />
-                                        <span class="truncate">{{ s.display_name }}</span>
+                                        <MapPinIcon class="w-3.5 h-3.5 text-red-400 shrink-0" />
+                                        <span class="truncate">{{ s.description }}</span>
                                     </li>
                                 </ul>
                             </div>
 
-                            <div class="space-y-2">
-                                <div class="grid grid-cols-[1fr_5rem] gap-2">
-                                    <input v-model="form.desembarque_logradouro" placeholder="Logradouro" required
-                                        :class="[addrInput('red'), form.errors.desembarque_logradouro ? 'border-red-400' : '']" />
-                                    <input v-model="form.desembarque_numero" placeholder="Nº" :class="addrInput('red')" />
-                                </div>
-                                <div class="grid grid-cols-2 gap-2">
-                                    <input v-model="form.desembarque_complemento" placeholder="Complemento" :class="addrInput('red')" />
-                                    <input v-model="form.desembarque_bairro" placeholder="Bairro" required :class="addrInput('red')" />
-                                </div>
-                                <div class="grid grid-cols-[1fr_3.5rem_1fr] gap-2">
-                                    <input v-model="form.desembarque_cidade" placeholder="Cidade" required :class="addrInput('red')" />
-                                    <input v-model="form.desembarque_estado" placeholder="UF" maxlength="2" required
-                                        :class="addrInput('red') + ' uppercase'" />
-                                    <input :value="form.desembarque_cep" @input="maskCep('desembarque_cep', $event)"
-                                        placeholder="CEP" required :class="addrInput('red')" />
-                                </div>
+                            <div class="grid grid-cols-[1fr_5rem] gap-2">
+                                <input v-model="form.desembarque_logradouro" placeholder="Logradouro" required
+                                    :class="[addrInput('red'), 'min-w-0', form.errors.desembarque_logradouro ? 'border-red-400' : '']" />
+                                <input v-model="form.desembarque_numero" placeholder="Nº" :class="[addrInput('red'), 'min-w-0']" />
+                            </div>
+                            <div class="grid grid-cols-2 gap-2">
+                                <input v-model="form.desembarque_complemento" placeholder="Complemento" :class="[addrInput('red'), 'min-w-0']" />
+                                <input v-model="form.desembarque_bairro" placeholder="Bairro" required :class="[addrInput('red'), 'min-w-0']" />
+                            </div>
+                            <div class="grid grid-cols-[1fr_3rem_6rem] gap-2">
+                                <input v-model="form.desembarque_cidade" placeholder="Cidade" required :class="[addrInput('red'), 'min-w-0']" />
+                                <input v-model="form.desembarque_estado" placeholder="UF" maxlength="2" required
+                                    :class="[addrInput('red'), 'min-w-0 uppercase text-center px-1']" />
+                                <input :value="form.desembarque_cep" @input="buscarCep('desembarque', $event)"
+                                    placeholder="CEP" inputmode="numeric" :class="[addrInput('red'), 'min-w-0']" />
                             </div>
                         </div>
                     </div>

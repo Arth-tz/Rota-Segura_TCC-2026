@@ -36,7 +36,6 @@ class MarketplaceController extends Controller
         $query = Disponibilidade::query()
             ->where('ativa', true)
             ->whereHas('van', fn ($q) => $q->where('status_aprovacao', 'aprovado')
-                                           ->where('status_operacional', 'ativa')
                                            ->whereNotNull('foto_url'))
             ->whereHas('van.motorista', fn ($q) => $q->where('status_aprovacao', 'aprovado'))
             ->with(['van.motorista.usuario.pessoa', 'dias'])
@@ -113,7 +112,6 @@ class MarketplaceController extends Controller
                     'doc_crlv'                       => !empty($disp->van?->crlv_url),
                     'doc_seguro'                     => !empty($disp->van?->seguro_url),
                     'doc_autorizacao'                => !empty($disp->van?->autorizacao_municipal_url),
-                    'doc_ipva'                       => !empty($disp->van?->ipva_comprovante_url),
                     'documentacao_completa'          => (bool) ($disp->van?->documentacao_completa ?? false),
                     // URLs de documentos regulatórios — visíveis ao responsável (CTB/LGPD art. 7, II)
                     'crlv_url'                       => $disp->van?->crlv_url,

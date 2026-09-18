@@ -32,7 +32,6 @@ class VanMotoristaSeeder extends Seeder
             'cor'                    => 'Branco',
             'capacidade_passageiros' => 15,
             'status_aprovacao'       => 'aprovado',
-            'status_operacional'     => 'ativa',
             'documentacao_completa'  => false,
             // Fotos placeholder para aparecer no marketplace
             'foto_url'              => 'https://images.unsplash.com/photo-1544620347-c4fd4a3d5957?w=800&q=80',

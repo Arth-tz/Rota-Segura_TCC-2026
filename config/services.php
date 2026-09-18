@@ -35,6 +35,14 @@ return [
         ],
     ],
 
+    'google' => [
+        'places_key' => env('GOOGLE_PLACES_KEY'),
+    ],
+
+    'geoapify' => [
+        'key' => env('GEOAPIFY_KEY'),
+    ],
+
     'nominatim' => [
         'base_url' => env('NOMINATIM_BASE_URL', 'https://nominatim.openstreetmap.org'),
         'timeout' => env('NOMINATIM_TIMEOUT', 5),

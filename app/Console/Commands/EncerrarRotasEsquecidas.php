@@ -58,15 +58,13 @@ class EncerrarRotasEsquecidas extends Command
 
                     if ($parada->tipo === 'embarque' && is_null($pivot->embarque_em)) {
                         $parada->passageiros()->updateExistingPivot($passageiro->id_passageiro, [
-                            'embarque_em'         => $agora,
-                            'marcado_por'         => 'sistema',
-                            'metodo_confirmacao'  => 'manual',
+                            'embarque_em' => $agora,
+                            'marcado_por' => 'sistema',
                         ]);
                     } elseif ($parada->tipo === 'desembarque' && is_null($pivot->desembarque_em)) {
                         $parada->passageiros()->updateExistingPivot($passageiro->id_passageiro, [
-                            'desembarque_em'      => $agora,
-                            'marcado_por'         => 'sistema',
-                            'metodo_confirmacao'  => 'manual',
+                            'desembarque_em' => $agora,
+                            'marcado_por'    => 'sistema',
                         ]);
                     }
                 }

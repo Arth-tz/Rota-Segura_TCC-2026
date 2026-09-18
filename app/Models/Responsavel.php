@@ -16,12 +16,9 @@ class Responsavel extends Model
         'id_usuario',
         'tipo_responsavel',
         'telefone_emergencia',
-        'data_responsavel_ate',
     ];
 
-    protected $casts = [
-        'data_responsavel_ate' => 'date',
-    ];
+    protected $casts = [];
 
     public function usuario()
     {

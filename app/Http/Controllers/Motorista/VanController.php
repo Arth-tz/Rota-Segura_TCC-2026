@@ -21,7 +21,6 @@ class VanController extends Controller
         'crlv'                  => ['url_col' => 'crlv_url',                  'val_col' => 'crlv_validade'],
         'seguro'                => ['url_col' => 'seguro_url',                 'val_col' => 'seguro_validade'],
         'autorizacao_municipal' => ['url_col' => 'autorizacao_municipal_url',  'val_col' => 'autorizacao_municipal_validade'],
-        'ipva'                  => ['url_col' => 'ipva_comprovante_url',       'val_col' => 'ipva_comprovante_data'],
     ];
 
     // ── CRIAR ────────────────────────────────────────────────────────────────
@@ -87,7 +86,6 @@ class VanController extends Controller
                 'cor'                    => $dados['cor'],
                 'capacidade_passageiros' => $dados['capacidade_passageiros'],
                 'status_aprovacao'       => 'pendente',
-                'status_operacional'     => 'ativa',
                 'documentacao_completa'  => false,
             ]);
         });
@@ -206,10 +204,6 @@ class VanController extends Controller
                 'autorizacao_municipal_url'        => $van->autorizacao_municipal_url,
                 'autorizacao_municipal_validade'   => $van->autorizacao_municipal_validade?->format('Y-m-d'),
                 'prefixo_municipal'                => $van->prefixo_municipal,
-                'ipva_comprovante_url'             => $van->ipva_comprovante_url,
-                'ipva_comprovante_data'            => $van->ipva_comprovante_data?->format('Y-m-d'),
-                'data_ultima_inspecao'             => $van->data_ultima_inspecao?->format('Y-m-d'),
-                'proxima_inspecao_prevista'        => $van->proxima_inspecao_prevista?->format('Y-m-d'),
             ],
         ]);
     }
@@ -269,25 +263,6 @@ class VanController extends Controller
         }
 
         return back()->with('sucesso', 'Documento atualizado com sucesso.');
-    }
-
-    public function updateInspecao(Request $request): RedirectResponse
-    {
-        $van = auth()->user()->motorista?->van;
-        if (!$van) return redirect()->route('motorista.van.create');
-
-        $dados = $request->validate([
-            'data_ultima_inspecao'      => ['nullable', 'date'],
-            'proxima_inspecao_prevista' => ['nullable', 'date'],
-        ]);
-
-        $van->update([
-            'data_ultima_inspecao'      => $dados['data_ultima_inspecao'] ?? null,
-            'proxima_inspecao_prevista' => $dados['proxima_inspecao_prevista'] ?? null,
-        ]);
-
-        return redirect()->route('motorista.dashboard')
-            ->with('sucesso', 'Datas de inspeção atualizadas.');
     }
 
     // ── UPLOADS DE FOTO (slots individuais) ──────────────────────────────────

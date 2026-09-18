@@ -26,7 +26,6 @@ const form = useForm({
     residencia_mesmo_embarque: true,
     residencia: enderecoVazio(),
 
-    desembarque_nome: '',
     desembarque: enderecoVazio(),
 
     foto_consentimento_lgpd: false,
@@ -79,34 +78,11 @@ function parseDateBrToIso(value) {
     return `${yyyy}-${mm}-${dd}`
 }
 
-// ─── GEOCODIFICAÇÃO SILENCIOSA ────────────────────────────────────────────────
-async function geocodificar(addr) {
-    if (addr.latitude && addr.longitude) return addr
-    const q = [addr.logradouro, addr.numero, addr.bairro, addr.cidade, addr.estado]
-        .filter(Boolean).join(', ')
-    if (!q) return addr
-    try {
-        const res = await fetch(
-            `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=br`,
-            { headers: { 'Accept-Language': 'pt-BR' } }
-        )
-        const data = await res.json()
-        if (data[0]) return { ...addr, latitude: data[0].lat, longitude: data[0].lon }
-    } catch {}
-    return addr
-}
-
 // ─── SUBMIT ──────────────────────────────────────────────────────────────────
-async function submit() {
+function submit() {
     if (form.processing) return
 
-    const embGeo = await geocodificar({ ...form.embarque })
-    const resGeo = form.residencia_mesmo_embarque
-        ? embGeo
-        : await geocodificar({ ...form.residencia })
-    const desGeo = form.desembarque.logradouro
-        ? await geocodificar({ ...form.desembarque })
-        : null
+    const desGeo = form.desembarque.logradouro ? form.desembarque : null
 
     form.transform(() => ({
         nome:            form.nome,
@@ -116,9 +92,9 @@ async function submit() {
         obs_medica:      form.obs_medica || null,
         foto:            form.foto,
         foto_consentimento_lgpd: form.foto_consentimento_lgpd,
-        embarques:  [embGeo],
-        residencia: [resGeo],
-        desembarques: desGeo ? [{ ...desGeo, nome: form.desembarque_nome }] : [],
+        embarques:  [form.embarque],
+        residencia: [form.residencia_mesmo_embarque ? form.embarque : form.residencia],
+        desembarques: desGeo ? [desGeo] : [],
     })).post(route('responsavel.passageiros.adicionar.store'), { forceFormData: true })
 }
 
@@ -308,16 +284,6 @@ const inputClass = computed(() => (err) =>
                     </div>
 
                     <div class="p-5 space-y-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-700 mb-1.5">
-                                Nome do local
-                                <span class="text-slate-400 font-normal">(opcional)</span>
-                            </label>
-                            <input v-model="form.desembarque_nome" type="text"
-                                placeholder="Ex: Escola Municipal João XXIII"
-                                :class="inputClass(null)" />
-                        </div>
-
                         <EnderecoSection v-model="form.desembarque" />
                     </div>
                 </section>

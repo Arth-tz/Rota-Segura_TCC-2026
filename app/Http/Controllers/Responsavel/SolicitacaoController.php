@@ -49,8 +49,7 @@ class SolicitacaoController extends Controller
 
         // Disponibilidade deve estar ativa e pertencer a van/motorista aprovados
         $disponibilidade = Disponibilidade::where('ativa', true)
-            ->whereHas('van', fn ($q) => $q->where('status_aprovacao', 'aprovado')
-                                           ->where('status_operacional', 'ativa'))
+            ->whereHas('van', fn ($q) => $q->where('status_aprovacao', 'aprovado'))
             ->whereHas('van.motorista', fn ($q) => $q->where('status_aprovacao', 'aprovado'))
             ->with('dias')
             ->findOrFail($validated['id_disponibilidade']);
@@ -194,9 +193,8 @@ class SolicitacaoController extends Controller
             ->findOrFail($id);
 
         $solicitacao->update([
-            'status'      => 'cancelada',
-            'cancelado_em' => now(),
-            'cancelado_por' => Auth::id(),
+            'status'        => 'cancelada',
+            'data_resposta' => now(),
         ]);
 
         return back()->with('sucesso', 'Solicitação cancelada.');

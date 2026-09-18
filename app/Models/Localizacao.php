@@ -19,17 +19,14 @@ class Localizacao extends Model
         'id_van',
         'latitude',
         'longitude',
-        'altitude',
         'precisao_metros',
         'fonte_localizacao',
-        'numero_satelites',
         'timestamp_captura',
     ];
 
     protected $casts = [
         'latitude'          => 'decimal:7',
         'longitude'         => 'decimal:7',
-        'altitude'          => 'decimal:2',
         'precisao_metros'   => 'decimal:2',
         'timestamp_captura' => 'datetime',
     ];

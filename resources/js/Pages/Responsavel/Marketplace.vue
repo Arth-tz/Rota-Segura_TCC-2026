@@ -91,6 +91,21 @@ function paginaLinks() {
     return (props.disponibilidades.links ?? []).filter(l => !isNaN(Number(l.label)))
 }
 
+// ── Filtros colapsáveis (mobile) ──────────────────────────────────────────────
+const filtrosAbertos = ref(false)
+
+const totalFiltrosAtivos = computed(() => {
+    let n = 0
+    if (f.turno)     n++
+    if (f.cidade)    n++
+    if (f.bairro)    n++
+    if (f.escola)    n++
+    if (f.motorista) n++
+    if (f.prefixo)   n++
+    n += f.dias.length
+    return n
+})
+
 // ── Bottom sheet de DETALHES ──────────────────────────────────────────────────
 const detalheAberto     = ref(false)
 const detalheSelecionado = ref(null)
@@ -224,15 +239,35 @@ function inicialNome(nome) {
         <main class="max-w-6xl mx-auto px-4 py-6 space-y-5">
 
             <!-- Filtros -->
-            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm p-5">
-                <div class="flex items-center gap-2 mb-4">
-                    <FunnelIcon class="w-4 h-4 text-slate-400" />
+            <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <!-- Cabeçalho — sempre visível; clicável só no mobile -->
+                <button type="button"
+                    class="w-full flex items-center gap-2 p-5 lg:cursor-default"
+                    @click="filtrosAbertos = !filtrosAbertos">
+                    <FunnelIcon class="w-4 h-4 text-slate-400 shrink-0" />
                     <span class="text-sm font-semibold text-slate-700">Filtros</span>
-                    <button v-if="filtrosAtivos()" @click="limpar"
-                        class="ml-auto flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-semibold">
+                    <span v-if="totalFiltrosAtivos > 0"
+                        class="ml-1 flex h-5 w-5 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+                        {{ totalFiltrosAtivos }}
+                    </span>
+                    <button v-if="filtrosAtivos()" @click.stop="limpar"
+                        class="ml-auto flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-semibold hidden lg:flex">
                         <XMarkIcon class="w-3.5 h-3.5" /> Limpar tudo
                     </button>
-                </div>
+                    <!-- Chevron só aparece no mobile -->
+                    <ChevronDownIcon class="ml-auto w-4 h-4 text-slate-400 transition-transform lg:hidden"
+                        :class="filtrosAbertos ? 'rotate-180' : ''" />
+                </button>
+
+                <!-- Corpo — no mobile, aparece só quando aberto; no desktop, sempre visível -->
+                <div :class="['px-5 pb-5', filtrosAbertos ? 'block' : 'hidden', 'lg:block']">
+                    <!-- Limpar (mobile) -->
+                    <div v-if="filtrosAtivos()" class="mb-3 lg:hidden flex justify-end">
+                        <button @click="limpar"
+                            class="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 font-semibold">
+                            <XMarkIcon class="w-3.5 h-3.5" /> Limpar tudo
+                        </button>
+                    </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
                     <div>
@@ -316,6 +351,7 @@ function inicialNome(nome) {
                         Buscar
                     </button>
                 </div>
+                </div><!-- fim corpo colapsável -->
             </div>
 
             <!-- Info resultados -->

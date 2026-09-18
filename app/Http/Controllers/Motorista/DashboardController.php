@@ -182,7 +182,6 @@ class DashboardController extends Controller
                 'cor'                    => $van->cor,
                 'capacidade_passageiros' => $van->capacidade_passageiros,
                 'status_aprovacao'       => $van->status_aprovacao,
-                'status_operacional'     => $van->status_operacional,
                 'documentacao_completa'  => $van->documentacao_completa,
                 'motivo_rejeicao'        => $van->motivo_rejeicao,
                 'foto_url'               => $van->foto_url,
