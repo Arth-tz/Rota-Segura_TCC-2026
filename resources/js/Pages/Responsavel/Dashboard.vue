@@ -143,8 +143,7 @@ const titulos = {
                 />
             </main>
 
-            <!-- Acompanhar fica sempre montado para o polling não parar ao trocar de seção -->
-            <div v-show="secaoAtiva === 'acompanhar'" class="flex-1 min-w-0 overflow-x-hidden px-4 md:px-8 py-6 pb-24 md:pb-8">
+            <div v-if="secaoAtiva === 'acompanhar'" class="flex-1 min-w-0 overflow-x-hidden px-4 md:px-8 py-6 pb-24 md:pb-8">
                 <SecaoAcompanhar />
             </div>
         </div>
