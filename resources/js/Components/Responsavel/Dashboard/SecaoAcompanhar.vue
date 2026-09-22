@@ -110,6 +110,7 @@ function atualizarMapaGrupo(grupo) {
             maxZoom: 19,
         }).addTo(mapa)
         mapas[idVan] = { mapa, marcadorVan: null, marcadoresEmb: {}, marcadoresDesemb: {} }
+        setTimeout(() => mapa.invalidateSize(), 0)
     }
 
     const m = mapas[idVan]
