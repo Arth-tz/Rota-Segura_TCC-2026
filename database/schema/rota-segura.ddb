@@ -338,7 +338,7 @@
     },
     {
       "name": "responsavel",
-      "color": "#3b82f6",
+      "color": "#6366f1",
       "fields": [
         {
           "id": "21224196-a643-47eb-9895-e1dd3dd69841",
@@ -441,7 +441,7 @@
     },
     {
       "name": "motorista",
-      "color": "#f59e0b",
+      "color": "#6366f1",
       "fields": [
         {
           "id": "17461508-8954-45b8-af9d-abcd82145e5f",
@@ -648,7 +648,7 @@
     },
     {
       "name": "passageiro",
-      "color": "#10b981",
+      "color": "#059669",
       "fields": [
         {
           "id": "c2de2c79-0e9c-4718-9509-f6f7b250c973",
@@ -777,7 +777,7 @@
     },
     {
       "name": "endereco",
-      "color": "#8b5cf6",
+      "color": "#059669",
       "fields": [
         {
           "id": "784705a1-121e-42b0-bd2b-a788b84fe7a2",
@@ -945,7 +945,7 @@
     },
     {
       "name": "passageiro_endereco",
-      "color": "#8b5cf6",
+      "color": "#059669",
       "fields": [
         {
           "id": "8512a233-9f56-4303-bf83-37f0084f5a53",
@@ -1061,7 +1061,7 @@
     },
     {
       "name": "responsavel_passageiro",
-      "color": "#3b82f6",
+      "color": "#059669",
       "fields": [
         {
           "id": "e2cea375-3e52-4f55-bd9f-f2d5ad94967e",
@@ -1164,7 +1164,7 @@
     },
     {
       "name": "van",
-      "color": "#f59e0b",
+      "color": "#d97706",
       "fields": [
         {
           "id": "98b4e4d0-94a2-483c-bf2b-51a26d69cbf7",
@@ -1966,7 +1966,7 @@
     },
     {
       "name": "solicitacao",
-      "color": "#ef4444",
+      "color": "#2563eb",
       "fields": [
         {
           "id": "b72023b6-d9b2-4d22-97dc-c12ea0252808",
@@ -2199,7 +2199,7 @@
     },
     {
       "name": "solicitacao_disponibilidade",
-      "color": "#ef4444",
+      "color": "#2563eb",
       "fields": [
         {
           "id": "9d655134-1dc7-48d1-ae45-7f561b1def7e",
@@ -2302,7 +2302,7 @@
     },
     {
       "name": "vinculo",
-      "color": "#059669",
+      "color": "#2563eb",
       "fields": [
         {
           "id": "071681fe-0c9c-495f-85f8-fd3a6de71943",
@@ -2457,7 +2457,7 @@
     },
     {
       "name": "vinculo_disponibilidade",
-      "color": "#059669",
+      "color": "#2563eb",
       "fields": [
         {
           "id": "465f977c-89f6-4efa-b8e5-4b87a6df1e69",
@@ -2573,7 +2573,7 @@
     },
     {
       "name": "disponibilidade_passageiro",
-      "color": "#059669",
+      "color": "#2563eb",
       "fields": [
         {
           "id": "e5d8db65-a7ec-461e-8819-51755e587d73",
@@ -2715,7 +2715,7 @@
     },
     {
       "name": "rota",
-      "color": "#64748b",
+      "color": "#7c3aed",
       "fields": [
         {
           "id": "46d774d8-fe32-45da-9825-f5d62bb390c3",
@@ -2909,7 +2909,7 @@
     },
     {
       "name": "parada",
-      "color": "#64748b",
+      "color": "#7c3aed",
       "fields": [
         {
           "id": "47b6609f-b2ea-4f69-86f7-dfac3af52bfe",
@@ -3051,7 +3051,7 @@
     },
     {
       "name": "parada_passageiro",
-      "color": "#64748b",
+      "color": "#7c3aed",
       "fields": [
         {
           "id": "6d95d692-fe44-4f75-bd6c-1ea830c1dc11",
@@ -3180,7 +3180,7 @@
     },
     {
       "name": "localizacao",
-      "color": "#64748b",
+      "color": "#7c3aed",
       "fields": [
         {
           "id": "d5d744a9-e727-42c4-84c5-27f5a124ab7f",
