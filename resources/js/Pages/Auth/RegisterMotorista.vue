@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import { CameraIcon, ArrowLeftIcon } from '@heroicons/vue/24/outline'
+import StepIndicador from '@/Components/UI/StepIndicador.vue'
 
 const form = useForm({
     nome: '',
@@ -160,6 +161,9 @@ const inputClass = computed(() => (err) =>
                     <ArrowLeftIcon class="w-4 h-4" />
                     Voltar ao início
                 </Link>
+
+                <!-- Indicador de passos -->
+                <StepIndicador :passoAtual="1" />
 
                 <!-- Cabeçalho -->
                 <div class="mb-6">

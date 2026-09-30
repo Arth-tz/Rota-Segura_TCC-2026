@@ -240,7 +240,7 @@ const modalPrevia = ref(false)
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-semibold text-amber-800">Adicione a foto da van</p>
                 <p class="text-xs text-amber-700 mt-0.5">
-                    A <strong>foto frontal</strong> é obrigatória para que sua van apareça na busca de motoristas para os responsáveis.
+                    Adicione a <strong>foto frontal</strong> para aparecer na busca — vans com foto passam muito mais confiança para os responsáveis na hora de escolher um motorista.
                 </p>
             </div>
             <Link :href="route('motorista.van.documentos')"
@@ -270,7 +270,7 @@ const modalPrevia = ref(false)
                         <p v-if="!checklistColapsado" class="text-xs text-slate-500 mt-0.5">
                             {{ tudo_pronto
                                 ? 'Aguardando avaliação do administrador.'
-                                : 'Você não aparece na busca de motoristas até estar aprovado.' }}
+                                : 'Envie os documentos quando estiver pronto. Você pode usar o painel normalmente enquanto isso.' }}
                         </p>
                     </div>
                 </div>

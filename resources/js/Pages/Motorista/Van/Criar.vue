@@ -4,6 +4,7 @@ import { Head, Link, useForm } from '@inertiajs/vue3'
 import { ArrowLeftIcon, CameraIcon } from '@heroicons/vue/24/outline'
 import FlashMessage from '@/Components/UI/FlashMessage.vue'
 import FotoSlotInput from '@/Components/UI/FotoSlotInput.vue'
+import StepIndicador from '@/Components/UI/StepIndicador.vue'
 
 const form = useForm({
     placa:                   '',
@@ -62,6 +63,9 @@ const selectClass = computed(() => (err) =>
         </header>
 
         <main class="max-w-2xl mx-auto px-4 py-6 space-y-4">
+
+            <!-- Indicador de passos -->
+            <StepIndicador :passoAtual="2" />
 
             <!-- ── ERRO GERAL ─────────────────────────────────────────────── -->
             <div v-if="form.errors.geral"

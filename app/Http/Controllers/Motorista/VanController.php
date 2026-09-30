@@ -95,7 +95,8 @@ class VanController extends Controller
         $this->salvarFotoSeEnviada($request, $van, 'foto_interior', 'foto_interior_url', 'interior');
 
         return redirect()->route('motorista.van.documentos')
-            ->with('sucesso', 'Van cadastrada! Adicione os documentos para iniciar a aprovação.');
+            ->with('sucesso', 'Van cadastrada! Adicione os documentos quando estiver pronto.')
+            ->with('cadastro_inicial', true);
     }
 
     // ── EDITAR ───────────────────────────────────────────────────────────────
@@ -182,6 +183,7 @@ class VanController extends Controller
         }
 
         return Inertia::render('Motorista/Van/Documentos', [
+            'cadastroInicial' => session('cadastro_inicial', false),
             'van' => [
                 'id_van'                           => $van->id_van,
                 'placa'                            => $van->placa,

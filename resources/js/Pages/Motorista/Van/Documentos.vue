@@ -13,11 +13,14 @@ import {
     LockClosedIcon,
     PaperClipIcon,
     ArrowTopRightOnSquareIcon,
+    InformationCircleIcon,
 } from '@heroicons/vue/24/outline'
 import FlashMessage from '@/Components/UI/FlashMessage.vue'
+import StepIndicador from '@/Components/UI/StepIndicador.vue'
 
 const props = defineProps({
-    van: { type: Object, required: true },
+    van:             { type: Object,  required: true },
+    cadastroInicial: { type: Boolean, default: false },
 })
 
 // ── STATUS DOS DOCUMENTOS ──────────────────────────────────────────────────
@@ -156,6 +159,25 @@ function nomeArquivo(url) {
         </header>
 
         <main class="max-w-2xl mx-auto px-4 py-6 space-y-5 pb-12">
+
+            <!-- STEP INDICATOR ──────────────────────────────────────────────── -->
+            <StepIndicador v-if="cadastroInicial" :passoAtual="3" />
+
+            <!-- BANNER DE SKIP (só no cadastro inicial) ─────────────────────── -->
+            <div v-if="cadastroInicial"
+                class="rounded-xl border border-sky-200 bg-sky-50 px-4 py-4 flex items-start gap-3">
+                <InformationCircleIcon class="w-5 h-5 text-sky-500 shrink-0 mt-0.5" />
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-semibold text-sky-900">Documentos são opcionais agora</p>
+                    <p class="text-xs text-sky-700 mt-0.5 leading-relaxed">
+                        Você pode enviar depois pelo painel. Sem eles, sua van não aparece nas buscas até o cadastro ser completado.
+                    </p>
+                </div>
+                <Link :href="route('motorista.dashboard')"
+                    class="shrink-0 rounded-lg bg-sky-700 hover:bg-sky-800 text-white text-xs font-bold px-3 py-2 transition whitespace-nowrap">
+                    Ir ao painel
+                </Link>
+            </div>
 
             <!-- AVISO DE PRIVACIDADE ─────────────────────────────────────────── -->
             <div class="flex gap-3 rounded-xl border border-slate-200 bg-white px-4 py-3">
