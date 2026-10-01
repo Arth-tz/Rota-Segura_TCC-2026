@@ -205,7 +205,18 @@ function whatsappUrl(telefone) {
 }
 
 function jaVinculado(id)  { return props.ids_vinculados.includes(id) }
-function jaSolicitado(id) { return props.ids_solicitados.includes(id) }
+
+// Retorna true só quando TODOS os passageiros já solicitaram essa disponibilidade
+function jaSolicitado(id) {
+    const passageirosSolicitados = props.ids_solicitados[id] ?? []
+    return props.passageiros.length > 0
+        && props.passageiros.every(p => passageirosSolicitados.includes(p.id_passageiro))
+}
+
+// Retorna true se aquele passageiro específico já tem solicitação pendente para essa disponibilidade
+function passageiroJaSolicitado(idDisp, idPassageiro) {
+    return (props.ids_solicitados[idDisp] ?? []).includes(idPassageiro)
+}
 
 function inicialNome(nome) {
     return nome?.charAt(0)?.toUpperCase() ?? '?'
@@ -927,8 +938,9 @@ function inicialNome(nome) {
                                     class="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition bg-white"
                                     :class="form.errors.id_passageiro ? 'border-red-300 bg-red-50' : ''">
                                     <option value="" disabled>Selecione o passageiro</option>
-                                    <option v-for="p in passageiros" :key="p.id_passageiro" :value="p.id_passageiro">
-                                        {{ p.nome }}{{ (!p.tem_embarque || !p.tem_desembarque) ? ' — sem endereço' : '' }}
+                                    <option v-for="p in passageiros" :key="p.id_passageiro" :value="p.id_passageiro"
+                                        :disabled="passageiroJaSolicitado(form.id_disponibilidade, p.id_passageiro)">
+                                        {{ p.nome }}{{ passageiroJaSolicitado(form.id_disponibilidade, p.id_passageiro) ? ' — solicitação pendente' : (!p.tem_embarque || !p.tem_desembarque) ? ' — sem endereço' : '' }}
                                     </option>
                                 </select>
                                 <p v-if="form.errors.id_passageiro" class="mt-1 text-xs text-red-600">{{ form.errors.id_passageiro }}</p>

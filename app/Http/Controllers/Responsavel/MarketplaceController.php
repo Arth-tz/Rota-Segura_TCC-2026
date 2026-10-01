@@ -156,15 +156,21 @@ class MarketplaceController extends Controller
                 ->unique()->values()->all()
             : [];
 
-        // IDs de disponibilidades com solicitação pendente
+        // Mapa de solicitações pendentes: {id_disponibilidade: [id_passageiro, ...]}
+        // Permite saber quais passageiros específicos já solicitaram cada disponibilidade
         $idsSolicitados = $idsPassageiros
             ? Solicitacao::where('id_responsavel', $responsavel->id_responsavel)
                 ->whereIn('id_passageiro', $idsPassageiros)
                 ->where('status', 'pendente')
                 ->with('disponibilidades')
                 ->get()
-                ->flatMap(fn ($s) => $s->disponibilidades->pluck('id_disponibilidade'))
-                ->unique()->values()->all()
+                ->flatMap(fn ($s) => $s->disponibilidades->map(fn ($d) => [
+                    'id_disponibilidade' => $d->id_disponibilidade,
+                    'id_passageiro'      => $s->id_passageiro,
+                ]))
+                ->groupBy('id_disponibilidade')
+                ->map(fn ($items) => $items->pluck('id_passageiro')->values()->all())
+                ->all()
             : [];
 
         return Inertia::render('Responsavel/Marketplace', [
