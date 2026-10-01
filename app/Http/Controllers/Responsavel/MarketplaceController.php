@@ -35,8 +35,7 @@ class MarketplaceController extends Controller
 
         $query = Disponibilidade::query()
             ->where('ativa', true)
-            ->whereHas('van', fn ($q) => $q->where('status_aprovacao', 'aprovado')
-                                           ->whereNotNull('foto_url'))
+            ->whereHas('van', fn ($q) => $q->where('status_aprovacao', 'aprovado'))
             ->whereHas('van.motorista', fn ($q) => $q->where('status_aprovacao', 'aprovado'))
             ->with(['van.motorista.usuario.pessoa', 'dias'])
             ->withCount(['vinculos as vagas_ocupadas' => fn ($q) => $q->where('status', 'ativo')]);
