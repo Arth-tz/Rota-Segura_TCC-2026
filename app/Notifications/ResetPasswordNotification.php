@@ -31,6 +31,7 @@ class ResetPasswordNotification extends Notification
             ->action('Redefinir Senha', $url)
             ->line('Este link expira em **60 minutos**.')
             ->line('Se você não solicitou a redefinição de senha, ignore este e-mail. Sua senha permanece a mesma.')
+            ->line('**Dica:** Se não encontrar este e-mail na caixa de entrada, verifique a pasta de **spam** ou lixo eletrônico.')
             ->salutation('Atenciosamente, Equipe Rota Segura');
     }
 }

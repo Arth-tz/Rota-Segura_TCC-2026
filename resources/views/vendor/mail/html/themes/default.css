@@ -84,7 +84,7 @@ img {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 100%;
-    background-color: #f1f5f9;
+    background-color: #1e3a8a;
     margin: 0;
     padding: 0;
     width: 100%;
@@ -119,9 +119,9 @@ img {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 100%;
-    background-color: #f1f5f9;
-    border-bottom: 1px solid #f1f5f9;
-    border-top: 1px solid #f1f5f9;
+    background-color: #1e40af;
+    border-bottom: 1px solid #1e3a8a;
+    border-top: 0;
     margin: 0;
     padding: 0;
     width: 100%;
@@ -133,9 +133,9 @@ img {
     -premailer-width: 570px;
     background-color: #ffffff;
     border-color: #dbeafe;
-    border-radius: 12px;
+    border-radius: 16px;
     border-width: 1px;
-    box-shadow: 0 4px 16px 0 rgba(37, 99, 235, 0.10), 0 1px 3px 0 rgba(0, 0, 0, 0.06);
+    box-shadow: 0 8px 32px 0 rgba(37, 99, 235, 0.12), 0 2px 6px 0 rgba(0, 0, 0, 0.06);
     margin: 0 auto;
     padding: 0;
     width: 570px;

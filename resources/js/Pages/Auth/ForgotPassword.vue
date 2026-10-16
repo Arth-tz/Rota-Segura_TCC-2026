@@ -73,7 +73,11 @@ const submit = () => {
 
                 <!-- Status (ex: link de redefinição enviado) -->
                 <div v-if="status" class="lg-status">
-                    {{ status }}
+                    <svg xmlns="http://www.w3.org/2000/svg" class="lg-status__icon" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    <div>
+                        <p class="lg-status__msg">{{ status }}</p>
+                        <p class="lg-status__spam">Nao encontrou? Verifique a pasta de <strong>spam</strong> ou lixo eletronico.</p>
+                    </div>
                 </div>
 
                 <!-- FORM -->
@@ -257,13 +261,15 @@ const submit = () => {
 
 /* Status */
 .lg-status {
-    display: flex; align-items: center; gap: 10px;
+    display: flex; align-items: flex-start; gap: 10px;
     background: #f0fdf4; border: 1px solid #bbf7d0;
-    border-radius: 12px; padding: 12px 16px;
+    border-radius: 12px; padding: 14px 16px;
     color: #15803d; font-size: 0.85rem; font-weight: 500;
     margin-bottom: 20px;
 }
-.lg-status__icon { width: 16px; height: 16px; flex-shrink: 0; }
+.lg-status__icon { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+.lg-status__msg { margin: 0 0 4px; font-weight: 600; }
+.lg-status__spam { margin: 0; font-size: 0.78rem; font-weight: 400; color: #166534; opacity: 0.85; }
 
 /* Form */
 .lg-form { display: flex; flex-direction: column; gap: 18px; }
