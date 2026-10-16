@@ -34,13 +34,51 @@ class PassageiroController extends Controller
 
     public function storeEssencial(StorePassageiroEssencialRequest $request): RedirectResponse
     {
-        $request->session()->put('cadastro_passageiro.essencial', $request->validated());
-        return redirect()->route('responsavel.passageiros.create.enderecos');
+        $dados = $request->validated();
+
+        try {
+            $passageiro = DB::transaction(function () use ($dados) {
+                $responsavel = auth()->user()->responsavel;
+
+                if (!$responsavel) {
+                    throw new \RuntimeException('Perfil de responsável não encontrado.');
+                }
+
+                $pessoa = Pessoa::create([
+                    'nome'            => trim($dados['nome']),
+                    'cpf'             => $dados['cpf'],
+                    'data_nascimento' => $dados['data_nascimento'],
+                    'telefone'        => null,
+                ]);
+
+                $passageiro = Passageiro::create([
+                    'id_pessoa'               => $pessoa->id_pessoa,
+                    'observacoes_medicas'     => $dados['obs_medica'] ?? null,
+                    'foto_consentimento_lgpd' => (bool) ($dados['foto_consentimento_lgpd'] ?? false),
+                    'ativo'                   => true,
+                    'data_inscricao'          => now()->toDateString(),
+                ]);
+
+                $responsavel->passageiros()->attach($passageiro->id_passageiro, [
+                    'data_inicio' => now()->toDateString(),
+                    'data_fim'    => null,
+                ]);
+
+                return $passageiro;
+            });
+
+            $request->session()->put('cadastro_passageiro.id_passageiro', $passageiro->id_passageiro);
+            return redirect()->route('responsavel.passageiros.create.enderecos');
+
+        } catch (\Throwable $e) {
+            report($e);
+            return back()->withErrors(['geral' => 'Erro ao salvar dados. Tente novamente.']);
+        }
     }
 
     public function createEnderecos(): RedirectResponse|Response
     {
-        if (!session()->has('cadastro_passageiro.essencial')) {
+        if (!session()->has('cadastro_passageiro.id_passageiro')) {
             return redirect()->route('responsavel.passageiros.create')
                 ->withErrors(['geral' => 'Preencha os dados essenciais primeiro.']);
         }
@@ -49,52 +87,32 @@ class PassageiroController extends Controller
 
     public function store(StorePassageiroEnderecosRequest $request): RedirectResponse
     {
-        $essencial = $request->session()->get('cadastro_passageiro.essencial');
+        $idPassageiro = $request->session()->get('cadastro_passageiro.id_passageiro');
 
-        if (!$essencial) {
+        if (!$idPassageiro) {
             return redirect()->route('responsavel.passageiros.create')
                 ->withErrors(['geral' => 'Sessão expirada. Recomece o cadastro.']);
+        }
+
+        $passageiro = $this->buscarPassageiroDoResponsavel($idPassageiro);
+
+        if (!$passageiro) {
+            return redirect()->route('responsavel.passageiros.create')
+                ->withErrors(['geral' => 'Passageiro não encontrado.']);
         }
 
         $dadosEnderecos = $this->enriquecerCoordenadasFaltantes($request->validated());
 
         try {
-            ['pessoa' => $pessoa, 'passageiro' => $passageiro] = DB::transaction(function () use ($dadosEnderecos, $essencial) {
-                $responsavel = auth()->user()->responsavel;
-
-                if (!$responsavel) {
-                    throw new \RuntimeException('Perfil de responsável não encontrado.');
-                }
-
-                $pessoa = Pessoa::create([
-                    'nome'            => trim($essencial['nome']),
-                    'cpf'             => $essencial['cpf'],
-                    'data_nascimento' => $essencial['data_nascimento'],
-                    'telefone'        => null,
-                ]);
-
-                $passageiro = Passageiro::create([
-                    'id_pessoa'                => $pessoa->id_pessoa,
-                    'observacoes_medicas'      => $essencial['obs_medica'] ?? null,
-                    'foto_consentimento_lgpd'  => (bool) ($essencial['foto_consentimento_lgpd'] ?? false),
-                    'ativo'                    => true,
-                    'data_inscricao'           => now()->toDateString(),
-                ]);
-
-                $responsavel->passageiros()->attach($passageiro->id_passageiro, [
-                    'data_inicio' => now()->toDateString(),
-                    'data_fim'    => null,
-                ]);
-
+            DB::transaction(function () use ($dadosEnderecos, $passageiro) {
                 $this->salvarEnderecos($passageiro, $dadosEnderecos);
-
-                return ['pessoa' => $pessoa, 'passageiro' => $passageiro];
             });
 
             if ($request->hasFile('foto')) {
+                $passageiro->load('pessoa');
                 $ext  = $request->file('foto')->getClientOriginalExtension();
                 $path = $request->file('foto')->storeAs("passageiros/{$passageiro->id_passageiro}", "foto.{$ext}", config('filesystems.upload'));
-                $pessoa->update(['foto_url' => Storage::disk(config('filesystems.upload'))->url($path)]);
+                $passageiro->pessoa->update(['foto_url' => Storage::disk(config('filesystems.upload'))->url($path)]);
             }
 
             $request->session()->forget('cadastro_passageiro');

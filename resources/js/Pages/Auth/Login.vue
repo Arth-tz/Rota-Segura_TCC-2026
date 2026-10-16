@@ -165,7 +165,7 @@ const submit = () => {
 
                 <p class="lg-register-hint">
                     Ainda não tem conta?
-                    <Link :href="route('home')" class="lg-register-link">Cadastre-se</Link>
+                    <Link :href="route('register.responsavel')" class="lg-register-link">Cadastre-se</Link>
                 </p>
 
             </div>
