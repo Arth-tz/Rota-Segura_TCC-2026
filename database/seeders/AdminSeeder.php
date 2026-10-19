@@ -12,8 +12,10 @@ class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        if (Usuario::where('role', UserRole::Admin)->exists()) {
-            $this->command->info('Admin já existe — seeder ignorado.');
+        $adminExistente = Usuario::where('role', UserRole::Admin)->first();
+        if ($adminExistente) {
+            $adminExistente->update(['senha_hash' => Hash::make('admin1234')]);
+            $this->command->info('Admin já existe — senha redefinida para admin1234.');
             return;
         }
 
