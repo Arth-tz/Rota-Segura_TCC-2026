@@ -317,6 +317,9 @@ class TestUsersSeeder extends Seeder
     {
         $existing = Usuario::where('email', $email)->first();
         if ($existing) {
+            \Illuminate\Support\Facades\DB::table('usuario')
+                ->where('email', $email)
+                ->update(['senha_hash' => Hash::make('Teste@2026')]);
             return $existing;
         }
 

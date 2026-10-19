@@ -6,16 +6,21 @@ use App\Enums\UserRole;
 use App\Models\Pessoa;
 use App\Models\Usuario;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
 class AdminSeeder extends Seeder
 {
     public function run(): void
     {
-        $adminExistente = Usuario::where('role', UserRole::Admin)->first();
-        if ($adminExistente) {
-            $adminExistente->update(['senha_hash' => Hash::make('admin1234')]);
-            $this->command->info('Admin já existe — senha redefinida para admin1234.');
+        $novoHash = Hash::make('admin1234');
+
+        $atualizado = DB::table('usuario')
+            ->where('email', 'admin@rotasegura.com')
+            ->update(['senha_hash' => $novoHash]);
+
+        if ($atualizado > 0) {
+            $this->command->info('Admin encontrado — senha redefinida para admin1234.');
             return;
         }
 
@@ -26,12 +31,14 @@ class AdminSeeder extends Seeder
             'ativo'           => true,
         ]);
 
-        Usuario::create([
+        DB::table('usuario')->insert([
             'id_pessoa'  => $pessoa->id_pessoa,
             'email'      => 'admin@rotasegura.com',
-            'senha_hash' => Hash::make('admin1234'),
-            'role'       => UserRole::Admin,
-            'ativo'      => true,
+            'senha_hash' => $novoHash,
+            'role'       => 'admin',
+            'ativo'      => 1,
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         $this->command->info('Admin criado: admin@rotasegura.com / admin1234');
