@@ -15,12 +15,26 @@ class AdminSeeder extends Seeder
     {
         $novoHash = Hash::make('admin1234');
 
+        // Primeiro tenta pelo email esperado
         $atualizado = DB::table('usuario')
             ->where('email', 'admin@rotasegura.com')
             ->update(['senha_hash' => $novoHash]);
 
         if ($atualizado > 0) {
-            $this->command->info('Admin encontrado — senha redefinida para admin1234.');
+            $this->command->info('Admin (admin@rotasegura.com) — senha redefinida.');
+            return;
+        }
+
+        // Se não existe pelo email, busca qualquer admin pela role e atualiza email+senha
+        $atualizado = DB::table('usuario')
+            ->where('role', 'admin')
+            ->update([
+                'email'      => 'admin@rotasegura.com',
+                'senha_hash' => $novoHash,
+            ]);
+
+        if ($atualizado > 0) {
+            $this->command->info('Admin existente — email e senha atualizados para admin@rotasegura.com / admin1234.');
             return;
         }
 
