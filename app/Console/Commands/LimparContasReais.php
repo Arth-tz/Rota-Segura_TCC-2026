@@ -25,7 +25,9 @@ class LimparContasReais extends Command
 
     public function handle(): int
     {
-        $contasReais = Usuario::whereNotIn('email', $this->emailsTeste)->get();
+        $contasReais = DB::table('usuario')
+            ->whereNotIn('email', $this->emailsTeste)
+            ->get(['id_usuario', 'email', 'role']);
 
         if ($contasReais->isEmpty()) {
             $this->info('Nenhuma conta real encontrada. Banco ja esta limpo.');
@@ -43,39 +45,76 @@ class LimparContasReais extends Command
             return 0;
         }
 
-        DB::transaction(function () use ($contasReais) {
-            foreach ($contasReais as $usuario) {
+        $ids   = $contasReais->pluck('id_usuario');
+        $count = 0;
+
+        DB::transaction(function () use ($ids, &$count) {
+            foreach (Usuario::whereIn('id_usuario', $ids)->get() as $usuario) {
                 $this->deletarUsuario($usuario);
+                $count++;
             }
         });
 
-        $this->info("Removidas {$contasReais->count()} conta(s) com sucesso.");
+        $this->info("Removidas {$count} conta(s) com sucesso.");
         return 0;
     }
 
     private function deletarUsuario(Usuario $usuario): void
     {
+        $idUsuario = $usuario->id_usuario;
+        $idPessoa  = $usuario->id_pessoa;
+
         if ($motorista = $usuario->motorista) {
             if ($van = $motorista->van) {
-                foreach ($van->disponibilidades as $disp) {
-                    $disp->dias()->delete();
-                    $disp->delete();
-                }
+                $idVan = $van->id_van;
+
+                // vinculo referencia van com RESTRICT; deletar antes
+                // vinculo_disponibilidade cascadeia ao deletar vinculo
+                DB::table('vinculo')->where('id_van', $idVan)->delete();
+
+                // solicitacao referencia van com RESTRICT; deletar apos vinculo
+                // solicitacao_disponibilidade cascadeia ao deletar solicitacao
+                DB::table('solicitacao')->where('id_van', $idVan)->delete();
+
+                // disponibilidade_dia cascadeia ao deletar disponibilidade
+                DB::table('disponibilidade')->where('id_van', $idVan)->delete();
+
                 $van->delete();
             }
             $motorista->delete();
         }
 
         if ($responsavel = $usuario->responsavel) {
-            foreach ($responsavel->passageiros as $passageiro) {
-                DB::table('passageiro_endereco')->where('id_passageiro', $passageiro->id_passageiro)->delete();
-                $passageiro->delete();
+            $passageiroIds = DB::table('responsavel_passageiro')
+                ->where('id_responsavel', $responsavel->id_responsavel)
+                ->pluck('id_passageiro');
+
+            if ($passageiroIds->isNotEmpty()) {
+                // vinculo e solicitacao referenciam passageiro com RESTRICT
+                DB::table('vinculo')->whereIn('id_passageiro', $passageiroIds)->delete();
+                DB::table('solicitacao')->whereIn('id_passageiro', $passageiroIds)->delete();
+                DB::table('passageiro_endereco')->whereIn('id_passageiro', $passageiroIds)->delete();
+
+                $pessoaIds = DB::table('passageiro')
+                    ->whereIn('id_passageiro', $passageiroIds)
+                    ->pluck('id_pessoa');
+
+                DB::table('passageiro')->whereIn('id_passageiro', $passageiroIds)->delete();
+
+                if ($pessoaIds->isNotEmpty()) {
+                    DB::table('pessoa')->whereIn('id_pessoa', $pessoaIds)->delete();
+                }
             }
-            DB::table('responsavel_passageiro')->where('id_responsavel', $responsavel->id_responsavel)->delete();
+
+            DB::table('responsavel_passageiro')
+                ->where('id_responsavel', $responsavel->id_responsavel)
+                ->delete();
             $responsavel->delete();
         }
 
-        $idPessoa = $usuario->id_pessoa;
+        // Solicitacoes onde este usuario e solicitante (RESTRICT antes de deletar usuario)
+        DB::table('solicitacao')->where('id_usuario_solicitante', $idUsuario)->delete();
+
         $usuario->delete();
 
         if ($idPessoa) {
